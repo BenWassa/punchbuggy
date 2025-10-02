@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" sizes="any" href="icons/punchbuggy.svg" />
+  <title>Punch Buggy — Mobile</title>
+  <style>
+    :root{
+      --bg: #0b0f1a;
+      --panel: #121829ee;
+      --panel-2: #0f1524aa;
+      --text: #e6ecff;
+      --muted: #97a3c0;
+      --accent: #5be2b0;
+      --accent-2:#8aa8ff;
+      --danger: #ff6b6b;
+      --gold: #ffd166;
+      --shadow: 0 6px 20px rgba(0,0,0,.35);
+      --radius: 16px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: system-ui,Roboto,Arial,sans-serif;
+      color:var(--text); background: var(--bg);
+      display:flex; flex-direction:column; padding:12px; gap:12px;
+    }
+
+    header{
+      text-align:center; font-weight:800; font-size:22px; padding:8px;
+    }
+
+    .players{ display:flex; flex-direction:column; gap:14px; flex:1 }
+    .card{
+      background:linear-gradient(160deg,var(--panel),var(--panel-2));
+      border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:14px; display:flex; flex-direction:column; align-items:center; gap:10px;
+    }
+    .avatar-wrapper{ position:relative; display:inline-block }
+    .avatar{
+      width:100px; height:100px; border-radius:50%; border:2px solid #2f4170;
+      object-fit:cover; cursor:pointer; position:relative; transition: transform .2s
+    }
+    .avatar:hover{ transform: scale(1.05) }
+    .upload-label{
+      position:absolute; bottom:0; right:0; background:#22c997; color:#fff;
+      border-radius:50%; width:32px; height:32px; display:flex; align-items:center;
+      justify-content:center; cursor:pointer; font-size:18px; box-shadow:0 2px 8px rgba(0,0,0,.3)
+    }
+    .upload-input{ display:none }
+    .name{
+      font-size:20px; font-weight:700; text-align:center; background:transparent;
+      border:none; outline:none; color:var(--text); margin:4px 0
+    }
+    .score{ font-size:42px; font-weight:900; transition: transform .3s, color .3s }
+    .score.bump{ animation: scoreBump .5s ease }
+    .streak{ font-size:14px; color:var(--muted) }
+
+    @keyframes scoreBump{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
+    @keyframes shake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+    .card.winner{ animation: winPulse .6s ease }
+    .card.loser{ animation: shake .5s ease }
+    @keyframes winPulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
+
+    button{
+      width:100%; padding:16px; font-size:18px; font-weight:700;
+      border:none; border-radius:var(--radius); cursor:pointer;
+    }
+    .accent{ background:linear-gradient(180deg,#22c997,#1aa97a); color:#fff }
+    .danger{ background:linear-gradient(180deg,#ff7c7c,#ff4d4d); color:#fff }
+    .ghost{ background:transparent; border:1px solid #2a3966; color:var(--text) }
+
+    .roundbar{
+      text-align:center; font-weight:700; padding:10px;
+      border-radius:var(--radius); background:#111832;
+    }
+
+    .log{
+      flex:1; overflow:auto; background:#0b1226; border-radius:var(--radius);
+      padding:10px; font-size:13px
+    }
+    .log h3{ margin:0 0 6px 0; font-size:12px; color:var(--muted) }
+    .log ul{
+      list-style:none; margin:0; padding:0; display:flex;
+      flex-direction:column; gap:6px
+    }
+    .log li{ padding:6px 8px; border-radius:8px; background:rgba(255,255,255,.05) }
+
+    .toolbar{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px }
+
+    @media(min-width:700px){ body{ max-width:420px; margin:0 auto } }
+
+    .confetti{ position:fixed; inset:0; pointer-events:none; }
+    .piece{ position:absolute; width:8px; height:12px }
+  </style>
+</head>
+<body>
+  <header>🚗💥 Punch Buggy</header>
+
+  <div class="players">
+    <div class="card" data-player="A">
+      <div class="avatar-wrapper">
+        <img class="avatar" src="https://via.placeholder.com/200.png?text=A" alt="Player A" id="avatarA">
+        <label class="upload-label" for="uploadA">📷</label>
+        <input type="file" class="upload-input" id="uploadA" accept="image/*">
+      </div>
+      <input class="name" id="nameA" value="Player A">
+      <div class="score" id="scoreA">0</div>
+      <div class="streak" id="streakA">🔥 0</div>
+      <button class="accent" id="btnA">+1 Punch</button>
+      <button class="ghost" id="minusA">−1</button>
+    </div>
+
+    <div class="card" data-player="B">
+      <div class="avatar-wrapper">
+        <img class="avatar" src="https://via.placeholder.com/200.png?text=B" alt="Player B" id="avatarB">
+        <label class="upload-label" for="uploadB">📷</label>
+        <input type="file" class="upload-input" id="uploadB" accept="image/*">
+      </div>
+      <input class="name" id="nameB" value="Player B">
+      <div class="score" id="scoreB">0</div>
+      <div class="streak" id="streakB">🔥 0</div>
+      <button class="accent" id="btnB">+1 Punch</button>
+      <button class="ghost" id="minusB">−1</button>
+    </div>
+  </div>
+
+  <div class="roundbar">Round <span id="round">1</span> • <span id="lead">Tied</span></div>
+
+  <div class="toolbar">
+    <button class="ghost" id="undoBtn">↶ Undo</button>
+    <button class="danger" id="resetBtn">⟳ Reset</button>
+    <button class="ghost" id="nextRound">Next Round ▶</button>
+    <button class="ghost" id="rulesBtn">❓ Rules</button>
+  </div>
+
+  <div class="log">
+    <h3>Event Log</h3>
+    <ul id="log"></ul>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+
+  <script>
+    const $=sel=>document.querySelector(sel);
+    const state={
+      round:1,
+      players:{
+        A:{name:'Player A',score:0,streak:0,avatar:''},
+        B:{name:'Player B',score:0,streak:0,avatar:''}
+      },
+      history:[]
+    };
+
+    function render(){
+      $('#scoreA').textContent=state.players.A.score;
+      $('#scoreB').textContent=state.players.B.score;
+      $('#streakA').textContent=`🔥 ${state.players.A.streak}`;
+      $('#streakB').textContent=`🔥 ${state.players.B.streak}`;
+      $('#nameA').value=state.players.A.name;
+      $('#nameB').value=state.players.B.name;
+      if(state.players.A.avatar) $('#avatarA').src=state.players.A.avatar;
+      if(state.players.B.avatar) $('#avatarB').src=state.players.B.avatar;
+      $('#round').textContent=state.round;
+      const diff=state.players.A.score-state.players.B.score;
+      $('#lead').textContent=diff===0?"Tied":diff>0?`${state.players.A.name} +${diff}`:`${state.players.B.name} +${Math.abs(diff)}`;
+      $('#log').innerHTML=state.history.slice().reverse().map(e=>`<li>${e}</li>`).join('');
+      save();
+    }
+
+    function save(){localStorage.setItem('punchBuggy',JSON.stringify(state))}
+    function load(){const s=localStorage.getItem('punchBuggy');if(s)Object.assign(state,JSON.parse(s));render()}
+
+    function log(msg){state.history.push(msg);render();}
+
+    function score(p,d=1){
+      const other=p==='A'?'B':'A';
+      state.players[p].score=Math.max(0,state.players[p].score+d);
+
+      if(d>0){
+        state.players[p].streak++;
+        state.players[other].streak=0;
+
+        // Winner animation
+        $(`.card[data-player="${p}"]`).classList.add('winner');
+        setTimeout(()=>$(`.card[data-player="${p}"]`).classList.remove('winner'),600);
+
+        // Loser animation
+        $(`.card[data-player="${other}"]`).classList.add('loser');
+        setTimeout(()=>$(`.card[data-player="${other}"]`).classList.remove('loser'),500);
+
+        // Score bump
+        $(`#score${p}`).classList.add('bump');
+        setTimeout(()=>$(`#score${p}`).classList.remove('bump'),500);
+
+        log(`${state.players[p].name} spotted a bug! +1`);
+
+        // Confetti on milestones
+        if(state.players[p].score%5===0) confetti();
+
+        // Extra celebration on first lead takeover
+        if(state.players[p].score>state.players[other].score && state.players[p].score-state.players[other].score===1){
+          setTimeout(()=>confetti(),200);
+        }
+      } else {
+        state.players[p].streak=0;
+        log(`${state.players[p].name} correction: -1`);
+      }
+
+      render();
+    }
+
+    function reset(){
+      if(confirm('Reset entire game?')){
+        state.round=1;
+        Object.values(state.players).forEach(p=>{p.score=0;p.streak=0});
+        state.history=[];
+        render();
+      }
+    }
+
+    function undo(){if(state.history.length>0)state.history.pop();render();}
+    function nextRound(){state.round++;log(`🏁 Round ${state.round} started!`);render();}
+
+    function confetti(){
+      const root=$('#confetti');
+      root.innerHTML='';
+      for(let i=0;i<50;i++){
+        const d=document.createElement('div');
+        d.className='piece';
+        d.style.left=Math.random()*100+'%';
+        d.style.top='-10px';
+        d.style.background=['#5be2b0','#8aa8ff','#ffd166','#ff6b6b'][Math.floor(Math.random()*4)];
+        d.style.transform=`rotate(${Math.random()*360}deg)`;
+        root.appendChild(d);
+        d.animate([
+          {top:'-10px',opacity:1},
+          {top:'110%',opacity:0}
+        ],{duration:1500+Math.random()*1000,easing:'cubic-bezier(.25,.46,.45,.94)'});
+        setTimeout(()=>d.remove(),3000);
+      }
+    }
+
+    function handleImageUpload(player,file){
+      if(!file||!file.type.startsWith('image/'))return;
+      const reader=new FileReader();
+      reader.onload=e=>{
+        state.players[player].avatar=e.target.result;
+        render();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    $('#btnA').onclick=()=>score('A',1);
+    $('#btnB').onclick=()=>score('B',1);
+    $('#minusA').onclick=()=>score('A',-1);
+    $('#minusB').onclick=()=>score('B',-1);
+    $('#resetBtn').onclick=reset;
+    $('#undoBtn').onclick=undo;
+    $('#nextRound').onclick=nextRound;
+    $('#rulesBtn').onclick=()=>alert('🚗 Punch Buggy Rules:\n\nSpot a VW Beetle first? Hit your button!\n\n• First to spot gets the point\n• Keep your streak alive\n• Every 5 points = confetti!\n• Use -1 for false calls\n\nHave fun & stay safe!');
+    $('#nameA').onchange=e=>{state.players.A.name=e.target.value;render()};
+    $('#nameB').onchange=e=>{state.players.B.name=e.target.value;render()};
+    $('#uploadA').onchange=e=>handleImageUpload('A',e.target.files[0]);
+    $('#uploadB').onchange=e=>handleImageUpload('B',e.target.files[0]);
+
+    load();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').catch(err => {
+          console.error('Service worker registration failed:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
