@@ -179,7 +179,7 @@
   <div class="players">
     <div class="card" data-player="A">
       <div class="avatar-wrapper">
-        <img class="avatar" src="https://via.placeholder.com/200.png?text=A" alt="Player A" id="avatarA">
+  <img class="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%2316273a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>A</text></svg>" alt="Player A" id="avatarA" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%2316273a\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>A</text></svg>'">
         <label class="upload-label" for="uploadA">📷</label>
         <input type="file" class="upload-input" id="uploadA" accept="image/*">
       </div>
@@ -192,7 +192,7 @@
 
     <div class="card" data-player="B">
       <div class="avatar-wrapper">
-        <img class="avatar" src="https://via.placeholder.com/200.png?text=B" alt="Player B" id="avatarB">
+  <img class="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%2316273a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>B</text></svg>" alt="Player B" id="avatarB" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%2316273a\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>B</text></svg>'">
         <label class="upload-label" for="uploadB">📷</label>
         <input type="file" class="upload-input" id="uploadB" accept="image/*">
       </div>
@@ -340,9 +340,11 @@
         return r;
       }).filter(Boolean);
 
-      const winsA = rounds.filter(r=>r.winner==='A').length;
-      const winsB = rounds.filter(r=>r.winner==='B').length;
-      $('#leaderboardSummary').textContent = `Rounds: ${rounds.length} • ${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB}`;
+  const winsA = rounds.filter(r=>r.winner==='A').length;
+  const winsB = rounds.filter(r=>r.winner==='B').length;
+  const currentScore = `${state.players.A.score} — ${state.players.B.score}`;
+  const leader = state.players.A.score === state.players.B.score ? 'Tied' : (state.players.A.score > state.players.B.score ? state.players.A.name : state.players.B.name);
+  $('#leaderboardSummary').textContent = `Rounds: ${rounds.length} • ${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB} • Live: ${currentScore} (${leader})`;
 
       // small card: compact list
       const tokensA = $('#tokensA');
