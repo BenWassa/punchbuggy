@@ -253,28 +253,20 @@
     <div class="leaderboard-grid">
       <div class="leaderboard-col" style="flex:1">
         <h4 style="margin-top:0">Rounds</h4>
-    <div id="fullList" style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow:auto"></div>
-    <div id="scoresTotals" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.04);"></div>
-      </div>
-      <div class="leaderboard-col" style="width:220px">
-        <h4 style="margin-top:0">Summary</h4>
-        <div id="sideSummary" style="display:flex;flex-direction:column;gap:8px">
-    <!-- summary updated in the header -->
-          <div style="display:flex;gap:8px;align-items:center">
-            <img id="miniAvatarA" src="" style="width:48px;height:48px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="A">
-            <div>
-              <div id="miniNameA" style="font-weight:800"></div>
-              <div id="miniScoreLiveA" style="color:var(--muted)"></div>
-            </div>
+        <!-- header: avatars & names -->
+        <div id="scoresHeader" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="text-align:left;display:flex;gap:10px;align-items:center">
+            <img id="headerAvatarA" src="" style="width:56px;height:56px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="A">
+            <div style="font-weight:800" id="headerNameA">Player A</div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <img id="miniAvatarB" src="" style="width:48px;height:48px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="B">
-            <div>
-              <div id="miniNameB" style="font-weight:800"></div>
-              <div id="miniScoreLiveB" style="color:var(--muted)"></div>
-            </div>
+          <div style="text-align:center;color:var(--muted);font-weight:700">Rounds</div>
+          <div style="text-align:right;display:flex;gap:10px;align-items:center;justify-content:flex-end">
+            <div style="font-weight:800" id="headerNameB">Player B</div>
+            <img id="headerAvatarB" src="" style="width:56px;height:56px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="B">
           </div>
         </div>
+        <div id="fullList" style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow:auto"></div>
+        <div id="scoresTotals" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.04);"></div>
       </div>
     </div>
   </div>
@@ -421,27 +413,31 @@
         full.appendChild(row);
       });
 
+      // header avatars & names
+      if($('#headerAvatarA')) $('#headerAvatarA').src = state.players.A.avatar || $('#avatarA').src;
+      if($('#headerAvatarB')) $('#headerAvatarB').src = state.players.B.avatar || $('#avatarB').src;
+      if($('#headerNameA')) $('#headerNameA').textContent = state.players.A.name;
+      if($('#headerNameB')) $('#headerNameB').textContent = state.players.B.name;
+
       // totals area
       const totals = $('#scoresTotals');
       if(totals){
         totals.innerHTML = '';
         const totalsRow = document.createElement('div'); totalsRow.style.display='grid'; totalsRow.style.gridTemplateColumns='1fr auto 1fr'; totalsRow.style.alignItems='center'; totalsRow.style.padding='12px'; totalsRow.style.borderRadius='10px'; totalsRow.style.marginTop='8px'; totalsRow.style.background='linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
-        const left = document.createElement('div'); left.style.textAlign='left'; left.innerHTML = `<div style="font-size:14px;color:var(--muted)">Cumulative</div><div style="font-weight:900;font-size:18px">${totalA}</div>`;
+        const left = document.createElement('div'); left.style.textAlign='left'; left.innerHTML = `<div style="font-size:14px;color:var(--muted)">${state.players.A.name} Total</div><div style="font-weight:900;font-size:18px">${totalA}</div>`;
         const mid = document.createElement('div'); mid.style.textAlign='center'; mid.innerHTML = `<div style="font-size:14px;color:var(--muted)">Rounds</div><div style="font-weight:900;font-size:18px">${rounds.length}</div>`;
-        const right = document.createElement('div'); right.style.textAlign='right'; right.innerHTML = `<div style="font-size:14px;color:var(--muted)">Wins</div><div style="font-weight:900;font-size:18px">A ${winsA} — B ${winsB}</div>`;
+        const right = document.createElement('div'); right.style.textAlign='right'; right.innerHTML = `<div style="font-size:14px;color:var(--muted)">Wins</div><div style="font-weight:900;font-size:18px">${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB}</div>`;
         totalsRow.appendChild(left); totalsRow.appendChild(mid); totalsRow.appendChild(right);
         totals.appendChild(totalsRow);
       }
       // update summary now that totals are available
       $('#leaderboardSummary').textContent = `Rounds: ${rounds.length} • ${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB} • Live: ${currentScore} (${leader})`;
 
-      // side summary: avatars, names, live scores
-      $('#miniAvatarA').src = state.players.A.avatar || $('#avatarA').src;
-      $('#miniAvatarB').src = state.players.B.avatar || $('#avatarB').src;
-      $('#miniNameA').textContent = state.players.A.name;
-      $('#miniNameB').textContent = state.players.B.name;
-      $('#miniScoreLiveA').textContent = `Live: ${state.players.A.score}`;
-      $('#miniScoreLiveB').textContent = `Live: ${state.players.B.score}`;
+  // header avatars/names (keep in sync)
+  if($('#headerAvatarA')) $('#headerAvatarA').src = state.players.A.avatar || $('#avatarA').src;
+  if($('#headerAvatarB')) $('#headerAvatarB').src = state.players.B.avatar || $('#avatarB').src;
+  if($('#headerNameA')) $('#headerNameA').textContent = state.players.A.name;
+  if($('#headerNameB')) $('#headerNameB').textContent = state.players.B.name;
     }
 
     function save(){localStorage.setItem('punchBuggy',JSON.stringify(state))}
