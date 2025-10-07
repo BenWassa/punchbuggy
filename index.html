@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <meta name="theme-color" content="#0b0f1a" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" type="image/svg+xml" sizes="any" href="icons/punchbuggy.svg" />
@@ -91,12 +91,86 @@
     }
     .log li{ padding:6px 8px; border-radius:8px; background:rgba(255,255,255,.05) }
 
-    .toolbar{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px }
+    .toolbar{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px }
 
     @media(min-width:700px){ body{ max-width:420px; margin:0 auto } }
 
     .confetti{ position:fixed; inset:0; pointer-events:none; }
     .piece{ position:absolute; width:8px; height:12px }
+
+    /* Leaderboard styles */
+    .leaderboard-wrap{ display:none; position:fixed; left:12px; right:12px; bottom:80px; z-index:40 }
+    .leaderboard{ display:flex; gap:8px; justify-content:space-between; align-items:center; padding:10px; border-radius:12px; background:linear-gradient(180deg,#081025, #0f1726); box-shadow:var(--shadow)}
+    .leaderboard .col{ display:flex; flex-direction:column; align-items:center; gap:8px; min-width:120px }
+    .leaderboard h4{ margin:0; font-size:12px; color:var(--muted) }
+    .tokens{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center }
+    .token{ width:20px; height:20px; border-radius:4px; display:inline-grid; place-items:center; font-size:12px; font-weight:800; color:#071024 }
+    .token.win{ background:var(--gold); color:#081025; box-shadow:0 4px 10px rgba(255,209,102,.12) }
+    .token.lose{ background:transparent; border:2px solid rgba(255,255,255,.06); color:var(--muted); position:relative }
+    .token.lose::after{ content:''; position:absolute; left:-6px; right:-6px; top:50%; height:2px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent); transform:rotate(-12deg) }
+    .leader-actions{ display:flex; gap:8px }
+
+    @media(min-width:700px){ .leaderboard-wrap{ left:50%; transform:translateX(-50%); width:420px } }
+  /* Fullscreen leaderboard view */
+  .leaderboard-view{
+    display:none; position:fixed; inset:0; z-index:60;
+    background: linear-gradient(135deg, #0a0e1a 0%, #0f1524 50%, #071024 100%);
+    padding:20px; overflow:auto; backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .leaderboard-view .view-header{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px;
+    padding:16px 20px; background: rgba(255,255,255,0.05); border-radius:16px;
+    border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  .view-title{
+    font-weight:900; font-size:20px; color: var(--accent); text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    flex:1; text-align:center;
+  }
+  .back-btn{
+    padding:10px 16px; border-radius:12px; background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    border: 1px solid rgba(255,255,255,0.15); color:var(--text); font-weight:700;
+    transition: all 0.2s ease; cursor:pointer;
+  }
+  .back-btn:hover{ background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1)); transform: scale(1.05); }
+  .leaderboard-summary{
+    text-align:center; margin-bottom:16px; font-size:18px; font-weight:600; color:var(--text);
+    background: rgba(255,255,255,0.05); padding:12px; border-radius:12px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .leaderboard-grid{ display:flex; gap:20px; flex-direction:column }
+  @media(min-width:700px){ .leaderboard-grid{ flex-direction:row } }
+  .leaderboard-col{
+    flex:1; background: linear-gradient(135deg, rgba(11,18,38,0.9), rgba(7,16,34,0.9));
+    padding:20px; border-radius:16px; border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4); transition: transform 0.2s ease;
+  }
+  .leaderboard-col:hover{ transform: translateY(-2px); }
+  .leaderboard-col h4{ margin:0 0 12px 0; font-size:16px; color:var(--accent); text-align:center; font-weight:700; }
+  .tokens-full{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center }
+  .token.full{
+    width:48px; height:48px; border-radius:8px; display:inline-grid; place-items:center; font-size:16px; font-weight:800;
+    transition: all 0.2s ease; cursor:default;
+  }
+  .token.full.win{
+    background: linear-gradient(135deg, #ffd166, #ffb347); color:#2d1b0f;
+    box-shadow: 0 4px 12px rgba(255,209,102,0.3); border: 2px solid rgba(255,255,255,0.2);
+  }
+  .token.full.lose{
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    border: 2px solid rgba(255,255,255,0.1); color:var(--muted);
+    position:relative;
+  }
+  .token.full.lose::after{
+    content:''; position:absolute; left:-8px; right:-8px; top:50%; height:3px;
+    background: linear-gradient(90deg, transparent, rgba(255,107,107,0.6), transparent);
+    transform: rotate(-15deg); border-radius: 2px;
+  }
+  .token.full:hover{ transform: scale(1.1); }
+  /* Modals */
+  .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:80; background:linear-gradient(180deg, rgba(2,6,12,0.6), rgba(2,6,12,0.85)); }
+  .modal-card{ width:calc(100% - 48px); max-width:720px; padding:16px; border-radius:14px; box-shadow:0 12px 48px rgba(0,0,0,0.6); }
+  @media(min-width:700px){ .modal-card{ padding:24px } }
   </style>
 </head>
 <body>
@@ -136,6 +210,8 @@
     <button class="ghost" id="undoBtn">↶ Undo</button>
     <button class="danger" id="resetBtn">⟳ Reset</button>
     <button class="ghost" id="nextRound">Next Round ▶</button>
+    <button class="ghost" id="leaderboardBtn">🏆 Leaderboard</button>
+    <button class="ghost" id="logBtn">📝 Log</button>
     <button class="ghost" id="rulesBtn">❓ Rules</button>
   </div>
 
@@ -146,6 +222,74 @@
 
   <div class="confetti" id="confetti"></div>
 
+  <!-- Leaderboard (hidden by default) -->
+  <div class="leaderboard-wrap" id="leaderboardWrap">
+    <div class="leaderboard card">
+      <div class="col">
+        <h4 id="lblA">Player A</h4>
+        <div class="tokens" id="tokensA"></div>
+      </div>
+      <div class="col leader-actions">
+        <button class="ghost" id="clearBoard">Clear</button>
+        <button class="ghost" id="closeBoard">Close</button>
+      </div>
+      <div class="col">
+        <h4 id="lblB">Player B</h4>
+        <div class="tokens" id="tokensB"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Leaderboard View -->
+  <div class="leaderboard-view" id="leaderboardView" role="dialog" aria-modal="true">
+    <div class="view-header">
+      <div class="view-title">Leaderboard — Rounds</div>
+      <div class="leaderboard-summary" id="leaderboardSummary">Total Wins: Player A 0 — Player B 0</div>
+      <div>
+        <button class="back-btn" id="closeFull">Back</button>
+      </div>
+    </div>
+    <div class="leaderboard-grid">
+      <div class="leaderboard-col">
+        <h4 id="fullLblA">Player A</h4>
+        <div class="tokens-full" id="fullTokensA"></div>
+      </div>
+      <div class="leaderboard-col">
+        <h4 id="fullLblB">Player B</h4>
+        <div class="tokens-full" id="fullTokensB"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules Modal -->
+  <div class="modal" id="rulesModal" role="dialog" aria-modal="true" style="display:none">
+    <div class="modal-card card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:900">Game Rules</div>
+        <button class="back-btn" id="closeRules">Close</button>
+      </div>
+      <div id="rulesContent" style="font-size:14px; color:var(--muted); line-height:1.4">
+        <!-- rules injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Event Log Modal -->
+  <div class="modal" id="logModal" role="dialog" aria-modal="true" style="display:none">
+    <div class="modal-card card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:900">Event Log</div>
+        <div>
+          <button class="back-btn" id="clearLog">Clear</button>
+          <button class="back-btn" id="closeLog">Close</button>
+        </div>
+      </div>
+      <div style="max-height:60vh; overflow:auto;">
+        <ul id="modalLog" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px"></ul>
+      </div>
+    </div>
+  </div>
+
   <script>
     const $=sel=>document.querySelector(sel);
     const state={
@@ -154,6 +298,8 @@
         A:{name:'Player A',score:0,streak:0,avatar:''},
         B:{name:'Player B',score:0,streak:0,avatar:''}
       },
+  // track rounds: {winner:'A'|'B'|'T', scoreA: number, scoreB: number}
+  roundWinners:[],
       history:[]
     };
 
@@ -170,11 +316,98 @@
       const diff=state.players.A.score-state.players.B.score;
       $('#lead').textContent=diff===0?"Tied":diff>0?`${state.players.A.name} +${diff}`:`${state.players.B.name} +${Math.abs(diff)}`;
       $('#log').innerHTML=state.history.slice().reverse().map(e=>`<li>${e}</li>`).join('');
+      renderLeaderboard();
+      renderModalLog();
       save();
     }
 
+    function renderModalLog(){
+      const list = $('#modalLog');
+      if(!list) return;
+      list.innerHTML = state.history.slice().reverse().map(e=>`<li style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.03)">${e}</li>`).join('');
+    }
+
+    function renderLeaderboard(){
+      // normalize legacy entries (strings) into objects
+      const rounds = state.roundWinners.map(r=>{
+        if(!r) return null;
+        if(typeof r === 'string'){
+          // legacy: 'A'|'B'|'T' - we don't have scores, use 0-0 placeholder
+          if(r==='A') return {winner:'A', scoreA:0, scoreB:0};
+          if(r==='B') return {winner:'B', scoreA:0, scoreB:0};
+          return {winner:'T', scoreA:0, scoreB:0};
+        }
+        return r;
+      }).filter(Boolean);
+
+      const winsA = rounds.filter(r=>r.winner==='A').length;
+      const winsB = rounds.filter(r=>r.winner==='B').length;
+      $('#leaderboardSummary').textContent = `Rounds: ${rounds.length} • ${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB}`;
+
+      // small card: compact list
+      const tokensA = $('#tokensA');
+      const tokensB = $('#tokensB');
+      tokensA.innerHTML = '';
+      tokensB.innerHTML = '';
+      rounds.forEach((r, idx)=>{
+        const entryA = document.createElement('div');
+        const entryB = document.createElement('div');
+        entryA.className='token'; entryB.className='token';
+        entryA.textContent = `${idx+1}`; entryB.textContent = `${idx+1}`;
+        if(r.winner==='A'){ entryA.classList.add('win'); entryB.classList.add('lose'); }
+        else if(r.winner==='B'){ entryB.classList.add('win'); entryA.classList.add('lose'); }
+        else { entryA.classList.add('lose'); entryB.classList.add('lose'); }
+        tokensA.appendChild(entryA); tokensB.appendChild(entryB);
+      });
+
+      // full view: detailed rows
+      const fullA = $('#fullTokensA');
+      const fullB = $('#fullTokensB');
+      if(fullA) fullA.innerHTML = '';
+      if(fullB) fullB.innerHTML = '';
+      // build a neat list element containing round number, winner, and score
+      const makeRow = (r, idx) => {
+        const row = document.createElement('div');
+        row.style.display='flex'; row.style.alignItems='center'; row.style.justifyContent='space-between';
+        row.style.padding='10px'; row.style.borderRadius='10px';
+        row.style.marginBottom='8px';
+        row.style.background='linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
+        const left = document.createElement('div'); left.style.display='flex'; left.style.alignItems='center'; left.style.gap='12px';
+        const badge = document.createElement('div'); badge.className='token full'; badge.textContent = idx+1;
+        if(r.winner==='A') badge.classList.add('win'); else if(r.winner==='B') badge.classList.add('win'); else badge.classList.add('lose');
+        const title = document.createElement('div'); title.style.fontWeight='700'; title.textContent = r.winner==='T'? 'Tie' : (r.winner==='A'? state.players.A.name : state.players.B.name);
+        left.appendChild(badge); left.appendChild(title);
+        const score = document.createElement('div'); score.style.fontWeight='800'; score.textContent = `${r.scoreA} — ${r.scoreB}`;
+        row.appendChild(left); row.appendChild(score);
+        return row;
+      };
+      rounds.forEach((r, idx)=>{
+        const row = makeRow(r, idx);
+        if(fullA) fullA.appendChild(row.cloneNode(true));
+        if(fullB) fullB.appendChild(row.cloneNode(true));
+      });
+    }
+
     function save(){localStorage.setItem('punchBuggy',JSON.stringify(state))}
-    function load(){const s=localStorage.getItem('punchBuggy');if(s)Object.assign(state,JSON.parse(s));render()}
+    function load(){
+      const s=localStorage.getItem('punchBuggy');
+      if(s){
+        const parsed = JSON.parse(s);
+        // migrate roundWinners legacy strings to objects
+        if(parsed.roundWinners && Array.isArray(parsed.roundWinners)){
+          parsed.roundWinners = parsed.roundWinners.map(r=>{
+            if(typeof r === 'string'){
+              if(r==='A') return {winner:'A',scoreA:0,scoreB:0};
+              if(r==='B') return {winner:'B',scoreA:0,scoreB:0};
+              return {winner:'T',scoreA:0,scoreB:0};
+            }
+            return r;
+          });
+        }
+        Object.assign(state,parsed);
+      }
+      render();
+    }
 
     function log(msg){state.history.push(msg);render();}
 
@@ -216,16 +449,34 @@
     }
 
     function reset(){
-      if(confirm('Reset entire game?')){
+      if(confirm('Reset entire game? This will also clear round history.')){
         state.round=1;
         Object.values(state.players).forEach(p=>{p.score=0;p.streak=0});
         state.history=[];
+        state.roundWinners=[];
         render();
       }
     }
 
     function undo(){if(state.history.length>0)state.history.pop();render();}
-    function nextRound(){state.round++;log(`🏁 Round ${state.round} started!`);render();}
+    function recordRoundWinner(){
+      const a=state.players.A.score; const b=state.players.B.score;
+      let win='T';
+      if(a>b) win='A'; else if(b>a) win='B';
+      state.roundWinners.push({ winner: win, scoreA: a, scoreB: b });
+      if(win==='T') log(`🤝 Round ${state.round} tied ${a}-${b}`);
+      else if(win==='A') log(`🏆 ${state.players.A.name} won Round ${state.round} ${a}-${b}`);
+      else log(`🏆 ${state.players.B.name} won Round ${state.round} ${b}-${a}`);
+    }
+
+    function nextRound(){
+      // record current winner, then bump round and reset scores
+      recordRoundWinner();
+      state.round++;
+      Object.values(state.players).forEach(p=>{p.score=0;p.streak=0});
+      log(`🏁 Round ${state.round} started!`);
+      render();
+    }
 
     function confetti(){
       const root=$('#confetti');
@@ -263,7 +514,49 @@
     $('#resetBtn').onclick=reset;
     $('#undoBtn').onclick=undo;
     $('#nextRound').onclick=nextRound;
-    $('#rulesBtn').onclick=()=>alert('🚗 Punch Buggy Rules:\n\nSpot a VW Beetle first? Hit your button!\n\n• First to spot gets the point\n• Keep your streak alive\n• Every 5 points = confetti!\n• Use -1 for false calls\n\nHave fun & stay safe!');
+    // bottom nav and leaderboard controls
+    function toggleLeaderboard(show){
+      const wrap = $('#leaderboardWrap');
+      wrap.style.display = show? 'block' : 'none';
+    }
+
+    $('#clearBoard').onclick=()=>{ if(confirm('Clear round history?')){ state.roundWinners=[]; render(); } };
+    $('#closeBoard').onclick=()=>toggleLeaderboard(false);
+    // fullscreen leaderboard controls
+    function openFullLeaderboard(){
+      document.body.style.overflow='hidden';
+      $('#leaderboardView').style.display='block';
+      renderLeaderboard();
+    }
+    function closeFullLeaderboard(){
+      document.body.style.overflow='auto';
+      $('#leaderboardView').style.display='none';
+    }
+    $('#leaderboardBtn').onclick=()=>openFullLeaderboard();
+    $('#closeFull').onclick=()=>closeFullLeaderboard();
+    // Rules content (concise, comprehensive)
+    const rules = [
+      'Objective: Spot the VW Beetle (or other agreed target) first to score a point.',
+      'Scoring: First player to call it gets +1. Use the correction (-1) for false calls.',
+      'Rounds: Press Next Round to record the round winner and start fresh scores for the next round.',
+      'Streaks: Consecutive correct calls increase your streak but do not change round scoring.',
+      'Safety: Keep your eyes on the road. No taking photos or reaching for phones while driving.',
+      'Fair Play: Disputes are resolved by mutual agreement; use -1 for honest corrections.',
+      'Milestones: Every 5 points triggers a celebration (confetti).',
+      'Tie Rounds: If both players have equal scores when Next Round is pressed, the round is recorded as a tie.',
+      'Customization: Change player names or avatars before/after rounds. Avatars are local only.'
+    ];
+    $('#rulesBtn').onclick=()=>{
+      const el = $('#rulesContent');
+      el.innerHTML = '<ol style="margin:0;padding-left:18px">' + rules.map(r=>`<li style="margin-bottom:8px">${r}</li>`).join('') + '</ol>';
+      $('#rulesModal').style.display='flex';
+    };
+
+    // Event log modal handlers
+    $('#logBtn').onclick=()=>{ $('#logModal').style.display='flex'; renderModalLog(); };
+    $('#closeLog').onclick=()=>{ $('#logModal').style.display='none'; };
+    $('#clearLog').onclick=()=>{ if(confirm('Clear event log?')){ state.history=[]; render(); } };
+    $('#closeRules').onclick=()=>{ $('#rulesModal').style.display='none'; };
     $('#nameA').onchange=e=>{state.players.A.name=e.target.value;render()};
     $('#nameB').onchange=e=>{state.players.B.name=e.target.value;render()};
     $('#uploadA').onchange=e=>handleImageUpload('A',e.target.files[0]);
