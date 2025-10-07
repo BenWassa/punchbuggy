@@ -46,6 +46,7 @@
       width:100px; height:100px; border-radius:50%; border:2px solid #2f4170;
       object-fit:cover; cursor:pointer; position:relative; transition: transform .2s
     }
+      .player-crown{ position:absolute; top:-6px; right:-6px; width:28px; height:28px; display:none; align-items:center; justify-content:center; font-size:18px; background:linear-gradient(180deg,#ffd166,#ffb347); color:#2b180d; border-radius:50%; box-shadow:0 6px 18px rgba(0,0,0,0.35); border:2px solid rgba(255,255,255,0.12) }
     .avatar:hover{ transform: scale(1.05) }
     .upload-label{
       position:absolute; bottom:0; right:0; background:#22c997; color:#fff;
@@ -167,6 +168,9 @@
     transform: rotate(-15deg); border-radius: 2px;
   }
   .token.full:hover{ transform: scale(1.1); }
+  .avatar-sm{ width:46px; height:46px; border-radius:8px; overflow:hidden; position:relative }
+  .avatar-sm img{ width:100%; height:100%; object-fit:cover; display:block }
+  .crown{ position:absolute; top:-6px; right:-6px; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px; background:linear-gradient(180deg,#ffd166,#ffb347); color:#2b180d; border-radius:50%; box-shadow:0 6px 12px rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.12) }
   /* Modals */
   .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:80; background:linear-gradient(180deg, rgba(2,6,12,0.6), rgba(2,6,12,0.85)); }
   .modal-card{ width:calc(100% - 48px); max-width:720px; padding:16px; border-radius:14px; box-shadow:0 12px 48px rgba(0,0,0,0.6); }
@@ -180,6 +184,7 @@
     <div class="card" data-player="A">
       <div class="avatar-wrapper">
   <img class="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%2316273a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>A</text></svg>" alt="Player A" id="avatarA" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%2316273a\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>A</text></svg>'">
+        <span class="player-crown" id="crownA">👑</span>
         <label class="upload-label" for="uploadA">📷</label>
         <input type="file" class="upload-input" id="uploadA" accept="image/*">
       </div>
@@ -193,6 +198,7 @@
     <div class="card" data-player="B">
       <div class="avatar-wrapper">
   <img class="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%2316273a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>B</text></svg>" alt="Player B" id="avatarB" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%2316273a\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>B</text></svg>'">
+        <span class="player-crown" id="crownB">👑</span>
         <label class="upload-label" for="uploadB">📷</label>
         <input type="file" class="upload-input" id="uploadB" accept="image/*">
       </div>
@@ -331,6 +337,11 @@
   const diff=state.players.A.score-state.players.B.score;
   $('#lead').textContent=diff===0?"Tied":diff>0?`${state.players.A.name} +${diff}`:`${state.players.B.name} +${Math.abs(diff)}`;
       renderLeaderboard();
+      // show crown on current leader avatar
+      const leader = state.players.A.score === state.players.B.score ? null : (state.players.A.score > state.players.B.score ? 'A' : 'B');
+      if(leader==='A'){ $('#crownA').style.display='flex'; $('#crownB').style.display='none'; }
+      else if(leader==='B'){ $('#crownB').style.display='flex'; $('#crownA').style.display='none'; }
+      else { $('#crownA').style.display='none'; $('#crownB').style.display='none'; }
       renderModalLog();
       save();
     }
@@ -388,13 +399,19 @@
         row.style.padding='12px'; row.style.borderRadius='12px'; row.style.marginBottom='8px';
         row.style.background='linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
 
-        const left = document.createElement('div'); left.style.display='flex'; left.style.alignItems='center'; left.style.gap='12px';
-        const thumb = document.createElement('img'); thumb.src = state.players[r.winner==='A'?'A':'B'].avatar || document.getElementById(r.winner==='A'?'avatarA':'avatarB').src; thumb.style.width='46px'; thumb.style.height='46px'; thumb.style.borderRadius='8px'; thumb.style.objectFit='cover'; thumb.alt='player';
-        const labelWrap = document.createElement('div');
+  const left = document.createElement('div'); left.style.display='flex'; left.style.alignItems='center'; left.style.gap='12px';
+  // thumbnail wrapper with crown overlay
+  const thumbWrap = document.createElement('div'); thumbWrap.className='avatar-sm'; thumbWrap.style.position='relative';
+  const thumbImg = document.createElement('img'); thumbImg.src = state.players[r.winner==='A'?'A':'B'].avatar || document.getElementById(r.winner==='A'?'avatarA':'avatarB').src; thumbImg.alt='player';
+  const crownEl = document.createElement('div'); crownEl.className='crown'; crownEl.textContent='👑';
+  // show crown only for non-tie winners
+  if(r.winner==='T') crownEl.style.display='none';
+  thumbWrap.appendChild(thumbImg); thumbWrap.appendChild(crownEl);
+  const labelWrap = document.createElement('div');
         const title = document.createElement('div'); title.style.fontWeight='800'; title.textContent = `Round ${idx+1} — ` + (r.winner==='T'? 'Tie' : (r.winner==='A'? state.players.A.name : state.players.B.name));
         const sub = document.createElement('div'); sub.style.color='var(--muted)'; sub.style.fontSize='13px'; sub.textContent = `Final: ${r.scoreA} — ${r.scoreB}`;
         labelWrap.appendChild(title); labelWrap.appendChild(sub);
-        left.appendChild(thumb); left.appendChild(labelWrap);
+  left.appendChild(thumbWrap); left.appendChild(labelWrap);
 
         const right = document.createElement('div'); right.style.fontWeight='900'; right.textContent = `${r.scoreA} — ${r.scoreB}`;
         full.appendChild(row);
