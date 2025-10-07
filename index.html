@@ -147,7 +147,8 @@
     box-shadow: 0 12px 40px rgba(0,0,0,0.4); transition: transform 0.2s ease;
   }
   .leaderboard-col:hover{ transform: translateY(-2px); }
-  .leaderboard-col h4{ margin:0 0 12px 0; font-size:16px; color:var(--accent); text-align:center; font-weight:700; }
+  .leaderboard-col h4{ margin:0 0 12px 0; font-size:16px; color:var(--accent); text-align:center; font-weight:700; display:block; width:100%; }
+  .leaderboard-col { text-align:center }
   .tokens-full{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center }
   .token.full{
     width:48px; height:48px; border-radius:8px; display:inline-grid; place-items:center; font-size:16px; font-weight:800;
@@ -259,7 +260,7 @@
             <img id="headerAvatarA" src="" style="width:56px;height:56px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="A">
             <div style="font-weight:800" id="headerNameA">Player A</div>
           </div>
-          <div style="text-align:center;color:var(--muted);font-weight:700">Rounds</div>
+          <!-- center is intentionally empty; H4 above is the 'Rounds' label -->
           <div style="text-align:right;display:flex;gap:10px;align-items:center;justify-content:flex-end">
             <div style="font-weight:800" id="headerNameB">Player B</div>
             <img id="headerAvatarB" src="" style="width:56px;height:56px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="B">
@@ -431,7 +432,7 @@
         totals.appendChild(totalsRow);
       }
       // update summary now that totals are available
-      $('#leaderboardSummary').textContent = `Rounds: ${rounds.length} • ${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB} • Live: ${currentScore} (${leader})`;
+  $('#leaderboardSummary').innerHTML = `<div style="font-weight:700">Rounds: ${rounds.length} — Live: ${currentScore}</div><div style="font-size:13px;color:var(--muted);margin-top:6px">Wins: ${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB} &nbsp; • &nbsp; Totals: ${state.players.A.name} ${totalA} — ${state.players.B.name} ${totalB}</div>`;
 
   // header avatars/names (keep in sync)
   if($('#headerAvatarA')) $('#headerAvatarA').src = state.players.A.avatar || $('#avatarA').src;
