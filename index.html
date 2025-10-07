@@ -211,7 +211,7 @@
     <button class="danger" id="resetBtn">⟳ Reset</button>
     <button class="ghost" id="nextRound">Next Round ▶</button>
     <button class="ghost" id="leaderboardBtn">🏆 Leaderboard</button>
-    <button class="ghost" id="logBtn">📝 Log</button>
+  <button class="ghost" id="dataBtn">� Data</button>
     <button class="ghost" id="rulesBtn">❓ Rules</button>
   </div>
 
@@ -288,16 +288,20 @@
     </div>
   </div>
 
-  <!-- Event Log Modal -->
-  <div class="modal" id="logModal" role="dialog" aria-modal="true" style="display:none">
+  <!-- Data & Event Log Modal -->
+  <div class="modal" id="dataModal" role="dialog" aria-modal="true" style="display:none">
     <div class="modal-card card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-weight:900">Event Log</div>
-        <div>
-          <button class="back-btn" id="clearLog">Clear</button>
-          <button class="back-btn" id="closeLog">Close</button>
+        <div style="font-weight:900">Data & Log</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="back-btn" id="exportData">Export</button>
+          <button class="back-btn" id="importBtn">Import</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none">
+          <button class="back-btn" id="clearData">Clear</button>
+          <button class="back-btn" id="closeData">Close</button>
         </div>
       </div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Export will download the full game state (JSON). Import will replace the current state if compatible. Logs are preserved unless cleared.</div>
       <div style="max-height:60vh; overflow:auto;">
         <ul id="modalLog" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px"></ul>
       </div>
@@ -574,10 +578,47 @@
       $('#rulesModal').style.display='flex';
     };
 
-    // Event log modal handlers
-    $('#logBtn').onclick=()=>{ $('#logModal').style.display='flex'; renderModalLog(); };
-    $('#closeLog').onclick=()=>{ $('#logModal').style.display='none'; };
-    $('#clearLog').onclick=()=>{ if(confirm('Clear event log?')){ state.history=[]; render(); } };
+    // Data modal handlers (export/import/log/clear)
+    $('#dataBtn').onclick=()=>{ $('#dataModal').style.display='flex'; renderModalLog(); };
+    $('#closeData').onclick=()=>{ $('#dataModal').style.display='none'; };
+    $('#clearData').onclick=()=>{ if(confirm('Clear all game data (rounds, scores, history)?')){ state.round=1; state.players.A.score=0; state.players.B.score=0; state.players.A.streak=0; state.players.B.streak=0; state.history=[]; state.roundWinners=[]; render(); } };
+
+    // Export state as JSON file
+    $('#exportData').onclick=()=>{
+      const payload = JSON.stringify(state, null, 2);
+      const blob = new Blob([payload], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download = `punchbuggy-export-${Date.now()}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    };
+
+    // Import - parse file and validate
+    $('#importBtn').onclick=()=>$('#importFile').click();
+    $('#importFile').onchange = async (e)=>{
+      const f = e.target.files && e.target.files[0];
+      if(!f) return;
+      try{
+        const text = await f.text();
+        const parsed = JSON.parse(text);
+        // basic validation: must have players and round
+        if(!parsed.players || !parsed.round){ alert('Invalid file: missing players or round'); return; }
+        if(!confirm('Importing will replace your current game state. Continue?')) return;
+        // migrate legacy roundWinners if needed
+        if(parsed.roundWinners && Array.isArray(parsed.roundWinners)){
+          parsed.roundWinners = parsed.roundWinners.map(r=>{
+            if(typeof r === 'string'){
+              if(r==='A') return {winner:'A',scoreA:0,scoreB:0};
+              if(r==='B') return {winner:'B',scoreA:0,scoreB:0};
+              return {winner:'T',scoreA:0,scoreB:0};
+            }
+            return r;
+          });
+        }
+        Object.assign(state, parsed);
+        render();
+        alert('Import successful');
+      }catch(err){ alert('Failed to import: ' + err.message); }
+      e.target.value='';
+    };
     $('#closeRules').onclick=()=>{ $('#rulesModal').style.display='none'; };
     $('#nameA').onchange=e=>{state.players.A.name=e.target.value;render()};
     $('#nameB').onchange=e=>{state.players.B.name=e.target.value;render()};
