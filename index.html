@@ -210,15 +210,12 @@
     <button class="ghost" id="undoBtn">↶ Undo</button>
     <button class="danger" id="resetBtn">⟳ Reset</button>
     <button class="ghost" id="nextRound">Next Round ▶</button>
-    <button class="ghost" id="leaderboardBtn">🏆 Leaderboard</button>
+    <button class="ghost" id="leaderboardBtn">🏆 Scores</button>
     <button class="ghost" id="dataBtn">&#x1F4BE; Data</button>
     <button class="ghost" id="rulesBtn">❓ Rules</button>
   </div>
 
-  <div class="log">
-    <h3>Event Log</h3>
-    <ul id="log"></ul>
-  </div>
+  <!-- Event log moved to Data modal -->
 
   <div class="confetti" id="confetti"></div>
 
@@ -331,9 +328,8 @@
       if(state.players.A.avatar) $('#avatarA').src=state.players.A.avatar;
       if(state.players.B.avatar) $('#avatarB').src=state.players.B.avatar;
       $('#round').textContent=state.round;
-      const diff=state.players.A.score-state.players.B.score;
-      $('#lead').textContent=diff===0?"Tied":diff>0?`${state.players.A.name} +${diff}`:`${state.players.B.name} +${Math.abs(diff)}`;
-      $('#log').innerHTML=state.history.slice().reverse().map(e=>`<li>${e}</li>`).join('');
+  const diff=state.players.A.score-state.players.B.score;
+  $('#lead').textContent=diff===0?"Tied":diff>0?`${state.players.A.name} +${diff}`:`${state.players.B.name} +${Math.abs(diff)}`;
       renderLeaderboard();
       renderModalLog();
       save();
