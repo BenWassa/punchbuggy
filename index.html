@@ -225,17 +225,15 @@
   <!-- Leaderboard (hidden by default) -->
   <div class="leaderboard-wrap" id="leaderboardWrap">
     <div class="leaderboard card">
-      <div class="col">
-        <h4 id="lblA">Player A</h4>
-        <div class="tokens" id="tokensA"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:800">Leaderboard</div>
+        <div>
+          <button class="ghost" id="clearBoard">Clear</button>
+          <button class="ghost" id="closeBoard">Close</button>
+        </div>
       </div>
-      <div class="col leader-actions">
-        <button class="ghost" id="clearBoard">Clear</button>
-        <button class="ghost" id="closeBoard">Close</button>
-      </div>
-      <div class="col">
-        <h4 id="lblB">Player B</h4>
-        <div class="tokens" id="tokensB"></div>
+      <div id="miniList" style="display:flex;flex-direction:column;gap:8px;">
+        <!-- compact per-round rows inserted here -->
       </div>
     </div>
   </div>
@@ -250,13 +248,29 @@
       </div>
     </div>
     <div class="leaderboard-grid">
-      <div class="leaderboard-col">
-        <h4 id="fullLblA">Player A</h4>
-        <div class="tokens-full" id="fullTokensA"></div>
+      <div class="leaderboard-col" style="flex:1">
+        <h4 style="margin-top:0">Rounds</h4>
+        <div id="fullList" style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow:auto"></div>
       </div>
-      <div class="leaderboard-col">
-        <h4 id="fullLblB">Player B</h4>
-        <div class="tokens-full" id="fullTokensB"></div>
+      <div class="leaderboard-col" style="width:220px">
+        <h4 style="margin-top:0">Summary</h4>
+        <div id="sideSummary" style="display:flex;flex-direction:column;gap:8px">
+          <div id="leaderboardSummary"></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <img id="miniAvatarA" src="" style="width:48px;height:48px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="A">
+            <div>
+              <div id="miniNameA" style="font-weight:800"></div>
+              <div id="miniScoreLiveA" style="color:var(--muted)"></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <img id="miniAvatarB" src="" style="width:48px;height:48px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="B">
+            <div>
+              <div id="miniNameB" style="font-weight:800"></div>
+              <div id="miniScoreLiveB" style="color:var(--muted)"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -346,48 +360,54 @@
   const leader = state.players.A.score === state.players.B.score ? 'Tied' : (state.players.A.score > state.players.B.score ? state.players.A.name : state.players.B.name);
   $('#leaderboardSummary').textContent = `Rounds: ${rounds.length} • ${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB} • Live: ${currentScore} (${leader})`;
 
-      // small card: compact list
-      const tokensA = $('#tokensA');
-      const tokensB = $('#tokensB');
-      tokensA.innerHTML = '';
-      tokensB.innerHTML = '';
+      // small card: compact per-round rows
+      const mini = $('#miniList');
+      mini.innerHTML = '';
       rounds.forEach((r, idx)=>{
-        const entryA = document.createElement('div');
-        const entryB = document.createElement('div');
-        entryA.className='token'; entryB.className='token';
-        entryA.textContent = `${idx+1}`; entryB.textContent = `${idx+1}`;
-        if(r.winner==='A'){ entryA.classList.add('win'); entryB.classList.add('lose'); }
-        else if(r.winner==='B'){ entryB.classList.add('win'); entryA.classList.add('lose'); }
-        else { entryA.classList.add('lose'); entryB.classList.add('lose'); }
-        tokensA.appendChild(entryA); tokensB.appendChild(entryB);
-      });
-
-      // full view: detailed rows
-      const fullA = $('#fullTokensA');
-      const fullB = $('#fullTokensB');
-      if(fullA) fullA.innerHTML = '';
-      if(fullB) fullB.innerHTML = '';
-      // build a neat list element containing round number, winner, and score
-      const makeRow = (r, idx) => {
         const row = document.createElement('div');
-        row.style.display='flex'; row.style.alignItems='center'; row.style.justifyContent='space-between';
-        row.style.padding='10px'; row.style.borderRadius='10px';
-        row.style.marginBottom='8px';
-        row.style.background='linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
-        const left = document.createElement('div'); left.style.display='flex'; left.style.alignItems='center'; left.style.gap='12px';
-        const badge = document.createElement('div'); badge.className='token full'; badge.textContent = idx+1;
-        if(r.winner==='A') badge.classList.add('win'); else if(r.winner==='B') badge.classList.add('win'); else badge.classList.add('lose');
+        row.style.display='flex'; row.style.alignItems='center'; row.style.justifyContent='space-between'; row.style.gap='12px';
+        row.style.padding='8px'; row.style.borderRadius='10px';
+        row.style.background='linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))';
+        const left = document.createElement('div'); left.style.display='flex'; left.style.alignItems='center'; left.style.gap='10px';
+        const badge = document.createElement('div'); badge.className='token'; badge.textContent = idx+1; badge.style.width='34px'; badge.style.height='34px'; badge.style.fontSize='14px';
         const title = document.createElement('div'); title.style.fontWeight='700'; title.textContent = r.winner==='T'? 'Tie' : (r.winner==='A'? state.players.A.name : state.players.B.name);
         left.appendChild(badge); left.appendChild(title);
         const score = document.createElement('div'); score.style.fontWeight='800'; score.textContent = `${r.scoreA} — ${r.scoreB}`;
+        if(r.winner==='A') row.style.borderLeft='4px solid rgba(93,212,162,0.9)';
+        else if(r.winner==='B') row.style.borderLeft='4px solid rgba(138,168,255,0.9)';
+        mini.appendChild(row);
         row.appendChild(left); row.appendChild(score);
-        return row;
-      };
-      rounds.forEach((r, idx)=>{
-        const row = makeRow(r, idx);
-        if(fullA) fullA.appendChild(row.cloneNode(true));
-        if(fullB) fullB.appendChild(row.cloneNode(true));
       });
+
+      // full view: detailed list
+      const full = $('#fullList');
+      if(full) full.innerHTML = '';
+      rounds.forEach((r, idx)=>{
+        const row = document.createElement('div');
+        row.style.display='flex'; row.style.alignItems='center'; row.style.justifyContent='space-between';
+        row.style.padding='12px'; row.style.borderRadius='12px'; row.style.marginBottom='8px';
+        row.style.background='linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
+
+        const left = document.createElement('div'); left.style.display='flex'; left.style.alignItems='center'; left.style.gap='12px';
+        const thumb = document.createElement('img'); thumb.src = state.players[r.winner==='A'?'A':'B'].avatar || document.getElementById(r.winner==='A'?'avatarA':'avatarB').src; thumb.style.width='46px'; thumb.style.height='46px'; thumb.style.borderRadius='8px'; thumb.style.objectFit='cover'; thumb.alt='player';
+        const labelWrap = document.createElement('div');
+        const title = document.createElement('div'); title.style.fontWeight='800'; title.textContent = `Round ${idx+1} — ` + (r.winner==='T'? 'Tie' : (r.winner==='A'? state.players.A.name : state.players.B.name));
+        const sub = document.createElement('div'); sub.style.color='var(--muted)'; sub.style.fontSize='13px'; sub.textContent = `Final: ${r.scoreA} — ${r.scoreB}`;
+        labelWrap.appendChild(title); labelWrap.appendChild(sub);
+        left.appendChild(thumb); left.appendChild(labelWrap);
+
+        const right = document.createElement('div'); right.style.fontWeight='900'; right.textContent = `${r.scoreA} — ${r.scoreB}`;
+        full.appendChild(row);
+        row.appendChild(left); row.appendChild(right);
+      });
+
+      // side summary: avatars, names, live scores
+      $('#miniAvatarA').src = state.players.A.avatar || $('#avatarA').src;
+      $('#miniAvatarB').src = state.players.B.avatar || $('#avatarB').src;
+      $('#miniNameA').textContent = state.players.A.name;
+      $('#miniNameB').textContent = state.players.B.name;
+      $('#miniScoreLiveA').textContent = `Live: ${state.players.A.score}`;
+      $('#miniScoreLiveB').textContent = `Live: ${state.players.B.score}`;
     }
 
     function save(){localStorage.setItem('punchBuggy',JSON.stringify(state))}
