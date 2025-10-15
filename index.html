@@ -33,7 +33,46 @@
 
     header{
       text-align:center; font-weight:800; font-size:22px; padding:8px;
+      position:relative;
     }
+
+    .version-tag{
+      position:absolute; right:12px; top:12px; font-size:12px; font-weight:600;
+      padding:4px 8px; border-radius:999px; background:rgba(255,255,255,0.08);
+      color:var(--muted); box-shadow:0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    .update-banner{
+      position:fixed; left:12px; right:12px; bottom:16px; z-index:100;
+      display:none; align-items:center; justify-content:space-between;
+      padding:12px 16px; border-radius:14px; background:linear-gradient(135deg,#12213f,#102542);
+      box-shadow:0 8px 24px rgba(0,0,0,0.45); gap:12px;
+    }
+
+    .update-banner strong{ font-size:14px; }
+
+    .update-actions{ display:flex; gap:8px; }
+
+    .update-banner button{
+      padding:10px 16px; border-radius:999px; border:none; cursor:pointer; font-weight:700;
+      background:linear-gradient(180deg,#22c997,#1aa97a); color:#fff;
+    }
+
+    .update-banner .ghost{
+      background:transparent; border:1px solid rgba(91,226,176,0.5); color:var(--muted);
+    }
+
+    .backup-panel{
+      margin-top:16px; padding:12px; border-radius:12px;
+      background:linear-gradient(180deg,rgba(15,22,40,0.9),rgba(12,19,34,0.9));
+      display:flex; flex-direction:column; gap:8px;
+    }
+
+    .backup-panel h4{ margin:0; font-size:14px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); }
+    .backup-status{ font-size:14px; line-height:1.4; color:var(--text); }
+    .backup-meta{ font-size:12px; color:var(--muted); }
+    .backup-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+    .backup-actions button{ flex:1; min-width:120px; font-size:14px; padding:10px; }
 
     .players{ display:flex; flex-direction:column; gap:14px; flex:1 }
     .card{
@@ -186,6 +225,7 @@
     <div class="app-title">
       <div class="title-main">Punch Buggy</div>
     </div>
+    <span class="version-tag">v<span id="appVersion">—</span></span>
   </header>
 
   <div class="players">
@@ -306,12 +346,35 @@
         </div>
       </div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Export will download the full game state (JSON). Import will replace the current state if compatible. Logs are preserved unless cleared.</div>
+      <div class="backup-panel" id="backupPanel">
+        <h4>Local backups</h4>
+        <div class="backup-status" id="backupStatusText">Backups are disabled.</div>
+        <div class="backup-meta" id="backupMetaText"></div>
+        <div class="backup-actions">
+          <button class="back-btn" id="connectBackup">Connect folder</button>
+          <button class="back-btn" id="runBackup">Run backup</button>
+          <button class="back-btn ghost" id="disconnectBackup">Forget folder</button>
+        </div>
+      </div>
       <div style="max-height:60vh; overflow:auto;">
         <ul id="modalLog" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px"></ul>
       </div>
     </div>
   </div>
 
+  <div class="update-banner" id="updateBanner" role="status" aria-live="polite">
+    <div>
+      <strong>Update ready</strong>
+      <div id="updateBannerText" style="font-size:13px;color:var(--muted);">A new version is available. Refresh to apply the latest fixes.</div>
+    </div>
+    <div class="update-actions">
+      <button class="ghost" id="dismissUpdate">Later</button>
+      <button id="refreshUpdate">Refresh</button>
+    </div>
+  </div>
+
+  <script src="app-version.js"></script>
+  <script src="backup.js"></script>
   <script>
     const $=sel=>document.querySelector(sel);
     const state={
@@ -324,6 +387,12 @@
   roundWinners:[],
       history:[]
     };
+
+    const Backup = window.PunchBuggyBackup;
+    const versionEl = $('#appVersion');
+    if(versionEl){
+      versionEl.textContent = window.PUNCHBUGGY_APP_VERSION || '—';
+    }
 
     function render(){
       $('#scoreA').textContent=state.players.A.score;
@@ -448,7 +517,12 @@
   if($('#headerNameB')) $('#headerNameB').textContent = state.players.B.name;
     }
 
-    function save(){localStorage.setItem('punchBuggy',JSON.stringify(state))}
+    function save(){
+      localStorage.setItem('punchBuggy',JSON.stringify(state));
+      if(Backup && typeof Backup.handleStoreSave==='function'){
+        Backup.handleStoreSave('auto');
+      }
+    }
     function load(){
       const s=localStorage.getItem('punchBuggy');
       if(s){
@@ -613,7 +687,7 @@
     };
 
     // Data modal handlers (export/import/log/clear)
-    $('#dataBtn').onclick=()=>{ $('#dataModal').style.display='flex'; renderModalLog(); };
+    $('#dataBtn').onclick=()=>{ $('#dataModal').style.display='flex'; renderModalLog(); if(typeof updateBackupUi==='function'){ updateBackupUi(Backup && Backup.getStatus ? Backup.getStatus() : {code:'unsupported'}); } };
     $('#closeData').onclick=()=>{ $('#dataModal').style.display='none'; };
     $('#clearData').onclick=()=>{ if(confirm('Clear all game data (rounds, scores, history)?')){ state.round=1; state.players.A.score=0; state.players.B.score=0; state.players.A.streak=0; state.players.B.streak=0; state.history=[]; state.roundWinners=[]; render(); } };
 
@@ -653,22 +727,157 @@
       }catch(err){ alert('Failed to import: ' + err.message); }
       e.target.value='';
     };
+
+    const backupStatusEl = $('#backupStatusText');
+    const backupMetaEl = $('#backupMetaText');
+    const connectBackupBtn = $('#connectBackup');
+    const runBackupBtn = $('#runBackup');
+    const disconnectBackupBtn = $('#disconnectBackup');
+    const connectedStatusCodes = new Set(['ready','busy','success','up-to-date','needs-permission','error']);
+
+    function describeBackupTime(ts){
+      if(!ts) return null;
+      const date = new Date(ts);
+      if(Number.isNaN(date.getTime())) return null;
+      const diff = Date.now() - date.getTime();
+      if(diff < 30 * 1000) return 'just now';
+      if(diff < 60 * 60 * 1000){
+        const mins = Math.round(diff / 60000);
+        return `${mins} minute${mins===1?'':'s'} ago`;
+      }
+      if(diff < 24 * 60 * 60 * 1000){
+        const hours = Math.round(diff / 3600000);
+        return `${hours} hour${hours===1?'':'s'} ago`;
+      }
+      return date.toLocaleString();
+    }
+
+    function updateBackupUi(status){
+      if(!backupStatusEl) return;
+      const state = status || {};
+      const code = state.code || 'idle';
+      backupStatusEl.textContent = state.message || 'Backups ready.';
+      if(backupMetaEl){
+        const details = [];
+        if(state.handleName) details.push(`Folder: ${state.handleName}`);
+        if(state.lastBackupAt){
+          const desc = describeBackupTime(state.lastBackupAt);
+          if(desc) details.push(`Last backup ${desc}`);
+        }
+        if(code === 'needs-permission') details.push('Permission required to continue automatic backups.');
+        if(code === 'unsupported') details.push('This browser does not support local folder backups.');
+        if(code === 'error' && state.error){
+          const errText = state.error && state.error.message ? state.error.message : String(state.error);
+          details.push(`Error: ${errText}`);
+        }
+        backupMetaEl.textContent = details.join(' • ');
+      }
+      const hasHandle = connectedStatusCodes.has(code);
+      if(runBackupBtn) runBackupBtn.disabled = !hasHandle || code === 'busy';
+      if(disconnectBackupBtn) disconnectBackupBtn.disabled = !hasHandle || code === 'busy';
+      if(connectBackupBtn) connectBackupBtn.disabled = code === 'busy';
+    }
+
+    if(!Backup || !Backup.SUPPORTED){
+      updateBackupUi({ code:'unsupported', message:'Backups require a compatible browser.' });
+      if(connectBackupBtn) connectBackupBtn.disabled = true;
+      if(runBackupBtn) runBackupBtn.disabled = true;
+      if(disconnectBackupBtn) disconnectBackupBtn.disabled = true;
+    }else{
+      if(connectBackupBtn) connectBackupBtn.onclick=()=>{ Backup.chooseDirectory(); };
+      if(runBackupBtn) runBackupBtn.onclick=()=>{ Backup.triggerManualBackup('manual').catch(err=>console.error('Manual backup failed',err)); };
+      if(disconnectBackupBtn) disconnectBackupBtn.onclick=()=>{
+        if(confirm('Forget this backup folder connection? Existing backup files stay on disk.')){
+          Backup.clearBackupData();
+        }
+      };
+      if(typeof Backup.hydrateMetaFromDb==='function'){
+        Backup.hydrateMetaFromDb();
+      }
+      Backup.init({ getState: ()=>state, onStatusChange: updateBackupUi });
+      updateBackupUi(Backup.getStatus());
+    }
     $('#closeRules').onclick=()=>{ $('#rulesModal').style.display='none'; };
     $('#nameA').onchange=e=>{state.players.A.name=e.target.value;render()};
     $('#nameB').onchange=e=>{state.players.B.name=e.target.value;render()};
     $('#uploadA').onchange=e=>handleImageUpload('A',e.target.files[0]);
     $('#uploadB').onchange=e=>handleImageUpload('B',e.target.files[0]);
 
-    load();
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js').catch(err => {
-          console.error('Service worker registration failed:', err);
+    function setupServiceWorkerUpdates(){
+      if(!('serviceWorker' in navigator)) return;
+      const banner = $('#updateBanner');
+      const bannerText = $('#updateBannerText');
+      const refreshBtn = $('#refreshUpdate');
+      const dismissBtn = $('#dismissUpdate');
+      let waitingWorker = null;
+      let autoReloadTimer = null;
+      let refreshing = false;
+
+      function hideBanner(){
+        if(autoReloadTimer) clearTimeout(autoReloadTimer);
+        autoReloadTimer = null;
+        if(banner) banner.style.display = 'none';
+        waitingWorker = null;
+      }
+
+      function requestRefresh(){
+        if(waitingWorker){
+          const worker = waitingWorker;
+          hideBanner();
+          worker.postMessage({type:'SKIP_WAITING'});
+        }
+      }
+
+      function showBanner(worker){
+        waitingWorker = worker;
+        if(!banner) return;
+        if(bannerText){
+          const version = window.PUNCHBUGGY_APP_VERSION || 'latest';
+          bannerText.textContent = `Version ${version} is ready. Refresh to load the latest updates.`;
+        }
+        banner.style.display = 'flex';
+        if(autoReloadTimer) clearTimeout(autoReloadTimer);
+        autoReloadTimer = setTimeout(()=>{
+          if(waitingWorker){
+            requestRefresh();
+          }
+        }, 30000);
+      }
+
+      if(refreshBtn) refreshBtn.onclick=()=>requestRefresh();
+      if(dismissBtn) dismissBtn.onclick=()=>hideBanner();
+
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if(refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+
+      navigator.serviceWorker.register('/service-worker.js').then(reg=>{
+        if(reg.waiting){
+          showBanner(reg.waiting);
+        }
+        reg.addEventListener('updatefound', ()=>{
+          const newWorker = reg.installing;
+          if(!newWorker) return;
+          newWorker.addEventListener('statechange', ()=>{
+            if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+              showBanner(newWorker);
+            }
+          });
         });
+        setInterval(()=>{
+          if(document.visibilityState === 'visible'){
+            reg.update();
+          }
+        }, 5 * 60 * 1000);
+      }).catch(err=>{
+        console.error('Service worker registration failed:', err);
       });
     }
+
+    load();
+    setupServiceWorkerUpdates();
   </script>
 </body>
 </html>
