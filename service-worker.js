@@ -1,10 +1,14 @@
-const CACHE_VERSION = 'v2';
-const CACHE_NAME = `punchbuggy-cache-${CACHE_VERSION}`;
+importScripts('./app-version.js');
+
+const APP_VERSION = self.PUNCHBUGGY_APP_VERSION || 'dev';
+const CACHE_NAME = `punchbuggy-cache-${APP_VERSION}`;
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './service-worker.js',
+  './app-version.js',
+  './backup.js',
   './icons/punchbuggy.svg'
 ].map(path => new URL(path, self.location).toString());
 
@@ -20,7 +24,7 @@ self.addEventListener('activate', event => {
       Promise.all(
         keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
       )
-    )
+    ).then(() => self.clients.claim())
   );
 });
 
@@ -43,4 +47,10 @@ self.addEventListener('fetch', event => {
         .catch(() => caches.match(new URL('./index.html', self.location).toString()));
     })
   );
+});
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
