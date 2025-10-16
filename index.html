@@ -65,14 +65,16 @@
     .backup-panel{
       margin-top:16px; padding:12px; border-radius:12px;
       background:linear-gradient(180deg,rgba(15,22,40,0.9),rgba(12,19,34,0.9));
-      display:flex; flex-direction:column; gap:8px;
+      display:flex; flex-direction:column; gap:10px;
     }
 
     .backup-panel h4{ margin:0; font-size:14px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); }
     .backup-status{ font-size:14px; line-height:1.4; color:var(--text); }
     .backup-meta{ font-size:12px; color:var(--muted); }
     .backup-actions{ display:flex; gap:8px; flex-wrap:wrap; }
-    .backup-actions button{ flex:1; min-width:120px; font-size:14px; padding:10px; }
+    .backup-actions button{ flex:1; min-width:140px; font-size:14px; padding:10px; }
+    .backup-toggle{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); }
+    .backup-toggle input{ width:18px; height:18px; }
 
     .players{ display:flex; flex-direction:column; gap:14px; flex:1 }
     .card{
@@ -347,13 +349,16 @@
       </div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Export will download the full game state (JSON). Import will replace the current state if compatible. Logs are preserved unless cleared.</div>
       <div class="backup-panel" id="backupPanel">
-        <h4>Local backups</h4>
-        <div class="backup-status" id="backupStatusText">Backups are disabled.</div>
-        <div class="backup-meta" id="backupMetaText"></div>
+        <h4>Automatic backups</h4>
+        <label class="backup-toggle">
+          <input type="checkbox" id="autoBackupToggle" checked>
+          <span>Enable automatic backups (stored in IndexedDB)</span>
+        </label>
+        <div class="backup-status" id="backupStatusText">Automatic backups are initializing…</div>
+        <div class="backup-meta" id="backupMetaText">No backups saved yet.</div>
         <div class="backup-actions">
-          <button class="back-btn" id="connectBackup">Connect folder</button>
-          <button class="back-btn" id="runBackup">Run backup</button>
-          <button class="back-btn ghost" id="disconnectBackup">Forget folder</button>
+          <button class="back-btn" id="downloadBackupBtn">Download backup</button>
+          <button class="back-btn ghost" id="restoreBackupBtn">Restore backup</button>
         </div>
       </div>
       <div style="max-height:60vh; overflow:auto;">
@@ -374,7 +379,7 @@
   </div>
 
   <script src="app-version.js"></script>
-  <script src="backup.js"></script>
+  <script src="auto-backup.js"></script>
   <script>
     const $=sel=>document.querySelector(sel);
     const state={
@@ -388,7 +393,7 @@
       history:[]
     };
 
-    const Backup = window.PunchBuggyBackup;
+    const AutoBackup = window.AutoBackup || window.PunchBuggyAutoBackup || window.PunchBuggyBackup;
     const versionEl = $('#appVersion');
     if(versionEl){
       versionEl.textContent = window.PUNCHBUGGY_APP_VERSION || '—';
@@ -519,8 +524,8 @@
 
     function save(){
       localStorage.setItem('punchBuggy',JSON.stringify(state));
-      if(Backup && typeof Backup.handleStoreSave==='function'){
-        Backup.handleStoreSave('auto');
+      if(AutoBackup && typeof AutoBackup.handleStoreSave==='function'){
+        AutoBackup.handleStoreSave('auto');
       }
     }
     function load(){
@@ -687,7 +692,7 @@
     };
 
     // Data modal handlers (export/import/log/clear)
-    $('#dataBtn').onclick=()=>{ $('#dataModal').style.display='flex'; renderModalLog(); if(typeof updateBackupUi==='function'){ updateBackupUi(Backup && Backup.getStatus ? Backup.getStatus() : {code:'unsupported'}); } };
+    $('#dataBtn').onclick=()=>{ $('#dataModal').style.display='flex'; renderModalLog(); if(typeof updateBackupUi==='function'){ updateBackupUi(AutoBackup && AutoBackup.getStatus ? AutoBackup.getStatus() : {code:'unsupported'}); } };
     $('#closeData').onclick=()=>{ $('#dataModal').style.display='none'; };
     $('#clearData').onclick=()=>{ if(confirm('Clear all game data (rounds, scores, history)?')){ state.round=1; state.players.A.score=0; state.players.B.score=0; state.players.A.streak=0; state.players.B.streak=0; state.history=[]; state.roundWinners=[]; render(); } };
 
@@ -730,14 +735,13 @@
 
     const backupStatusEl = $('#backupStatusText');
     const backupMetaEl = $('#backupMetaText');
-    const connectBackupBtn = $('#connectBackup');
-    const runBackupBtn = $('#runBackup');
-    const disconnectBackupBtn = $('#disconnectBackup');
-    const connectedStatusCodes = new Set(['ready','busy','success','up-to-date','needs-permission','error']);
+    const autoBackupToggle = $('#autoBackupToggle');
+    const downloadBackupBtn = $('#downloadBackupBtn');
+    const restoreBackupBtn = $('#restoreBackupBtn');
 
-    function describeBackupTime(ts){
-      if(!ts) return null;
-      const date = new Date(ts);
+    function describeBackupIso(iso){
+      if(!iso) return null;
+      const date = new Date(iso);
       if(Number.isNaN(date.getTime())) return null;
       const diff = Date.now() - date.getTime();
       if(diff < 30 * 1000) return 'just now';
@@ -754,48 +758,125 @@
 
     function updateBackupUi(status){
       if(!backupStatusEl) return;
-      const state = status || {};
-      const code = state.code || 'idle';
-      backupStatusEl.textContent = state.message || 'Backups ready.';
+      const data = status || {};
+      const metadata = data.metadata || {};
+      if(typeof data.enabled === 'boolean' && autoBackupToggle){
+        autoBackupToggle.checked = data.enabled;
+      }
+      backupStatusEl.textContent = data.message || (data.enabled === false ? 'Automatic backups are disabled.' : 'Automatic backups ready.');
       if(backupMetaEl){
         const details = [];
-        if(state.handleName) details.push(`Folder: ${state.handleName}`);
-        if(state.lastBackupAt){
-          const desc = describeBackupTime(state.lastBackupAt);
-          if(desc) details.push(`Last backup ${desc}`);
-        }
-        if(code === 'needs-permission') details.push('Permission required to continue automatic backups.');
-        if(code === 'unsupported') details.push('This browser does not support local folder backups.');
-        if(code === 'error' && state.error){
-          const errText = state.error && state.error.message ? state.error.message : String(state.error);
-          details.push(`Error: ${errText}`);
+        if(data.code === 'unsupported'){
+          details.push('This browser does not support IndexedDB-based backups.');
+        }else{
+          if(metadata.currentBackupDate){
+            const desc = describeBackupIso(metadata.currentBackupDate);
+            if(desc) details.push(`Current backup saved ${desc}`);
+          }
+          if(metadata.previousBackupDate){
+            const desc = describeBackupIso(metadata.previousBackupDate);
+            if(desc) details.push(`Previous backup saved ${desc}`);
+          }
+          if(metadata.oldestBackupDate){
+            const desc = describeBackupIso(metadata.oldestBackupDate);
+            if(desc) details.push(`Oldest backup saved ${desc}`);
+          }
+          if(!metadata.currentBackupDate && data.enabled !== false){
+            details.push('No backups have been created yet.');
+          }
+          if(data.code === 'error' && data.error){
+            const errText = data.error && data.error.message ? data.error.message : String(data.error);
+            details.push(`Error: ${errText}`);
+          }
         }
         backupMetaEl.textContent = details.join(' • ');
       }
-      const hasHandle = connectedStatusCodes.has(code);
-      if(runBackupBtn) runBackupBtn.disabled = !hasHandle || code === 'busy';
-      if(disconnectBackupBtn) disconnectBackupBtn.disabled = !hasHandle || code === 'busy';
-      if(connectBackupBtn) connectBackupBtn.disabled = code === 'busy';
+      const disabled = data.code === 'unsupported' || data.enabled === false;
+      if(downloadBackupBtn) downloadBackupBtn.disabled = disabled;
+      if(restoreBackupBtn) restoreBackupBtn.disabled = disabled || !(metadata.backupCount > 0);
     }
 
-    if(!Backup || !Backup.SUPPORTED){
-      updateBackupUi({ code:'unsupported', message:'Backups require a compatible browser.' });
-      if(connectBackupBtn) connectBackupBtn.disabled = true;
-      if(runBackupBtn) runBackupBtn.disabled = true;
-      if(disconnectBackupBtn) disconnectBackupBtn.disabled = true;
-    }else{
-      if(connectBackupBtn) connectBackupBtn.onclick=()=>{ Backup.chooseDirectory(); };
-      if(runBackupBtn) runBackupBtn.onclick=()=>{ Backup.triggerManualBackup('manual').catch(err=>console.error('Manual backup failed',err)); };
-      if(disconnectBackupBtn) disconnectBackupBtn.onclick=()=>{
-        if(confirm('Forget this backup folder connection? Existing backup files stay on disk.')){
-          Backup.clearBackupData();
-        }
+    function applyRestoredState(snapshot){
+      if(!snapshot || typeof snapshot !== 'object') return;
+      const defaults = {
+        round: 1,
+        players: {
+          A: { name: 'Player A', score: 0, streak: 0, avatar: '' },
+          B: { name: 'Player B', score: 0, streak: 0, avatar: '' }
+        },
+        roundWinners: [],
+        history: []
       };
-      if(typeof Backup.hydrateMetaFromDb==='function'){
-        Backup.hydrateMetaFromDb();
+      const next = Object.assign({}, defaults, snapshot);
+      const nextPlayers = snapshot && snapshot.players ? snapshot.players : {};
+      next.players = Object.assign({}, defaults.players, nextPlayers);
+      next.players.A = Object.assign({}, defaults.players.A, nextPlayers.A || {});
+      next.players.B = Object.assign({}, defaults.players.B, nextPlayers.B || {});
+      next.roundWinners = Array.isArray(snapshot && snapshot.roundWinners) ? snapshot.roundWinners.slice() : [];
+      next.history = Array.isArray(snapshot && snapshot.history) ? snapshot.history.slice() : [];
+      Object.assign(state, next);
+      render();
+    }
+
+    if(!AutoBackup || !AutoBackup.SUPPORTED){
+      updateBackupUi({ code:'unsupported', message:'Automatic backups are unavailable in this browser.', enabled:false });
+      if(autoBackupToggle) autoBackupToggle.disabled = true;
+      if(downloadBackupBtn) downloadBackupBtn.disabled = true;
+      if(restoreBackupBtn) restoreBackupBtn.disabled = true;
+    }else{
+      if(autoBackupToggle){
+        autoBackupToggle.addEventListener('change', e=>{
+          try{
+            AutoBackup.setEnabled(e.target.checked);
+          }catch(err){
+            console.error('AutoBackup toggle failed', err);
+            e.target.checked = !e.target.checked;
+          }
+        });
       }
-      Backup.init({ getState: ()=>state, onStatusChange: updateBackupUi });
-      updateBackupUi(Backup.getStatus());
+      if(downloadBackupBtn){
+        downloadBackupBtn.onclick = async ()=>{
+          try{
+            await AutoBackup.manualBackup();
+          }catch(err){
+            console.error('Manual backup failed', err);
+            alert('Failed to download backup: ' + (err && err.message ? err.message : err));
+          }
+        };
+      }
+      if(restoreBackupBtn){
+        restoreBackupBtn.onclick = async ()=>{
+          try{
+            const backups = await AutoBackup.listBackups();
+            if(!backups.length){
+              alert('No backups available to restore yet.');
+              return;
+            }
+            const labels = { current: 'Current', previous: 'Previous', oldest: 'Oldest' };
+            const options = backups.map((item, idx)=>{
+              const desc = describeBackupIso(item.savedAt) || item.savedAt || 'unknown time';
+              return `${idx+1}. ${labels[item.key] || item.key} — saved ${desc}`;
+            });
+            const choice = prompt(`Restore which backup?\n${options.join('\n')}\nEnter a number:`, '1');
+            if(!choice) return;
+            const index = parseInt(choice,10) - 1;
+            if(Number.isNaN(index) || index < 0 || index >= backups.length){
+              alert('Invalid selection.');
+              return;
+            }
+            const selected = backups[index];
+            const when = describeBackupIso(selected.savedAt) || selected.savedAt || 'an unknown time';
+            if(!confirm(`Restore the ${labels[selected.key] || selected.key} backup from ${when}? This will replace your current game data.`)) return;
+            await AutoBackup.restoreFromBackup(selected.key);
+            alert('Backup restored successfully.');
+          }catch(err){
+            console.error('Restore backup failed', err);
+            alert('Failed to restore backup: ' + (err && err.message ? err.message : err));
+          }
+        };
+      }
+      AutoBackup.init({ getState: ()=>state, applyState: applyRestoredState, onStatusChange: updateBackupUi });
+      updateBackupUi(AutoBackup.getStatus());
     }
     $('#closeRules').onclick=()=>{ $('#rulesModal').style.display='none'; };
     $('#nameA').onchange=e=>{state.players.A.name=e.target.value;render()};
