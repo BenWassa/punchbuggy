@@ -8,7 +8,7 @@ const APP_SHELL = [
   './manifest.webmanifest',
   './service-worker.js',
   './app-version.js',
-  './backup.js',
+  './auto-backup.js',
   './icons/punchbuggy.svg'
 ].map(path => new URL(path, self.location).toString());
 
