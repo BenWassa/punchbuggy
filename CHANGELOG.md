@@ -11,3 +11,7 @@ All notable changes to this project will be documented in this file.
 ### Migration notes
 - The app will attempt an automatic, non-destructive migration of local state. A backup copy of the raw JSON is stored in localStorage under `punchBuggy_backup_<timestamp>` and a pointer in `punchBuggy_last_backup`.
 - If you prefer a manual rollback: open DevTools → Application → Local Storage, find the backup key and restore by copying its value back to the `punchBuggy` key, or use the Import feature with the exported JSON.
+
+## [2.0.1] - 2025-10-21
+- Patch: small bug fixes and polish after v2.0.0 migration rollout.
+- Fixes: minor UI text tweaks, improved migration logging in Data → Log, and safer object merging when restoring backups.

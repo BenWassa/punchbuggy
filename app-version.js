@@ -1,3 +1,3 @@
 // Application version used by the service worker and UI.
-// Bumped for schema changes and migration: v2.0.0
-self.PUNCHBUGGY_APP_VERSION = '2.0.0';
+// Patch release for bug fixes: v2.0.1
+self.PUNCHBUGGY_APP_VERSION = '2.0.1';
