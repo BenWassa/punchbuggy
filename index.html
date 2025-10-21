@@ -382,16 +382,81 @@
   <script src="auto-backup.js"></script>
   <script>
     const $=sel=>document.querySelector(sel);
-    const state={
-      round:1,
-      players:{
-        A:{name:'Player A',score:0,streak:0,avatar:''},
-        B:{name:'Player B',score:0,streak:0,avatar:''}
-      },
-  // track rounds: {winner:'A'|'B'|'T', scoreA: number, scoreB: number}
-  roundWinners:[],
-      history:[]
-    };
+
+    function createDefaultState(){
+      return {
+        round:1,
+        players:{
+          A:{name:'Player A',score:0,streak:0,avatar:''},
+          B:{name:'Player B',score:0,streak:0,avatar:''}
+        },
+        // track rounds: {winner:'A'|'B'|'T', scoreA: number, scoreB: number}
+        roundWinners:[],
+        history:[]
+      };
+    }
+
+    function coerceScore(value, fallback){
+      const num=Number(value);
+      if(Number.isFinite(num)){
+        return Math.max(0,Math.round(num));
+      }
+      return fallback;
+    }
+
+    function normalizePlayer(player,fallback){
+      const defaults=fallback || {name:'Player',score:0,streak:0,avatar:''};
+      const source=(player&&typeof player==='object')?player:{};
+      const name=typeof source.name==='string' && source.name.trim()?source.name.trim():defaults.name;
+      return {
+        name,
+        score:coerceScore(source.score,defaults.score ?? 0),
+        streak:coerceScore(source.streak,defaults.streak ?? 0),
+        avatar:typeof source.avatar==='string'?source.avatar:''
+      };
+    }
+
+    function normalizeRoundWinner(entry){
+      if(!entry) return null;
+      if(typeof entry==='string'){
+        if(entry==='A') return {winner:'A',scoreA:0,scoreB:0};
+        if(entry==='B') return {winner:'B',scoreA:0,scoreB:0};
+        return {winner:'T',scoreA:0,scoreB:0};
+      }
+      if(typeof entry!=='object') return null;
+      const winner=entry.winner==='A'||entry.winner==='B'?entry.winner:'T';
+      return {
+        winner,
+        scoreA:coerceScore(entry.scoreA,0),
+        scoreB:coerceScore(entry.scoreB,0)
+      };
+    }
+
+    function sanitizeState(raw){
+      if(!raw||typeof raw!=='object') throw new Error('State must be an object.');
+      const defaults=createDefaultState();
+      const next=createDefaultState();
+      const round=Number(raw.round);
+      if(!Number.isFinite(round)) throw new Error('Round value is invalid.');
+      next.round=Math.max(1,Math.round(round));
+      const players=raw.players && typeof raw.players==='object'?raw.players:{};
+      next.players={
+        A:normalizePlayer(players.A,defaults.players.A),
+        B:normalizePlayer(players.B,defaults.players.B)
+      };
+      next.roundWinners=Array.isArray(raw.roundWinners)?raw.roundWinners.map(normalizeRoundWinner).filter(Boolean):[];
+      next.history=Array.isArray(raw.history)?raw.history.filter(item=>typeof item==='string' && item.trim()).map(item=>item.trim()):[];
+      return next;
+    }
+
+    function applyState(next){
+      state.round=next.round;
+      state.players=next.players;
+      state.roundWinners=next.roundWinners;
+      state.history=next.history;
+    }
+
+    const state=createDefaultState();
 
     const AutoBackup = window.AutoBackup || window.PunchBuggyAutoBackup || window.PunchBuggyBackup;
     const versionEl = $('#appVersion');
@@ -531,19 +596,13 @@
     function load(){
       const s=localStorage.getItem('punchBuggy');
       if(s){
-        const parsed = JSON.parse(s);
-        // migrate roundWinners legacy strings to objects
-        if(parsed.roundWinners && Array.isArray(parsed.roundWinners)){
-          parsed.roundWinners = parsed.roundWinners.map(r=>{
-            if(typeof r === 'string'){
-              if(r==='A') return {winner:'A',scoreA:0,scoreB:0};
-              if(r==='B') return {winner:'B',scoreA:0,scoreB:0};
-              return {winner:'T',scoreA:0,scoreB:0};
-            }
-            return r;
-          });
+        try{
+          const parsed=JSON.parse(s);
+          const sanitized=sanitizeState(parsed);
+          applyState(sanitized);
+        }catch(err){
+          console.error('Failed to load saved state',err);
         }
-        Object.assign(state,parsed);
       }
       render();
     }
@@ -712,21 +771,9 @@
       try{
         const text = await f.text();
         const parsed = JSON.parse(text);
-        // basic validation: must have players and round
-        if(!parsed.players || !parsed.round){ alert('Invalid file: missing players or round'); return; }
+        const sanitized = sanitizeState(parsed);
         if(!confirm('Importing will replace your current game state. Continue?')) return;
-        // migrate legacy roundWinners if needed
-        if(parsed.roundWinners && Array.isArray(parsed.roundWinners)){
-          parsed.roundWinners = parsed.roundWinners.map(r=>{
-            if(typeof r === 'string'){
-              if(r==='A') return {winner:'A',scoreA:0,scoreB:0};
-              if(r==='B') return {winner:'B',scoreA:0,scoreB:0};
-              return {winner:'T',scoreA:0,scoreB:0};
-            }
-            return r;
-          });
-        }
-        Object.assign(state, parsed);
+        applyState(sanitized);
         render();
         alert('Import successful');
       }catch(err){ alert('Failed to import: ' + err.message); }
@@ -797,24 +844,8 @@
     }
 
     function applyRestoredState(snapshot){
-      if(!snapshot || typeof snapshot !== 'object') return;
-      const defaults = {
-        round: 1,
-        players: {
-          A: { name: 'Player A', score: 0, streak: 0, avatar: '' },
-          B: { name: 'Player B', score: 0, streak: 0, avatar: '' }
-        },
-        roundWinners: [],
-        history: []
-      };
-      const next = Object.assign({}, defaults, snapshot);
-      const nextPlayers = snapshot && snapshot.players ? snapshot.players : {};
-      next.players = Object.assign({}, defaults.players, nextPlayers);
-      next.players.A = Object.assign({}, defaults.players.A, nextPlayers.A || {});
-      next.players.B = Object.assign({}, defaults.players.B, nextPlayers.B || {});
-      next.roundWinners = Array.isArray(snapshot && snapshot.roundWinners) ? snapshot.roundWinners.slice() : [];
-      next.history = Array.isArray(snapshot && snapshot.history) ? snapshot.history.slice() : [];
-      Object.assign(state, next);
+      const sanitized=sanitizeState(snapshot);
+      applyState(sanitized);
       render();
     }
 
