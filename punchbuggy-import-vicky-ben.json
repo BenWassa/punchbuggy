@@ -1,33 +1,109 @@
 {
-  "round": 3,
+  "schemaVersion": 2,
+  "meta": {
+    "createdAt": "2024-02-01T12:00:00.000Z",
+    "updatedAt": "2024-02-01T12:10:00.000Z"
+  },
   "players": {
     "A": {
+      "id": "A",
       "name": "Vicky",
-      "score": 0,
-      "streak": 0,
-      "avatar": ""
+      "avatar": "",
+      "current": {
+        "score": 0,
+        "streak": 0
+      },
+      "totals": {
+        "wins": 1,
+        "losses": 0,
+        "ties": 1,
+        "roundsPlayed": 2,
+        "totalScore": 23,
+        "maxStreak": 0
+      }
     },
     "B": {
+      "id": "B",
       "name": "Ben",
-      "score": 0,
-      "streak": 0,
-      "avatar": ""
+      "avatar": "",
+      "current": {
+        "score": 0,
+        "streak": 0
+      },
+      "totals": {
+        "wins": 0,
+        "losses": 1,
+        "ties": 1,
+        "roundsPlayed": 2,
+        "totalScore": 8,
+        "maxStreak": 0
+      }
     }
   },
-  "roundWinners": [
+  "rounds": {
+    "current": {
+      "number": 3,
+      "startedAt": "2024-02-01T12:10:00.000Z",
+      "scores": {
+        "A": 0,
+        "B": 0
+      },
+      "events": []
+    },
+    "history": [
+      {
+        "number": 1,
+        "winner": "A",
+        "scores": {
+          "A": 22,
+          "B": 7
+        },
+        "startedAt": "2024-02-01T12:00:00.000Z",
+        "endedAt": "2024-02-01T12:05:00.000Z",
+        "notes": []
+      },
+      {
+        "number": 2,
+        "winner": "T",
+        "scores": {
+          "A": 1,
+          "B": 1
+        },
+        "startedAt": "2024-02-01T12:05:00.000Z",
+        "endedAt": "2024-02-01T12:09:30.000Z",
+        "notes": []
+      }
+    ]
+  },
+  "history": [
     {
-      "winner": "A",
-      "scoreA": 22,
-      "scoreB": 7
+      "id": "log_round1",
+      "ts": "2024-02-01T12:05:01.000Z",
+      "type": "round",
+      "message": "Vicky won round 1 22-7",
+      "data": {
+        "number": 1,
+        "winner": "A"
+      }
     },
     {
-      "winner": "T",
-      "scoreA": 1,
-      "scoreB": 1
+      "id": "log_round2",
+      "ts": "2024-02-01T12:09:31.000Z",
+      "type": "round",
+      "message": "Round 2 tied 1-1",
+      "data": {
+        "number": 2,
+        "winner": "T"
+      }
+    },
+    {
+      "id": "log_round3_start",
+      "ts": "2024-02-01T12:10:01.000Z",
+      "type": "round",
+      "message": "Round 3 started",
+      "data": {
+        "number": 3
+      }
     }
-  ],
-  "history": [
-    "Round 1: Vicky won 22-7",
-    "Round 2: Tied at 1-1"
   ]
 }

@@ -1,27 +1,56 @@
 {
-  "round": 1,
+  "schemaVersion": 2,
+  "meta": {
+    "createdAt": "2024-01-01T00:00:00.000Z",
+    "updatedAt": "2024-01-01T00:00:00.000Z"
+  },
   "players": {
     "A": {
+      "id": "A",
       "name": "Player A",
-      "score": 0,
-      "streak": 0,
-      "avatar": ""
+      "avatar": "",
+      "current": {
+        "score": 0,
+        "streak": 0
+      },
+      "totals": {
+        "wins": 0,
+        "losses": 0,
+        "ties": 0,
+        "roundsPlayed": 0,
+        "totalScore": 0,
+        "maxStreak": 0
+      }
     },
     "B": {
+      "id": "B",
       "name": "Player B",
-      "score": 0,
-      "streak": 0,
-      "avatar": ""
+      "avatar": "",
+      "current": {
+        "score": 0,
+        "streak": 0
+      },
+      "totals": {
+        "wins": 0,
+        "losses": 0,
+        "ties": 0,
+        "roundsPlayed": 0,
+        "totalScore": 0,
+        "maxStreak": 0
+      }
     }
   },
-  "roundWinners": [
-    {
-      "winner": "A",
-      "scoreA": 0,
-      "scoreB": 0
-    }
-  ],
-  "history": [
-    "Optional log entry text"
-  ]
+  "rounds": {
+    "current": {
+      "number": 1,
+      "startedAt": "2024-01-01T00:00:00.000Z",
+      "scores": {
+        "A": 0,
+        "B": 0
+      },
+      "events": []
+    },
+    "history": []
+  },
+  "history": []
 }
