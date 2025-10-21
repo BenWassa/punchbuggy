@@ -1,0 +1,33 @@
+{
+  "round": 3,
+  "players": {
+    "A": {
+      "name": "Vicky",
+      "score": 0,
+      "streak": 0,
+      "avatar": ""
+    },
+    "B": {
+      "name": "Ben",
+      "score": 0,
+      "streak": 0,
+      "avatar": ""
+    }
+  },
+  "roundWinners": [
+    {
+      "winner": "A",
+      "scoreA": 22,
+      "scoreB": 7
+    },
+    {
+      "winner": "T",
+      "scoreA": 1,
+      "scoreB": 1
+    }
+  ],
+  "history": [
+    "Round 1: Vicky won 22-7",
+    "Round 2: Tied at 1-1"
+  ]
+}

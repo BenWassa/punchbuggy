@@ -1,0 +1,27 @@
+{
+  "round": 1,
+  "players": {
+    "A": {
+      "name": "Player A",
+      "score": 0,
+      "streak": 0,
+      "avatar": ""
+    },
+    "B": {
+      "name": "Player B",
+      "score": 0,
+      "streak": 0,
+      "avatar": ""
+    }
+  },
+  "roundWinners": [
+    {
+      "winner": "A",
+      "scoreA": 0,
+      "scoreB": 0
+    }
+  ],
+  "history": [
+    "Optional log entry text"
+  ]
+}
