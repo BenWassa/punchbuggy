@@ -43,23 +43,33 @@
     }
 
     .update-banner{
-      position:fixed; left:12px; right:12px; bottom:16px; z-index:100;
-      display:none; align-items:center; justify-content:space-between;
-      padding:12px 16px; border-radius:14px; background:linear-gradient(135deg,#12213f,#102542);
-      box-shadow:0 8px 24px rgba(0,0,0,0.45); gap:12px;
+      position:fixed; left:12px; right:12px; top:12px; z-index:100;
+      display:none; align-items:flex-start; justify-content:space-between;
+      padding:14px 18px; border-radius:14px;
+      background:linear-gradient(135deg,#136a3a,#1da762);
+      color:#e6ffef;
+      box-shadow:0 10px 26px rgba(0,0,0,0.45); gap:12px;
+      border:1px solid rgba(91,226,176,0.45);
     }
 
-    .update-banner strong{ font-size:14px; }
+    .update-banner strong{
+      font-size:15px;
+      letter-spacing:0.01em;
+      text-transform:uppercase;
+      display:block;
+      margin-bottom:2px;
+    }
 
     .update-actions{ display:flex; gap:8px; }
 
     .update-banner button{
-      padding:10px 16px; border-radius:999px; border:none; cursor:pointer; font-weight:700;
-      background:linear-gradient(180deg,#22c997,#1aa97a); color:#fff;
+      padding:10px 18px; border-radius:999px; border:none; cursor:pointer; font-weight:700;
+      background:linear-gradient(180deg,#7fffc5,#32de8f); color:#064021;
+      border:1px solid rgba(8,63,34,0.18);
     }
 
     .update-banner .ghost{
-      background:transparent; border:1px solid rgba(91,226,176,0.5); color:var(--muted);
+      background:transparent; border:1px solid rgba(233,255,243,0.28); color:#d8ffec;
     }
 
     .backup-panel{
@@ -227,7 +237,7 @@
     <div class="app-title">
       <div class="title-main">Punch Buggy</div>
     </div>
-    <span class="version-tag">v<span id="appVersion">2.1.1</span></span>
+    <span class="version-tag">v<span id="appVersion">2.1.2</span></span>
   </header>
 
   <div class="players">
@@ -369,12 +379,12 @@
 
   <div class="update-banner" id="updateBanner" role="status" aria-live="polite">
     <div>
-      <strong>Update ready</strong>
-      <div id="updateBannerText" style="font-size:13px;color:var(--muted);">A new version is available. Refresh to apply the latest fixes.</div>
+      <strong>Update Available</strong>
+      <div id="updateBannerText" style="font-size:13px;color:#f0fff7;">Tap Update to install the latest version of Punch Buggy.</div>
     </div>
     <div class="update-actions">
       <button class="ghost" id="dismissUpdate">Later</button>
-      <button id="refreshUpdate">Refresh</button>
+      <button id="refreshUpdate">Update</button>
     </div>
   </div>
 
@@ -924,6 +934,7 @@
       let waitingWorker = null;
       let autoReloadTimer = null;
       let refreshing = false;
+      let announcedVersion = null;
 
       function hideBanner(){
         if(autoReloadTimer) clearTimeout(autoReloadTimer);
@@ -937,15 +948,29 @@
           const worker = waitingWorker;
           hideBanner();
           worker.postMessage({type:'SKIP_WAITING'});
+        } else {
+          hideBanner();
+          navigator.serviceWorker.getRegistration().then(reg=>{
+            if(reg){
+              reg.update().catch(err=>console.warn('Service worker update failed during refresh:', err)).finally(()=>{
+                window.location.reload();
+              });
+            } else {
+              window.location.reload();
+            }
+          }).catch(()=>{
+            window.location.reload();
+          });
         }
       }
 
-      function showBanner(worker){
-        waitingWorker = worker;
+      function showBanner(worker, versionHint){
+        if(worker) waitingWorker = worker;
         if(!banner) return;
+        if(versionHint) announcedVersion = versionHint;
         if(bannerText){
-          const version = window.PUNCHBUGGY_APP_VERSION || 'latest';
-          bannerText.textContent = `Version ${version} is ready. Refresh to load the latest updates.`;
+          const version = announcedVersion || window.PUNCHBUGGY_APP_VERSION || 'latest';
+          bannerText.textContent = `Version ${version} is ready. Tap Update to get the latest Punch Buggy features.`;
         }
         banner.style.display = 'flex';
         if(autoReloadTimer) clearTimeout(autoReloadTimer);
@@ -954,6 +979,35 @@
             requestRefresh();
           }
         }, 30000);
+      }
+
+      async function fetchLatestVersion(){
+        try{
+          const response = await fetch(`/app-version.js?ts=${Date.now()}`, { cache:'no-store' });
+          if(!response.ok) throw new Error(`Status ${response.status}`);
+          const text = await response.text();
+          const match = text.match(/PUNCHBUGGY_APP_VERSION\s*=\s*['\"]([^'\"]+)/);
+          return match ? match[1] : null;
+        }catch(err){
+          console.warn('Unable to check latest app version:', err);
+          return null;
+        }
+      }
+
+      async function checkLatestVersion(reg){
+        const currentVersion = window.PUNCHBUGGY_APP_VERSION;
+        if(!currentVersion) return;
+        const latestVersion = await fetchLatestVersion();
+        if(!latestVersion || latestVersion === currentVersion) return;
+        announcedVersion = latestVersion;
+        if(reg && reg.waiting){
+          showBanner(reg.waiting, latestVersion);
+        }else{
+          showBanner(null, latestVersion);
+        }
+        if(reg){
+          reg.update().catch(err=>console.warn('Service worker update failed:', err));
+        }
       }
 
       if(refreshBtn) refreshBtn.onclick=()=>requestRefresh();
@@ -978,9 +1032,16 @@
             }
           });
         });
+        checkLatestVersion(reg);
+        document.addEventListener('visibilitychange', ()=>{
+          if(document.visibilityState === 'visible'){
+            checkLatestVersion(reg);
+          }
+        });
         setInterval(()=>{
           if(document.visibilityState === 'visible'){
             reg.update();
+            checkLatestVersion(reg);
           }
         }, 5 * 60 * 1000);
       }).catch(err=>{
