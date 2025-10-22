@@ -9,6 +9,9 @@ All notable changes to this project will be documented in this file.
 ## [2.1.0] - 2025-10-21
 - Minor: improved import handling — supports nested `rounds` exports and legacy player shapes; added normalization for `players.*.current` and `rounds.history` mappings.
 - UI: small refinements to Data → Import messaging.
+
+## [2.1.1] - 2025-10-21
+- Patch: make service worker update auto-apply opt-in by default; add `DEBUG_showUpdateBanner` helper for manual testing.
 - Build: Incremented manifest and runtime versions to publish the banner fix.
 
 ## [2.0.2] - 2025-10-21
