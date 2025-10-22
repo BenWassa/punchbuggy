@@ -1005,6 +1005,8 @@
       function requestRefresh(){
         if(waitingWorker){
           const worker = waitingWorker;
+          // mark that a refresh was explicitly requested so controllerchange will reload
+          refreshing = true;
           hideBanner();
           worker.postMessage({type:'SKIP_WAITING'});
         }
@@ -1048,8 +1050,9 @@
       };
 
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if(refreshing) return;
-        refreshing = true;
+        // Only reload the page when we explicitly requested the refresh (refreshing === true).
+        if(!refreshing) return;
+        // proceed with reload
         window.location.reload();
       });
 
