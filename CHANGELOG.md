@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.1.3] - 2025-10-21
+- Fix: version tag now shows running version (not newly-fetched) until user clicks Refresh to apply update.
+- Dev: added console logging on page load showing version details (runningVersion, fetchedVersion, autoApplyEnabled).
+
 ## [2.1.2] - 2025-10-21
 - Patch: make service worker update auto-apply opt-in by default; add `DEBUG_showUpdateBanner` helper for manual testing.
 - Build: Incremented manifest and runtime versions to publish the banner fix.
