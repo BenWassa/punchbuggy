@@ -42,7 +42,7 @@
   },
   "rounds": {
     "current": {
-      "number": 3,
+      "number": 2,
       "startedAt": "2024-02-01T12:10:00.000Z",
       "scores": {
         "A": 0,

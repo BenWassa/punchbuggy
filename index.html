@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -728,7 +728,76 @@
       const a = document.createElement('a'); a.href=url; a.download = `punchbuggy-export-${Date.now()}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     };
 
-    // Import - parse file and validate
+    // Import - parse file and normalize various export shapes (supports older shape and `rounds`-style exports)
+    function normalizeImportedState(parsed){
+      if(!parsed || typeof parsed !== 'object') return { error: 'invalid' };
+
+      const out = {};
+      // Players: support both flat {players.A.score} and nested {players.A.current.score}
+      out.players = {
+        A: { name: 'Player A', score: 0, streak: 0, avatar: '' },
+        B: { name: 'Player B', score: 0, streak: 0, avatar: '' }
+      };
+
+      if(parsed.players && typeof parsed.players === 'object'){
+        ['A','B'].forEach(k=>{
+          const p = parsed.players[k] || {};
+          const name = typeof p.name === 'string' && p.name.trim() ? p.name.trim() : out.players[k].name;
+          const avatar = typeof p.avatar === 'string' ? p.avatar : '';
+          let score = 0, streak = 0;
+          if(p.current && typeof p.current === 'object'){
+            score = Number(p.current.score) || 0;
+            streak = Number(p.current.streak) || 0;
+          } else {
+            score = Number(p.score) || 0;
+            streak = Number(p.streak) || 0;
+          }
+          out.players[k] = { name, score, streak, avatar };
+        });
+      }
+
+      // Round number: prefer top-level `round`, fallback to `rounds.current.number`
+      if(Number.isFinite(Number(parsed.round))) out.round = Math.max(1, Math.round(Number(parsed.round)));
+      else if(parsed.rounds && parsed.rounds.current && Number.isFinite(Number(parsed.rounds.current.number))) out.round = Math.max(1, Math.round(Number(parsed.rounds.current.number)));
+      else out.round = 1;
+
+      // Round winners: try to map from `rounds.history` if present, otherwise use roundWinners if available
+      out.roundWinners = [];
+      if(parsed.rounds && Array.isArray(parsed.rounds.history)){
+        out.roundWinners = parsed.rounds.history.map(r=>{
+          const winner = r && r.winner ? r.winner : 'T';
+          const scoreA = r && r.scores && Number.isFinite(Number(r.scores.A)) ? Number(r.scores.A) : 0;
+          const scoreB = r && r.scores && Number.isFinite(Number(r.scores.B)) ? Number(r.scores.B) : 0;
+          return { winner, scoreA, scoreB };
+        });
+      } else if(Array.isArray(parsed.roundWinners)){
+        out.roundWinners = parsed.roundWinners.map(r=>{
+          if(typeof r === 'string'){
+            if(r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
+            if(r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
+            return { winner: 'T', scoreA: 0, scoreB: 0 };
+          }
+          return r;
+        }).filter(Boolean);
+      }
+
+      // History: accept array of log objects or strings
+      if(Array.isArray(parsed.history)){
+        out.history = parsed.history.map(h=>{
+          if(typeof h === 'string') return h;
+          if(h && h.message) return h.message;
+          try{ return JSON.stringify(h); }catch(e){ return String(h); }
+        });
+      } else {
+        out.history = [];
+      }
+
+      // optional: preserve schemaVersion if present
+      if(parsed.schemaVersion) out.schemaVersion = parsed.schemaVersion;
+
+      return out;
+    }
+
     $('#importBtn').onclick=()=>$('#importFile').click();
     $('#importFile').onchange = async (e)=>{
       const f = e.target.files && e.target.files[0];
@@ -736,24 +805,13 @@
       try{
         const text = await f.text();
         const parsed = JSON.parse(text);
-        // basic validation: must have players and round
-        if(!parsed.players || !parsed.round){ alert('Invalid file: missing players or round'); return; }
-        if(!confirm('Importing will replace your current game state. Continue?')) return;
-        // migrate legacy roundWinners if needed
-        if(parsed.roundWinners && Array.isArray(parsed.roundWinners)){
-          parsed.roundWinners = parsed.roundWinners.map(r=>{
-            if(typeof r === 'string'){
-              if(r==='A') return {winner:'A',scoreA:0,scoreB:0};
-              if(r==='B') return {winner:'B',scoreA:0,scoreB:0};
-              return {winner:'T',scoreA:0,scoreB:0};
-            }
-            return r;
-          });
-        }
-        Object.assign(state, parsed);
+        const normalized = normalizeImportedState(parsed);
+        if(normalized && normalized.error){ alert('Invalid file: could not parse import'); e.target.value=''; return; }
+        if(!confirm('Importing will replace your current game state. Continue?')) { e.target.value=''; return; }
+        Object.assign(state, normalized);
         render();
         alert('Import successful');
-      }catch(err){ alert('Failed to import: ' + err.message); }
+      }catch(err){ alert('Failed to import: ' + (err && err.message ? err.message : String(err))); }
       e.target.value='';
     };
 
