@@ -418,10 +418,26 @@
     };
 
     const AutoBackup = window.AutoBackup || window.PunchBuggyAutoBackup || window.PunchBuggyBackup;
+    
+    // Version display: show the *running* version (persisted in localStorage on first load)
+    // rather than the newly-fetched version from app-version.js, so users see the current version
+    // until they explicitly click Refresh to apply the update.
     const versionEl = $('#appVersion');
     if(versionEl){
-      versionEl.textContent = window.PUNCHBUGGY_APP_VERSION || '—';
+      const currentVersion = localStorage.getItem('punchBuggy_running_version') || window.PUNCHBUGGY_APP_VERSION || '—';
+      versionEl.textContent = currentVersion;
+      // Persist the running version on first load (if not already set)
+      if(!localStorage.getItem('punchBuggy_running_version')){
+        localStorage.setItem('punchBuggy_running_version', window.PUNCHBUGGY_APP_VERSION || 'unknown');
+      }
     }
+    
+    // Console logging: print version details on page load for debugging
+    console.log('[PunchBuggy] Version info:', {
+      runningVersion: localStorage.getItem('punchBuggy_running_version'),
+      fetchedVersion: window.PUNCHBUGGY_APP_VERSION,
+      autoApplyEnabled: window.PUNCHBUGGY_AUTO_APPLY_UPDATES
+    });
 
     function render(){
       $('#scoreA').textContent=state.players.A.score;
@@ -1007,6 +1023,9 @@
           const worker = waitingWorker;
           // mark that a refresh was explicitly requested so controllerchange will reload
           refreshing = true;
+          // Update the running version in localStorage so after reload the UI shows the new version
+          localStorage.setItem('punchBuggy_running_version', window.PUNCHBUGGY_APP_VERSION || 'unknown');
+          console.log('[PunchBuggy] Update requested, new version will be:', window.PUNCHBUGGY_APP_VERSION);
           hideBanner();
           worker.postMessage({type:'SKIP_WAITING'});
         }
