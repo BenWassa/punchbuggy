@@ -968,6 +968,10 @@
 
     function setupServiceWorkerUpdates(){
       if(!('serviceWorker' in navigator)) return;
+      // Dev flag: set to `false` to require manual refresh. Set to `true` to re-enable auto-apply.
+      // Default intentionally `false` so users must click Refresh to apply updates.
+      window.PUNCHBUGGY_AUTO_APPLY_UPDATES = window.PUNCHBUGGY_AUTO_APPLY_UPDATES === undefined ? false : !!window.PUNCHBUGGY_AUTO_APPLY_UPDATES;
+      
       const banner = $('#updateBanner');
       const bannerText = $('#updateBannerText');
       const refreshBtn = $('#refreshUpdate');
@@ -1016,16 +1020,32 @@
         banner.style.display = 'flex';
         applyBannerOffset();
         if(autoReloadTimer) clearTimeout(autoReloadTimer);
-        autoReloadTimer = setTimeout(()=>{
-          if(waitingWorker){
-            requestRefresh();
-          }
-        }, 30000);
+        // Only schedule auto-apply when explicitly enabled.
+        if(window.PUNCHBUGGY_AUTO_APPLY_UPDATES){
+          autoReloadTimer = setTimeout(()=>{
+            if(waitingWorker){
+              requestRefresh();
+            }
+          }, 30000);
+        } else {
+          autoReloadTimer = null;
+        }
       }
 
       if(refreshBtn) refreshBtn.onclick=()=>requestRefresh();
       if(dismissBtn) dismissBtn.onclick=()=>hideBanner();
       window.addEventListener('resize', applyBannerOffset);
+
+      // Debug helper: allow manual banner show from console during testing.
+      // Usage: window.DEBUG_showUpdateBanner('Optional message');
+      window.DEBUG_showUpdateBanner = function(versionText){
+        try{
+          if(!banner) return;
+          if(bannerText) bannerText.textContent = versionText || `Version ${window.PUNCHBUGGY_APP_VERSION || 'latest'} is ready. Refresh to load the latest updates.`;
+          banner.style.display = 'flex';
+          applyBannerOffset();
+        }catch(err){ console.warn('DEBUG_showUpdateBanner failed', err); }
+      };
 
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if(refreshing) return;
