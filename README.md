@@ -11,7 +11,7 @@ No punchbacks.
 
 ## Versioning & release flow
 
-All runtime consumers read a single source of truth from `app-version.js`, which the service worker also imports. The PWA manifest mirrors that value so app stores detect the release.
+All runtime consumers read a single source of truth from `app-version.js` (now located in `src/app-version.js`), which the service worker also imports. The PWA manifest mirrors that value so app stores detect the release.
 
 1. Bump the version string in `app-version.js`.
 2. Mirror that version in `manifest.webmanifest` and add a changelog entry.

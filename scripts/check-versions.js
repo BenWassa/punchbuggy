@@ -10,7 +10,7 @@ function readFile(p){
 }
 
 const files = {
-  appVersion: 'app-version.js',
+  appVersionCandidates: ['app-version.js', 'src/app-version.js'],
   manifest: 'manifest.webmanifest',
   changelog: 'CHANGELOG.md',
 };
@@ -18,7 +18,11 @@ const files = {
 const output = {};
 
 // app-version.js
-const appJs = readFile(files.appVersion);
+let appJs = null;
+for(const candidate of files.appVersionCandidates){
+  appJs = readFile(candidate);
+  if(appJs) break;
+}
 if(appJs){
   const m = appJs.match(/PUNCHBUGGY_APP_VERSION\s*=\s*['"]([^'\"]+)/);
   output.appVersion = m ? m[1] : null;
