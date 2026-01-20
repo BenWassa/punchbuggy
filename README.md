@@ -16,7 +16,7 @@ All runtime consumers read a single source of truth from `app-version.js` (now l
 1. Run `npm install` (first time or after dependency changes).
 2. Run checks: `npm run lint` / `npm run format` if configured, plus any tests.
 3. Bump the version using `npm run bump -- x.y.z "Release notes"` and review the changelog entry.
-4. `npm run build` to generate `dist/`.
+4. `npm run build` to generate `docs/`.
 5. `git commit -m "chore: release x.y.z"` and push to `main`.
 6. Deploy the static bundle and open the app once to confirm the update banner appears.
 7. After 30 seconds the banner auto-refreshes unless dismissed; verify backups still report OK in the Data & Log modal.
@@ -24,6 +24,6 @@ All runtime consumers read a single source of truth from `app-version.js` (now l
 ## Dev tips
 
 - `scripts/check-versions.js` sanity-checks that the manifest, changelog, and runtime version stay in sync.
-- `npm install` then `npm run dev` starts Vite; `npm run build` outputs `dist/` for deployment.
+- `npm install` then `npm run dev` starts Vite; `npm run build` outputs `docs/` for deployment.
 - The update banner offset is controlled via the CSS custom property `--update-banner-offset`; when tweaking layout, confirm it still gets set inside `setupServiceWorkerUpdates()` in `src/main.js`.
 - Keep README and CHANGELOG synchronized with user-facing tweaks so release notes stay authoritative.

@@ -1,0 +1,18 @@
+{
+  "name": "Punch Buggy",
+  "short_name": "PunchBuggy",
+  "version": "3.0.1",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0b0f1a",
+  "theme_color": "#0b0f1a",
+  "description": "Track Punch Buggy scores offline with a quick, mobile-friendly interface.",
+  "icons": [
+    {
+      "src": "icons/punchbuggy.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ]
+}
