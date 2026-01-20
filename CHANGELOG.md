@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0] - 2026-01-20
+
+- TBD
+
 ## [3.0.1] - 2026-01-20
 
 - Patch release test

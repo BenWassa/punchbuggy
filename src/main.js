@@ -304,7 +304,6 @@ function score(p, d = 1) {
     setTimeout(() => $(`#score${p}`).classList.remove('bump'), 500);
 
     log(`${state.players[p].name} spotted a bug! +1`);
-
   } else {
     state.players[p].streak = 0;
     log(`${state.players[p].name} correction: -1`);
@@ -363,7 +362,6 @@ function nextRound() {
   log(`🏁 Round ${state.round} started!`);
   render();
 }
-
 
 function handleImageUpload(player, file) {
   if (!file || !file.type.startsWith('image/')) return;
@@ -763,10 +761,7 @@ try {
       // notify user in data modal log
       const logEl = document.getElementById('modalLog');
       if (logEl)
-        logEl.insertAdjacentHTML(
-          'beforeend',
-          '<li>Migrated local data to schema v2.0.0.</li>'
-        );
+        logEl.insertAdjacentHTML('beforeend', '<li>Migrated local data to schema v2.0.0.</li>');
     }
   }
 } catch (err) {
