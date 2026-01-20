@@ -760,17 +760,6 @@ button {
   }
 }
 
-.confetti {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 30;
-}
-.piece {
-  position: absolute;
-  width: 8px;
-  height: 12px;
-}
 
 /* Leaderboard styles */
 .leaderboard-wrap {

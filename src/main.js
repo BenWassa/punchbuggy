@@ -307,16 +307,6 @@ function score(p, d = 1) {
 
     log(`${state.players[p].name} spotted a bug! +1`);
 
-    // Confetti on milestones
-    if (state.players[p].score % 5 === 0) confetti();
-
-    // Extra celebration on first lead takeover
-    if (
-      state.players[p].score > state.players[other].score &&
-      state.players[p].score - state.players[other].score === 1
-    ) {
-      setTimeout(() => confetti(), 200);
-    }
   } else {
     state.players[p].streak = 0;
     log(`${state.players[p].name} correction: -1`);
@@ -366,29 +356,6 @@ function nextRound() {
   render();
 }
 
-function confetti() {
-  const root = $('#confetti');
-  root.innerHTML = '';
-  for (let i = 0; i < 50; i++) {
-    const d = document.createElement('div');
-    d.className = 'piece';
-    d.style.left = Math.random() * 100 + '%';
-    d.style.top = '-10px';
-    d.style.background = ['#5be2b0', '#8aa8ff', '#ffd166', '#ff6b6b'][
-      Math.floor(Math.random() * 4)
-    ];
-    d.style.transform = `rotate(${Math.random() * 360}deg)`;
-    root.appendChild(d);
-    d.animate(
-      [
-        { top: '-10px', opacity: 1 },
-        { top: '110%', opacity: 0 },
-      ],
-      { duration: 1500 + Math.random() * 1000, easing: 'cubic-bezier(.25,.46,.45,.94)' }
-    );
-    setTimeout(() => d.remove(), 3000);
-  }
-}
 
 function handleImageUpload(player, file) {
   if (!file || !file.type.startsWith('image/')) return;
@@ -451,7 +418,6 @@ const rules = [
   'Streaks: Consecutive correct calls increase your streak but do not change round scoring.',
   'Safety: Keep your eyes on the road. No taking photos or reaching for phones while driving.',
   'Fair Play: Disputes are resolved by mutual agreement; use -1 for honest corrections.',
-  'Milestones: Every 5 points triggers a celebration (confetti).',
   'Tie Rounds: If both players have equal scores when Next Round is pressed, the round is recorded as a tie.',
   'Customization: Change player names or avatars before/after rounds. Avatars are local only.',
 ];
