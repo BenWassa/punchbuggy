@@ -1,0 +1,20 @@
+{
+  "round": 1,
+  "players": {
+    "A": {
+      "name": "Player A",
+      "score": 0,
+      "streak": 0,
+      "avatar": ""
+    },
+    "B": {
+      "name": "Player B",
+      "score": 0,
+      "streak": 0,
+      "avatar": ""
+    }
+  },
+  "roundWinners": [],
+  "history": [],
+  "schemaVersion": "2.0.0"
+}

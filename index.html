@@ -146,87 +146,67 @@
 
     <!-- Fullscreen Leaderboard View -->
     <div class="leaderboard-view" id="leaderboardView" role="dialog" aria-modal="true">
-      <div class="view-header">
-        <div class="view-title">Scores — Rounds</div>
-        <div class="leaderboard-summary" id="leaderboardSummary">
-          Total Wins: Player A 0 — Player B 0
-        </div>
-        <div>
-          <button class="back-btn" id="closeFull">Back</button>
-        </div>
+      <div class="lb-header">
+        <div class="lb-title">🏆 Leaderboard</div>
+        <button class="lb-close" id="closeFull" aria-label="Close">✕</button>
       </div>
-      <div class="leaderboard-grid">
-        <div class="leaderboard-col" style="flex: 1">
-          <h4 style="margin-top: 0">Rounds</h4>
-          <!-- header: avatars & names -->
-          <div
-            id="scoresHeader"
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: space-between;
-              margin-bottom: 12px;
-            "
-          >
-            <div style="text-align: left; display: flex; gap: 10px; align-items: center">
-              <img
-                id="headerAvatarA"
-                src=""
-                style="
-                  width: 56px;
-                  height: 56px;
-                  border-radius: 8px;
-                  object-fit: cover;
-                  border: 2px solid rgba(255, 255, 255, 0.06);
-                "
-                alt="A"
-              />
-              <div style="font-weight: 800" id="headerNameA">Player A</div>
+
+      <div class="lb-content">
+        <section class="matchup-card">
+          <div class="matchup-header">Total Wins</div>
+          <div class="players-row">
+            <div class="player p1" id="lbPlayerA">
+              <div class="avatar-container">
+                <span class="crown-icon" id="lbCrownA">👑</span>
+                <img class="avatar-lg" id="lbAvatarA" src="" alt="Player A" />
+              </div>
+              <div class="big-score" id="lbWinsA">0</div>
+              <div class="player-name" id="lbNameA">Player A</div>
             </div>
-            <!-- center is intentionally empty; H4 above is the 'Rounds' label -->
-            <div
-              style="
-                text-align: right;
-                display: flex;
-                gap: 10px;
-                align-items: center;
-                justify-content: flex-end;
-              "
-            >
-              <div style="font-weight: 800" id="headerNameB">Player B</div>
-              <img
-                id="headerAvatarB"
-                src=""
-                style="
-                  width: 56px;
-                  height: 56px;
-                  border-radius: 8px;
-                  object-fit: cover;
-                  border: 2px solid rgba(255, 255, 255, 0.06);
-                "
-                alt="B"
-              />
+
+            <div class="vs-divider">VS</div>
+
+            <div class="player p2" id="lbPlayerB">
+              <div class="avatar-container">
+                <span class="crown-icon" id="lbCrownB">👑</span>
+                <img class="avatar-lg" id="lbAvatarB" src="" alt="Player B" />
+              </div>
+              <div class="big-score" id="lbWinsB">0</div>
+              <div class="player-name" id="lbNameB">Player B</div>
             </div>
           </div>
-          <div
-            id="fullList"
-            style="
-              display: flex;
-              flex-direction: column;
-              gap: 10px;
-              max-height: 60vh;
-              overflow: auto;
-            "
-          ></div>
-          <div
-            id="scoresTotals"
-            style="
-              margin-top: 12px;
-              padding-top: 12px;
-              border-top: 1px solid rgba(255, 255, 255, 0.04);
-            "
-          ></div>
-        </div>
+
+          <div class="meter-container">
+            <div class="meter-labels">
+              <span id="lbPercentA" style="color: var(--accent)">50%</span>
+              <span id="lbPercentB" style="color: var(--accent-2)">50%</span>
+            </div>
+            <div class="meter-bar">
+              <div class="meter-fill-p1" id="lbMeterA"></div>
+              <div class="meter-fill-p2" id="lbMeterB"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="stats-grid">
+          <div class="stat-box">
+            <div class="stat-label">Total Rounds</div>
+            <div class="stat-value" id="lbTotalRounds">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Ties</div>
+            <div class="stat-value" id="lbTotalTies">0</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Total Punches</div>
+            <div class="stat-value" id="lbTotalPunches">0</div>
+          </div>
+        </section>
+
+        <section class="history-section">
+          <h3>History <span id="lbHistoryCount">0</span></h3>
+          <div class="round-list" id="roundList"></div>
+        </section>
       </div>
     </div>
 

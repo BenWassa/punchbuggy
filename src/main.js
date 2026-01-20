@@ -105,14 +105,6 @@ function renderLeaderboard() {
     })
     .filter(Boolean);
 
-  const currentScore = `${state.players.A.score} — ${state.players.B.score}`;
-  const leader =
-    state.players.A.score === state.players.B.score
-      ? 'Tied'
-      : state.players.A.score > state.players.B.score
-        ? state.players.A.name
-        : state.players.B.name;
-
   // small card: compact per-round rows
   const mini = $('#miniList');
   mini.innerHTML = '';
@@ -152,106 +144,99 @@ function renderLeaderboard() {
     row.appendChild(score);
   });
 
-  // full view: simple scores list (A | Round | B)
-  const full = $('#fullList');
-  if (full) full.innerHTML = '';
-  // totals
-  let totalA = 0,
-    totalB = 0,
-    winsA = 0,
-    winsB = 0;
-  rounds.forEach((r, idx) => {
+  // totals and stats
+  let totalA = 0;
+  let totalB = 0;
+  let winsA = 0;
+  let winsB = 0;
+  let ties = 0;
+  rounds.forEach((r) => {
     totalA += r.scoreA;
     totalB += r.scoreB;
     if (r.winner === 'A') winsA++;
     else if (r.winner === 'B') winsB++;
-
-    const row = document.createElement('div');
-    row.style.display = 'grid';
-    row.style.gridTemplateColumns = '1fr auto 1fr';
-    row.style.alignItems = 'center';
-    row.style.padding = '10px 12px';
-    row.style.borderRadius = '10px';
-    row.style.marginBottom = '6px';
-    row.style.background = 'linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
-
-    const aCol = document.createElement('div');
-    aCol.style.textAlign = 'left';
-    aCol.style.fontWeight = '800';
-    aCol.style.fontSize = '16px';
-    aCol.textContent = r.scoreA;
-    const mid = document.createElement('div');
-    mid.style.textAlign = 'center';
-    mid.style.color = 'var(--muted)';
-    mid.style.fontWeight = '700';
-    mid.textContent = `Round ${idx + 1}`;
-    const bCol = document.createElement('div');
-    bCol.style.textAlign = 'right';
-    bCol.style.fontWeight = '800';
-    bCol.style.fontSize = '16px';
-    bCol.textContent = r.scoreB;
-
-    // highlight winning score
-    if (r.winner === 'A') {
-      aCol.style.color = 'var(--gold)';
-      aCol.style.fontSize = '20px';
-    } else if (r.winner === 'B') {
-      bCol.style.color = 'var(--gold)';
-      bCol.style.fontSize = '20px';
-    } else {
-      // tie
-      aCol.style.color = 'var(--muted)';
-      bCol.style.color = 'var(--muted)';
-    }
-
-    row.appendChild(aCol);
-    row.appendChild(mid);
-    row.appendChild(bCol);
-    full.appendChild(row);
+    else ties++;
   });
 
-  // header avatars & names
-  if ($('#headerAvatarA')) $('#headerAvatarA').src = state.players.A.avatar || $('#avatarA').src;
-  if ($('#headerAvatarB')) $('#headerAvatarB').src = state.players.B.avatar || $('#avatarB').src;
-  if ($('#headerNameA')) $('#headerNameA').textContent = state.players.A.name;
-  if ($('#headerNameB')) $('#headerNameB').textContent = state.players.B.name;
+  const totalPunches = totalA + totalB;
+  const winTotal = winsA + winsB;
+  const percentA = winTotal ? Math.round((winsA / winTotal) * 100) : 50;
+  const percentB = 100 - percentA;
 
-  // totals area
-  const totals = $('#scoresTotals');
-  if (totals) {
-    totals.innerHTML = '';
-    const totalsRow = document.createElement('div');
-    totalsRow.style.display = 'grid';
-    totalsRow.style.gridTemplateColumns = '1fr auto 1fr';
-    totalsRow.style.alignItems = 'center';
-    totalsRow.style.padding = '12px';
-    totalsRow.style.borderRadius = '10px';
-    totalsRow.style.marginTop = '8px';
-    totalsRow.style.background =
-      'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
-    const left = document.createElement('div');
-    left.style.textAlign = 'left';
-    left.innerHTML = `<div style="font-size:14px;color:var(--muted)">${state.players.A.name} Total</div><div style="font-weight:900;font-size:18px">${totalA}</div>`;
-    const mid = document.createElement('div');
-    mid.style.textAlign = 'center';
-    mid.innerHTML = `<div style="font-size:14px;color:var(--muted)">Rounds</div><div style="font-weight:900;font-size:18px">${rounds.length}</div>`;
-    const right = document.createElement('div');
-    right.style.textAlign = 'right';
-    right.innerHTML = `<div style="font-size:14px;color:var(--muted)">Wins</div><div style="font-weight:900;font-size:18px">${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB}</div>`;
-    totalsRow.appendChild(left);
-    totalsRow.appendChild(mid);
-    totalsRow.appendChild(right);
-    totals.appendChild(totalsRow);
+  const avatarA = state.players.A.avatar || $('#avatarA').src;
+  const avatarB = state.players.B.avatar || $('#avatarB').src;
+
+  if ($('#lbAvatarA')) $('#lbAvatarA').src = avatarA;
+  if ($('#lbAvatarB')) $('#lbAvatarB').src = avatarB;
+  if ($('#lbNameA')) $('#lbNameA').textContent = state.players.A.name;
+  if ($('#lbNameB')) $('#lbNameB').textContent = state.players.B.name;
+  if ($('#lbWinsA')) $('#lbWinsA').textContent = winsA;
+  if ($('#lbWinsB')) $('#lbWinsB').textContent = winsB;
+  if ($('#lbPercentA')) $('#lbPercentA').textContent = `${percentA}%`;
+  if ($('#lbPercentB')) $('#lbPercentB').textContent = `${percentB}%`;
+  if ($('#lbMeterA')) $('#lbMeterA').style.width = `${percentA}%`;
+  if ($('#lbMeterB')) $('#lbMeterB').style.width = `${percentB}%`;
+  if ($('#lbTotalRounds')) $('#lbTotalRounds').textContent = rounds.length;
+  if ($('#lbTotalTies')) $('#lbTotalTies').textContent = ties;
+  if ($('#lbTotalPunches')) $('#lbTotalPunches').textContent = totalPunches;
+  if ($('#lbHistoryCount')) $('#lbHistoryCount').textContent = rounds.length;
+
+  const playerAEl = $('#lbPlayerA');
+  const playerBEl = $('#lbPlayerB');
+  if (playerAEl) playerAEl.classList.toggle('winner', winsA > winsB);
+  if (playerBEl) playerBEl.classList.toggle('winner', winsB > winsA);
+  if ($('#lbCrownA')) $('#lbCrownA').style.display = winsA > winsB ? 'block' : 'none';
+  if ($('#lbCrownB')) $('#lbCrownB').style.display = winsB > winsA ? 'block' : 'none';
+
+  const roundList = $('#roundList');
+  if (roundList) {
+    roundList.innerHTML = '';
+    rounds
+      .slice()
+      .reverse()
+      .forEach((r, idx) => {
+        const roundNumber = rounds.length - idx;
+        const item = document.createElement('div');
+        const winClass = r.winner === 'A' ? 'win-a' : r.winner === 'B' ? 'win-b' : 'tie';
+        item.className = `round-item ${winClass}`;
+
+        const roundNum = document.createElement('div');
+        roundNum.className = 'round-num';
+        roundNum.textContent = `#${roundNumber}`;
+
+        const scores = document.createElement('div');
+        scores.className = 'round-scores';
+
+        const scoreA = document.createElement('span');
+        scoreA.className = `score-val p1 ${r.scoreA > r.scoreB ? 'winner' : 'dim'}`;
+        scoreA.textContent = r.scoreA;
+
+        const divider = document.createElement('span');
+        divider.className = 'round-divider';
+        divider.textContent = '—';
+
+        const scoreB = document.createElement('span');
+        scoreB.className = `score-val p2 ${r.scoreB > r.scoreA ? 'winner' : 'dim'}`;
+        scoreB.textContent = r.scoreB;
+
+        scores.appendChild(scoreA);
+        scores.appendChild(divider);
+        scores.appendChild(scoreB);
+
+        const badge = document.createElement('div');
+        badge.className = 'round-badge';
+        const badgeLabel = document.createElement('span');
+        badgeLabel.className =
+          r.winner === 'A' ? 'badge-a' : r.winner === 'B' ? 'badge-b' : 'badge-tie';
+        badgeLabel.textContent = r.winner === 'T' ? 'TIE' : 'WIN';
+        badge.appendChild(badgeLabel);
+
+        item.appendChild(roundNum);
+        item.appendChild(scores);
+        item.appendChild(badge);
+        roundList.appendChild(item);
+      });
   }
-  // update summary now that totals are available
-  $('#leaderboardSummary').innerHTML =
-    `<div style="font-weight:700">Rounds: ${rounds.length} — Live: ${currentScore}</div><div style="font-size:13px;color:var(--muted);margin-top:6px">Wins: ${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB} &nbsp; • &nbsp; Totals: ${state.players.A.name} ${totalA} — ${state.players.B.name} ${totalB}</div>`;
-
-  // header avatars/names (keep in sync)
-  if ($('#headerAvatarA')) $('#headerAvatarA').src = state.players.A.avatar || $('#avatarA').src;
-  if ($('#headerAvatarB')) $('#headerAvatarB').src = state.players.B.avatar || $('#avatarB').src;
-  if ($('#headerNameA')) $('#headerNameA').textContent = state.players.A.name;
-  if ($('#headerNameB')) $('#headerNameB').textContent = state.players.B.name;
 }
 
 function save() {
@@ -427,7 +412,7 @@ function openFullLeaderboard() {
   renderLeaderboard();
 }
 function closeFullLeaderboard() {
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow = '';
   $('#leaderboardView').style.display = 'none';
 }
 $('#leaderboardBtn').onclick = () => openFullLeaderboard();
