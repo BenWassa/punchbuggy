@@ -6,7 +6,8 @@ No punchbacks.
 
 - **Mobile-first UI** with a persistent, top-mounted update banner that respects safe-area insets, so new builds are obvious even on notch devices.
 - **Player avatars** support inline uploads with a consistent SVG camera icon and accessible labels (screen readers announce “Change Player X avatar”).
-- **Data export/import** lets players capture a JSON snapshot or replace the current state as needed.
+- **Undo** rewinds the last score change without losing the rest of the game state.
+- **Data export/import** lets players capture a JSON snapshot or replace the current state as needed; Delete all is confirmed before clearing local data.
 - **Schema migration** keeps older local data compatible without interrupting play.
 
 ## Versioning & release flow
