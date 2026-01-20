@@ -27,9 +27,12 @@
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; font-family: system-ui,Roboto,Arial,sans-serif;
-      color:var(--text); background: var(--bg);
-      display:flex; flex-direction:column; padding:12px; padding-top:calc(12px + var(--update-banner-offset, 0px)); gap:12px;
+      margin:0; font-family: "Sora","Avenir Next","Gill Sans","Trebuchet MS",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(120% 80% at 18% 0%, #15254a 0%, #0b0f1a 55%, #070e1d 100%);
+      display:flex; flex-direction:column; padding:12px; padding-top:calc(12px + var(--update-banner-offset, 0px)); padding-bottom:calc(62px + 12px);
+      gap:8px; min-height:100svh; overflow:hidden;
     }
     @supports (orientation: landscape) {
       @media (orientation: landscape) {
@@ -45,17 +48,41 @@
     }
 
     header{
-      text-align:center; font-weight:800; font-size:22px; padding:8px;
-      position:sticky; top:0; z-index:50; background:linear-gradient(180deg,var(--bg),var(--bg));
-      backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,0.08);
-      box-shadow:0 2px 8px rgba(0,0,0,0.3);
-      display:flex; flex-direction:column; gap:8px; margin:-12px -12px 0 -12px; padding:8px 12px; margin-bottom:12px;
+      text-align:center; font-weight:800; font-size:22px;
+      position:relative; z-index:50;
+      background:linear-gradient(180deg, rgba(8,12,22,0.92), rgba(8,12,22,0.6));
+      backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 10px 22px rgba(0,0,0,0.35);
+      display:flex; flex-direction:column; gap:8px; padding:12px; border-radius:18px;
     }
 
-    .version-tag{
-      position:absolute; right:12px; top:12px; font-size:12px; font-weight:600;
-      padding:4px 8px; border-radius:999px; background:rgba(255,255,255,0.08);
-      color:var(--muted); box-shadow:0 2px 6px rgba(0,0,0,0.3);
+    .topbar{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:12px }
+    .icon-btn{
+      width:42px; height:42px; display:grid; place-items:center;
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
+      border-radius:12px; color:var(--text); font-size:18px; cursor:pointer;
+      line-height:1; padding:0; text-align:center;
+      transition: transform .2s ease, background .2s ease;
+    }
+    .icon-btn:hover{ transform:translateY(-1px); background:rgba(255,255,255,0.14); }
+
+    .menu-panel{
+      position:absolute; top:60px; left:12px; z-index:60;
+      width:210px; padding:12px; border-radius:14px;
+      background:linear-gradient(160deg, rgba(12,20,40,0.98), rgba(9,16,32,0.96));
+      border:1px solid rgba(255,255,255,0.08); box-shadow:0 12px 30px rgba(0,0,0,0.45);
+      display:none; flex-direction:column; gap:10px;
+    }
+    .menu-panel.open{ display:flex; }
+    .menu-title{ font-size:12px; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); }
+    .menu-section{ display:flex; flex-direction:column; gap:8px; }
+    .menu-btn{
+      padding:10px 12px; border-radius:10px; font-weight:700; font-size:14px;
+      border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04);
+      color:var(--text); cursor:pointer; text-align:left;
+    }
+    .menu-meta{
+      font-size:12px; color:var(--muted); padding-top:6px; border-top:1px solid rgba(255,255,255,0.06);
     }
 
     .update-banner{
@@ -90,7 +117,7 @@
     }
 
     .backup-panel{
-      margin-top:16px; padding:12px; border-radius:12px;
+      margin-top:12px; padding:12px; border-radius:12px;
       background:linear-gradient(180deg,rgba(15,22,40,0.9),rgba(12,19,34,0.9));
       display:flex; flex-direction:column; gap:10px;
     }
@@ -103,20 +130,21 @@
     .backup-toggle{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); }
     .backup-toggle input{ width:18px; height:18px; }
 
-    .players{ display:flex; flex-direction:column; gap:12px; flex:1 }
+    .players{ display:flex; flex-direction:column; gap:8px; flex:1; }
     .card{
       background:linear-gradient(160deg,var(--panel),var(--panel-2));
       border-radius:var(--radius); box-shadow:var(--shadow);
-      padding:12px; display:flex; flex-direction:column; align-items:center; gap:8px;
+      padding:10px; display:flex; flex-direction:column; align-items:stretch; gap:6px;
     }
+    .card-top{ display:flex; align-items:center; gap:10px }
     .avatar-wrapper{ position:relative; display:inline-block }
     .avatar{
-      width:100px; height:100px; border-radius:50%; border:2px solid #2f4170;
+      width:62px; height:62px; border-radius:16px; border:2px solid #2f4170;
       object-fit:cover; cursor:pointer; position:relative; transition: transform .2s, width .2s, height .2s
     }
       .player-crown{ position:absolute; top:-6px; right:-6px; width:28px; height:28px; display:none; align-items:center; justify-content:center; font-size:18px; background:linear-gradient(180deg,#ffd166,#ffb347); color:#2b180d; border-radius:50%; box-shadow:0 6px 18px rgba(0,0,0,0.35); border:2px solid rgba(255,255,255,0.12) }
     @media(min-width:700px){
-      .avatar{ width:75px; height:75px; }
+      .avatar{ width:78px; height:78px; }
     }
     .avatar:hover{ transform: scale(1.05) }
     .upload-label{
@@ -128,16 +156,15 @@
       width:18px; height:18px; display:block;
     }
     .upload-input{ display:none }
+    .player-meta{ display:flex; flex-direction:column; gap:4px; flex:1; min-width:0 }
     .name{
-      font-size:20px; font-weight:700; text-align:center; background:transparent;
-      border:none; outline:none; color:var(--text); margin:4px 0
+      font-size:16px; font-weight:800; text-align:left; background:transparent;
+      border:none; outline:none; color:var(--text); margin:0; padding:0; width:100%;
     }
-    .score{ font-size:42px; font-weight:900; transition: transform .3s, color .3s, font-size .2s }
-    @media(min-width:700px){
-      .score{ font-size:34px; }
-    }
+    .score{ font-size:36px; font-weight:900; text-align:left; transition: transform .3s, color .3s, font-size .2s }
+    @media(min-width:700px){ .score{ font-size:34px; } }
     .score.bump{ animation: scoreBump .5s ease }
-    .streak{ font-size:14px; color:var(--muted) }
+    .streak{ font-size:12px; color:var(--muted) }
 
     @keyframes scoreBump{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
     @keyframes shake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
@@ -146,21 +173,20 @@
     @keyframes winPulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
 
     button{
-      width:100%; padding:16px; font-size:18px; font-weight:700;
+      width:100%; padding:12px; font-size:16px; font-weight:700;
       border:none; border-radius:var(--radius); cursor:pointer; transition: all .2s;
     }
-    .card button{ padding:14px; font-size:16px; }
-    @media(min-width:700px){
-      .card button{ flex:1; min-width:0; }
-    }
+    .card-bottom{ display:grid; grid-template-columns:0.8fr 1.2fr; align-items:center; gap:6px }
+    .card-actions{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px }
+    .card button{ padding:8px 6px; font-size:13px; }
     .accent{ background:linear-gradient(180deg,#22c997,#1aa97a); color:#fff }
     .danger{ background:linear-gradient(180deg,#ff7c7c,#ff4d4d); color:#fff }
     .ghost{ background:transparent; border:1px solid #2a3966; color:var(--text) }
 
     .roundbar{
-      text-align:center; font-weight:700; padding:8px 12px;
-      border-radius:0; background:transparent; font-size:14px; color:var(--muted);
-      border-top:1px solid rgba(255,255,255,0.04); margin:0; order:-1;
+      text-align:center; font-weight:700; padding:6px 10px;
+      border-radius:10px; background:rgba(255,255,255,0.04); font-size:13px; color:var(--muted);
+      border:1px solid rgba(255,255,255,0.05); margin:0;
     }
 
     .log{
@@ -174,15 +200,12 @@
     }
     .log li{ padding:6px 8px; border-radius:8px; background:rgba(255,255,255,.05) }
 
-    .toolbar{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px }
+    .toolbar{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; position:fixed; bottom:12px; left:12px; right:12px; z-index:40; }
 
     @media(min-width:700px){
       body{ max-width:520px; margin:0 auto }
-      .players{ flex-direction:row; gap:12px; }
-      .card{ flex:1; }
-      .toolbar{ grid-template-columns:repeat(6,1fr); }
-      .name{ font-size:16px; }
-      .streak{ font-size:12px; }
+      .players{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); }
+      .toolbar{ grid-template-columns:repeat(3,1fr); }
     }
 
     .confetti{ position:fixed; inset:0; pointer-events:none; z-index:30; }
@@ -190,7 +213,7 @@
 
     /* Leaderboard styles */
     .leaderboard-wrap{ display:none; position:fixed; left:12px; right:12px; bottom:80px; z-index:45 }
-    .leaderboard{ display:flex; gap:8px; justify-content:space-between; align-items:center; padding:10px; border-radius:12px; background:linear-gradient(180deg,#081025, #0f1726); box-shadow:var(--shadow)}
+    .leaderboard{ display:flex; gap:10px; justify-content:space-between; align-items:center; padding:12px; border-radius:12px; background:linear-gradient(180deg,#081025, #0f1726); box-shadow:var(--shadow)}
     .leaderboard .col{ display:flex; flex-direction:column; align-items:center; gap:8px; min-width:120px }
     .leaderboard h4{ margin:0; font-size:12px; color:var(--muted) }
     .tokens{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center }
@@ -205,12 +228,12 @@
   .leaderboard-view{
     display:none; position:fixed; inset:0; z-index:60;
     background: linear-gradient(135deg, #0a0e1a 0%, #0f1524 50%, #071024 100%);
-    padding:20px; overflow:auto; backdrop-filter: blur(8px);
+    padding:12px; overflow:auto; backdrop-filter: blur(8px);
     border: 1px solid rgba(255,255,255,0.1);
   }
   .leaderboard-view .view-header{
-    display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px;
-    padding:16px 20px; background: rgba(255,255,255,0.05); border-radius:16px;
+    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;
+    padding:12px; background: rgba(255,255,255,0.05); border-radius:16px;
     border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 32px rgba(0,0,0,0.3);
   }
     .view-title{
@@ -235,7 +258,7 @@
   @media(min-width:700px){ .leaderboard-grid{ flex-direction:row } }
   .leaderboard-col{
     flex:1; background: linear-gradient(135deg, rgba(11,18,38,0.9), rgba(7,16,34,0.9));
-    padding:20px; border-radius:16px; border: 1px solid rgba(255,255,255,0.1);
+    padding:12px; border-radius:16px; border: 1px solid rgba(255,255,255,0.1);
     box-shadow: 0 12px 40px rgba(0,0,0,0.4); transition: transform 0.2s ease;
   }
   .leaderboard-col:hover{ transform: translateY(-2px); }
@@ -266,22 +289,34 @@
   .crown{ position:absolute; top:-6px; right:-6px; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px; background:linear-gradient(180deg,#ffd166,#ffb347); color:#2b180d; border-radius:50%; box-shadow:0 6px 12px rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.12) }
   /* Modals */
   .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:85; background:linear-gradient(180deg, rgba(2,6,12,0.6), rgba(2,6,12,0.85)); }
-  .modal-card{ width:calc(100% - 48px); max-width:720px; padding:16px; border-radius:14px; box-shadow:0 12px 48px rgba(0,0,0,0.6); }
-  @media(min-width:700px){ .modal-card{ padding:24px } }
+  .modal-card{ width:calc(100% - 24px); max-width:720px; padding:12px; border-radius:14px; box-shadow:0 12px 48px rgba(0,0,0,0.6); }
+  @media(min-width:700px){ .modal-card{ padding:16px } }
   </style>  
 </head>
 <body>
   <header>
-    <div class="app-title">
-      <div class="title-main">Punch Buggy</div>
+    <div class="topbar">
+      <button class="icon-btn" id="menuBtn" aria-label="Menu">☰</button>
+      <div class="app-title">
+        <div class="title-main">Punch Buggy</div>
+      </div>
+      <button class="icon-btn" id="leaderboardBtn" aria-label="Scores">🏆</button>
     </div>
-    <span class="version-tag">v<span id="appVersion">—</span></span>
     <div class="roundbar">Round <span id="round">1</span> • <span id="lead">Tied</span></div>
+    <div class="menu-panel" id="menuPanel" aria-hidden="true">
+      <div class="menu-section">
+        <div class="menu-title">Menu</div>
+        <button class="menu-btn" id="dataBtn">&#x1F4BE; Data & Log</button>
+        <button class="menu-btn" id="rulesBtn">❓ Rules</button>
+      </div>
+      <div class="menu-meta">Version v<span id="appVersion">—</span></div>
+    </div>
   </header>
 
   <div class="players">
     <div class="card" data-player="A">
-      <div class="avatar-wrapper">
+      <div class="card-top">
+        <div class="avatar-wrapper">
   <img class="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%2316273a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>A</text></svg>" alt="Player A" id="avatarA" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%2316273a\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>A</text></svg>'">
         <span class="player-crown" id="crownA">👑</span>
         <label class="upload-label" for="uploadA" aria-label="Change Player A avatar">
@@ -290,16 +325,24 @@
           </svg>
         </label>
         <input type="file" class="upload-input" id="uploadA" accept="image/*">
+        </div>
+        <div class="player-meta">
+          <input class="name" id="nameA" value="Player A">
+          <div class="streak" id="streakA">🔥 0</div>
+        </div>
       </div>
-      <input class="name" id="nameA" value="Player A">
-      <div class="score" id="scoreA">0</div>
-      <div class="streak" id="streakA">🔥 0</div>
-      <button class="accent" id="btnA">+1 Punch</button>
-      <button class="ghost" id="minusA">−1</button>
+      <div class="card-bottom">
+        <div class="score" id="scoreA">0</div>
+        <div class="card-actions">
+          <button class="accent" id="btnA">+1 Punch</button>
+          <button class="ghost" id="minusA">−1</button>
+        </div>
+      </div>
     </div>
 
     <div class="card" data-player="B">
-      <div class="avatar-wrapper">
+      <div class="card-top">
+        <div class="avatar-wrapper">
   <img class="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%2316273a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>B</text></svg>" alt="Player B" id="avatarB" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%2316273a\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>B</text></svg>'">
         <span class="player-crown" id="crownB">👑</span>
         <label class="upload-label" for="uploadB" aria-label="Change Player B avatar">
@@ -308,12 +351,19 @@
           </svg>
         </label>
         <input type="file" class="upload-input" id="uploadB" accept="image/*">
+        </div>
+        <div class="player-meta">
+          <input class="name" id="nameB" value="Player B">
+          <div class="streak" id="streakB">🔥 0</div>
+        </div>
       </div>
-      <input class="name" id="nameB" value="Player B">
-      <div class="score" id="scoreB">0</div>
-      <div class="streak" id="streakB">🔥 0</div>
-      <button class="accent" id="btnB">+1 Punch</button>
-      <button class="ghost" id="minusB">−1</button>
+      <div class="card-bottom">
+        <div class="score" id="scoreB">0</div>
+        <div class="card-actions">
+          <button class="accent" id="btnB">+1 Punch</button>
+          <button class="ghost" id="minusB">−1</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -321,9 +371,6 @@
     <button class="ghost" id="undoBtn">↶ Undo</button>
     <button class="danger" id="resetBtn">⟳ Reset</button>
     <button class="ghost" id="nextRound">Next Round ▶</button>
-  <button class="ghost" id="leaderboardBtn">🏆 Scores</button>
-    <button class="ghost" id="dataBtn">&#x1F4BE; Data</button>
-    <button class="ghost" id="rulesBtn">❓ Rules</button>
   </div>
 
   <!-- Event log moved to Data modal -->
@@ -743,11 +790,22 @@
       renderLeaderboard();
     }
     function closeFullLeaderboard(){
-      document.body.style.overflow='auto';
+      document.body.style.overflow='hidden';
       $('#leaderboardView').style.display='none';
     }
     $('#leaderboardBtn').onclick=()=>openFullLeaderboard();
     $('#closeFull').onclick=()=>closeFullLeaderboard();
+    const menuPanel = $('#menuPanel');
+    const menuBtn = $('#menuBtn');
+    function toggleMenu(force){
+      if(!menuPanel) return;
+      const shouldOpen = typeof force === 'boolean' ? force : !menuPanel.classList.contains('open');
+      menuPanel.classList.toggle('open', shouldOpen);
+      menuPanel.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+    }
+    if(menuBtn){
+      menuBtn.onclick = ()=>toggleMenu();
+    }
     // Rules content (concise, comprehensive)
     const rules = [
       'Objective: Spot the VW Beetle (or other agreed target) first to score a point.',
@@ -761,13 +819,19 @@
       'Customization: Change player names or avatars before/after rounds. Avatars are local only.'
     ];
     $('#rulesBtn').onclick=()=>{
+      toggleMenu(false);
       const el = $('#rulesContent');
       el.innerHTML = '<ol style="margin:0;padding-left:18px">' + rules.map(r=>`<li style="margin-bottom:8px">${r}</li>`).join('') + '</ol>';
       $('#rulesModal').style.display='flex';
     };
 
     // Data modal handlers (export/import/log/clear)
-    $('#dataBtn').onclick=()=>{ $('#dataModal').style.display='flex'; renderModalLog(); if(typeof updateBackupUi==='function'){ updateBackupUi(AutoBackup && AutoBackup.getStatus ? AutoBackup.getStatus() : {code:'unsupported'}); } };
+    $('#dataBtn').onclick=()=>{
+      toggleMenu(false);
+      $('#dataModal').style.display='flex';
+      renderModalLog();
+      if(typeof updateBackupUi==='function'){ updateBackupUi(AutoBackup && AutoBackup.getStatus ? AutoBackup.getStatus() : {code:'unsupported'}); }
+    };
     $('#closeData').onclick=()=>{ $('#dataModal').style.display='none'; };
     async function clearAllAppData(){
       // Reset in-memory state first so UI clears immediately.
