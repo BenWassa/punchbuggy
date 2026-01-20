@@ -424,11 +424,14 @@
     // until they explicitly click Refresh to apply the update.
     const versionEl = $('#appVersion');
     if(versionEl){
-      const currentVersion = localStorage.getItem('punchBuggy_running_version') || window.PUNCHBUGGY_APP_VERSION || '—';
+      const storedVersion = localStorage.getItem('punchBuggy_running_version');
+      const appVersion = window.PUNCHBUGGY_APP_VERSION || 'unknown';
+      const currentVersion = storedVersion || appVersion || '—';
       versionEl.textContent = currentVersion;
-      // Persist the running version on first load (if not already set)
-      if(!localStorage.getItem('punchBuggy_running_version')){
-        localStorage.setItem('punchBuggy_running_version', window.PUNCHBUGGY_APP_VERSION || 'unknown');
+      // Persist or sync the running version so the UI reflects the active build.
+      if(!storedVersion || (appVersion && storedVersion !== appVersion)){
+        localStorage.setItem('punchBuggy_running_version', appVersion);
+        versionEl.textContent = appVersion;
       }
     }
     
@@ -734,7 +737,55 @@
     // Data modal handlers (export/import/log/clear)
     $('#dataBtn').onclick=()=>{ $('#dataModal').style.display='flex'; renderModalLog(); if(typeof updateBackupUi==='function'){ updateBackupUi(AutoBackup && AutoBackup.getStatus ? AutoBackup.getStatus() : {code:'unsupported'}); } };
     $('#closeData').onclick=()=>{ $('#dataModal').style.display='none'; };
-    $('#clearData').onclick=()=>{ if(confirm('Clear all game data (rounds, scores, history)?')){ state.round=1; state.players.A.score=0; state.players.B.score=0; state.players.A.streak=0; state.players.B.streak=0; state.history=[]; state.roundWinners=[]; render(); } };
+    async function clearAllAppData(){
+      // Reset in-memory state first so UI clears immediately.
+      state.round = 1;
+      state.players.A = { name: 'Player A', score: 0, streak: 0, avatar: '' };
+      state.players.B = { name: 'Player B', score: 0, streak: 0, avatar: '' };
+      state.history = [];
+      state.roundWinners = [];
+      render();
+
+      // Remove localStorage data and backups.
+      try{
+        localStorage.removeItem('punchBuggy');
+        localStorage.removeItem('punchBuggy_last_backup');
+        localStorage.removeItem('punchbuggy-auto-backup-enabled');
+        localStorage.removeItem('punchbuggy-auto-backup-meta');
+        const keysToRemove = [];
+        for(let i = 0; i < localStorage.length; i++){
+          const key = localStorage.key(i);
+          if(key && key.startsWith('punchBuggy_backup_')) keysToRemove.push(key);
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+      }catch(err){
+        console.warn('Failed to clear localStorage', err);
+      }
+
+      // Remove IndexedDB auto-backups if available.
+      if(window.indexedDB && AutoBackup && AutoBackup.DB_NAME){
+        try{
+          await new Promise((resolve, reject)=>{
+            const req = indexedDB.deleteDatabase(AutoBackup.DB_NAME);
+            req.onsuccess = () => resolve();
+            req.onerror = () => reject(req.error);
+            req.onblocked = () => resolve();
+          });
+        }catch(err){
+          console.warn('Failed to clear IndexedDB backups', err);
+        }
+      }
+
+      if(typeof updateBackupUi === 'function' && AutoBackup && AutoBackup.getStatus){
+        updateBackupUi(AutoBackup.getStatus());
+      }
+    }
+
+    $('#clearData').onclick=()=>{
+      if(confirm('Clear all game data (rounds, scores, history, names, avatars)?')){
+        clearAllAppData();
+      }
+    };
 
     // Export state as JSON file
     $('#exportData').onclick=()=>{
@@ -747,6 +798,8 @@
     // Import - parse file and normalize various export shapes (supports older shape and `rounds`-style exports)
     function normalizeImportedState(parsed){
       if(!parsed || typeof parsed !== 'object') return { error: 'invalid' };
+      // Support backup wrapper shape: { app, createdAt, version, data }
+      const source = (parsed.data && typeof parsed.data === 'object') ? parsed.data : parsed;
 
       const out = {};
       // Players: support both flat {players.A.score} and nested {players.A.current.score}
@@ -755,9 +808,9 @@
         B: { name: 'Player B', score: 0, streak: 0, avatar: '' }
       };
 
-      if(parsed.players && typeof parsed.players === 'object'){
+      if(source.players && typeof source.players === 'object'){
         ['A','B'].forEach(k=>{
-          const p = parsed.players[k] || {};
+          const p = source.players[k] || {};
           const name = typeof p.name === 'string' && p.name.trim() ? p.name.trim() : out.players[k].name;
           const avatar = typeof p.avatar === 'string' ? p.avatar : '';
           let score = 0, streak = 0;
@@ -773,21 +826,21 @@
       }
 
       // Round number: prefer top-level `round`, fallback to `rounds.current.number`
-      if(Number.isFinite(Number(parsed.round))) out.round = Math.max(1, Math.round(Number(parsed.round)));
-      else if(parsed.rounds && parsed.rounds.current && Number.isFinite(Number(parsed.rounds.current.number))) out.round = Math.max(1, Math.round(Number(parsed.rounds.current.number)));
+      if(Number.isFinite(Number(source.round))) out.round = Math.max(1, Math.round(Number(source.round)));
+      else if(source.rounds && source.rounds.current && Number.isFinite(Number(source.rounds.current.number))) out.round = Math.max(1, Math.round(Number(source.rounds.current.number)));
       else out.round = 1;
 
       // Round winners: try to map from `rounds.history` if present, otherwise use roundWinners if available
       out.roundWinners = [];
-      if(parsed.rounds && Array.isArray(parsed.rounds.history)){
-        out.roundWinners = parsed.rounds.history.map(r=>{
+      if(source.rounds && Array.isArray(source.rounds.history)){
+        out.roundWinners = source.rounds.history.map(r=>{
           const winner = r && r.winner ? r.winner : 'T';
           const scoreA = r && r.scores && Number.isFinite(Number(r.scores.A)) ? Number(r.scores.A) : 0;
           const scoreB = r && r.scores && Number.isFinite(Number(r.scores.B)) ? Number(r.scores.B) : 0;
           return { winner, scoreA, scoreB };
         });
-      } else if(Array.isArray(parsed.roundWinners)){
-        out.roundWinners = parsed.roundWinners.map(r=>{
+      } else if(Array.isArray(source.roundWinners)){
+        out.roundWinners = source.roundWinners.map(r=>{
           if(typeof r === 'string'){
             if(r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
             if(r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
@@ -798,8 +851,8 @@
       }
 
       // History: accept array of log objects or strings
-      if(Array.isArray(parsed.history)){
-        out.history = parsed.history.map(h=>{
+      if(Array.isArray(source.history)){
+        out.history = source.history.map(h=>{
           if(typeof h === 'string') return h;
           if(h && h.message) return h.message;
           try{ return JSON.stringify(h); }catch(e){ return String(h); }
@@ -809,7 +862,8 @@
       }
 
       // optional: preserve schemaVersion if present
-      if(parsed.schemaVersion) out.schemaVersion = parsed.schemaVersion;
+      const schemaVersion = source.schemaVersion || parsed.schemaVersion;
+      if(schemaVersion) out.schemaVersion = schemaVersion;
 
       return out;
     }

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.2.0] - 2025-10-27
+- Fix import to accept backup wrapper files (restore from AutoBackup downloads).
+- Sync UI version tag with active build after updates.
+- Clear Data now purges localStorage + IndexedDB backups, plus names and avatars.
+
 ## [2.1.3] - 2025-10-21
 - Fix: version tag now shows running version (not newly-fetched) until user clicks Refresh to apply update.
 - Dev: added console logging on page load showing version details (runningVersion, fetchedVersion, autoApplyEnabled).
