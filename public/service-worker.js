@@ -10,29 +10,28 @@ const APP_SHELL = [
   './manifest.webmanifest',
   './service-worker.js',
   './app-version.js',
-  './icons/punchbuggy.svg'
-].map(path => new URL(path, self.location).toString());
+  './icons/punchbuggy.svg',
+].map((path) => new URL(path, self.location).toString());
 
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
   if (IS_DEV_HOST) {
     self.skipWaiting();
   }
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
 });
 
-self.addEventListener('activate', event => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
       )
-    ).then(() => self.clients.claim())
+      .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', event => {
+self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') {
     return;
   }
@@ -44,9 +43,9 @@ self.addEventListener('fetch', event => {
   if (isNavigationRequest) {
     event.respondWith(
       fetch(event.request)
-        .then(response => {
+        .then((response) => {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
         })
         .catch(() => caches.match(event.request))
@@ -60,14 +59,14 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
+    caches.match(event.request).then((cached) => {
       if (cached) {
         return cached;
       }
       return fetch(event.request)
-        .then(response => {
+        .then((response) => {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
         })
         .catch(() => caches.match(new URL('./index.html', self.location).toString()));
@@ -75,7 +74,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-self.addEventListener('message', event => {
+self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }

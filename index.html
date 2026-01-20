@@ -1,203 +1,322 @@
-﻿<!DOCTYPE html>
+﻿<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="theme-color" content="#0b0f1a" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="icon" type="image/svg+xml" sizes="any" href="/icons/punchbuggy.svg" />
-  <title>Punch Buggy — Mobile</title>  
-</head>
-<body>
-  <header>
-    <div class="topbar">
-      <button class="icon-btn" id="menuBtn" aria-label="Menu">☰</button>
-      <div class="app-title">
-        <div class="title-main">Punch Buggy</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+    />
+    <meta name="theme-color" content="#0b0f1a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" sizes="any" href="/icons/punchbuggy.svg" />
+    <title>Punch Buggy — Mobile</title>
+  </head>
+  <body>
+    <header>
+      <div class="topbar">
+        <button class="icon-btn" id="menuBtn" aria-label="Menu">☰</button>
+        <div class="app-title">
+          <div class="title-main">Punch Buggy</div>
+        </div>
+        <button class="icon-btn" id="leaderboardBtn" aria-label="Scores">🏆</button>
       </div>
-      <button class="icon-btn" id="leaderboardBtn" aria-label="Scores">🏆</button>
+      <div class="roundbar">Round <span id="round">1</span> • <span id="lead">Tied</span></div>
+      <div class="menu-panel" id="menuPanel" aria-hidden="true">
+        <div class="menu-section">
+          <div class="menu-title">Menu</div>
+          <button class="menu-btn" id="dataBtn">&#x1F4BE; Data & Log</button>
+          <button class="menu-btn" id="rulesBtn">❓ Rules</button>
+        </div>
+        <div class="menu-meta">Version v<span id="appVersion">—</span></div>
+      </div>
+    </header>
+
+    <div class="players">
+      <div class="card" data-player="A">
+        <div class="card-top">
+          <div class="avatar-wrapper">
+            <img
+              class="avatar"
+              src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%25' height='100%25' fill='%2316273a'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>A</text></svg>"
+              alt="Player A"
+              id="avatarA"
+              onerror="
+                this.src =
+                  'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%25\' height=\'100%25\' fill=\'%2316273a\'/><text x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>A</text></svg>'
+              "
+            />
+            <span class="player-crown" id="crownA">👑</span>
+            <label class="upload-label" for="uploadA" aria-label="Change Player A avatar">
+              <svg class="upload-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M4 6h3l1-1h8l1 1h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm8 3.5a4.5 4.5 0 1 0 4.5 4.5A4.5 4.5 0 0 0 12 9.5zm0 1.5a3 3 0 1 1-3 3 3 3 0 0 1 3-3z"
+                />
+              </svg>
+            </label>
+            <input type="file" class="upload-input" id="uploadA" accept="image/*" />
+          </div>
+          <div class="player-meta">
+            <input class="name" id="nameA" value="Player A" />
+            <div class="streak" id="streakA">🔥 0</div>
+          </div>
+        </div>
+        <div class="card-bottom">
+          <div class="score" id="scoreA">0</div>
+          <div class="card-actions">
+            <button class="accent" id="btnA">+1 Punch</button>
+            <button class="ghost" id="minusA">−1</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" data-player="B">
+        <div class="card-top">
+          <div class="avatar-wrapper">
+            <img
+              class="avatar"
+              src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%25' height='100%25' fill='%2316273a'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>B</text></svg>"
+              alt="Player B"
+              id="avatarB"
+              onerror="
+                this.src =
+                  'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%25\' height=\'100%25\' fill=\'%2316273a\'/><text x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>B</text></svg>'
+              "
+            />
+            <span class="player-crown" id="crownB">👑</span>
+            <label class="upload-label" for="uploadB" aria-label="Change Player B avatar">
+              <svg class="upload-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M4 6h3l1-1h8l1 1h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm8 3.5a4.5 4.5 0 1 0 4.5 4.5A4.5 4.5 0 0 0 12 9.5zm0 1.5a3 3 0 1 1-3 3 3 3 0 0 1 3-3z"
+                />
+              </svg>
+            </label>
+            <input type="file" class="upload-input" id="uploadB" accept="image/*" />
+          </div>
+          <div class="player-meta">
+            <input class="name" id="nameB" value="Player B" />
+            <div class="streak" id="streakB">🔥 0</div>
+          </div>
+        </div>
+        <div class="card-bottom">
+          <div class="score" id="scoreB">0</div>
+          <div class="card-actions">
+            <button class="accent" id="btnB">+1 Punch</button>
+            <button class="ghost" id="minusB">−1</button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="roundbar">Round <span id="round">1</span> • <span id="lead">Tied</span></div>
-    <div class="menu-panel" id="menuPanel" aria-hidden="true">
-      <div class="menu-section">
-        <div class="menu-title">Menu</div>
-        <button class="menu-btn" id="dataBtn">&#x1F4BE; Data & Log</button>
-        <button class="menu-btn" id="rulesBtn">❓ Rules</button>
-      </div>
-      <div class="menu-meta">Version v<span id="appVersion">—</span></div>
-    </div>
-  </header>
 
-  <div class="players">
-    <div class="card" data-player="A">
-      <div class="card-top">
-        <div class="avatar-wrapper">
-  <img class="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%2316273a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>A</text></svg>" alt="Player A" id="avatarA" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%2316273a\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>A</text></svg>'">
-        <span class="player-crown" id="crownA">👑</span>
-        <label class="upload-label" for="uploadA" aria-label="Change Player A avatar">
-          <svg class="upload-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="currentColor" d="M4 6h3l1-1h8l1 1h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm8 3.5a4.5 4.5 0 1 0 4.5 4.5A4.5 4.5 0 0 0 12 9.5zm0 1.5a3 3 0 1 1-3 3 3 3 0 0 1 3-3z"/>
-          </svg>
-        </label>
-        <input type="file" class="upload-input" id="uploadA" accept="image/*">
+    <div class="toolbar">
+      <button class="ghost" id="undoBtn">↶ Undo</button>
+      <button class="danger" id="resetBtn">⟳ Reset</button>
+      <button class="ghost" id="nextRound">Next Round ▶</button>
+    </div>
+
+    <!-- Event log moved to Data modal -->
+
+    <div class="confetti" id="confetti"></div>
+
+    <!-- Leaderboard (hidden by default) -->
+    <div class="leaderboard-wrap" id="leaderboardWrap">
+      <div class="leaderboard card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+          "
+        >
+          <div style="font-weight: 800">Scores</div>
+          <div>
+            <button class="ghost" id="clearBoard">Clear</button>
+            <button class="ghost" id="closeBoard">Close</button>
+          </div>
         </div>
-        <div class="player-meta">
-          <input class="name" id="nameA" value="Player A">
-          <div class="streak" id="streakA">🔥 0</div>
-        </div>
-      </div>
-      <div class="card-bottom">
-        <div class="score" id="scoreA">0</div>
-        <div class="card-actions">
-          <button class="accent" id="btnA">+1 Punch</button>
-          <button class="ghost" id="minusA">−1</button>
+        <div id="miniList" style="display: flex; flex-direction: column; gap: 8px">
+          <!-- compact per-round rows inserted here -->
         </div>
       </div>
     </div>
 
-    <div class="card" data-player="B">
-      <div class="card-top">
-        <div class="avatar-wrapper">
-  <img class="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%2316273a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>B</text></svg>" alt="Player B" id="avatarB" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%2316273a\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>B</text></svg>'">
-        <span class="player-crown" id="crownB">👑</span>
-        <label class="upload-label" for="uploadB" aria-label="Change Player B avatar">
-          <svg class="upload-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="currentColor" d="M4 6h3l1-1h8l1 1h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm8 3.5a4.5 4.5 0 1 0 4.5 4.5A4.5 4.5 0 0 0 12 9.5zm0 1.5a3 3 0 1 1-3 3 3 3 0 0 1 3-3z"/>
-          </svg>
-        </label>
-        <input type="file" class="upload-input" id="uploadB" accept="image/*">
+    <!-- Fullscreen Leaderboard View -->
+    <div class="leaderboard-view" id="leaderboardView" role="dialog" aria-modal="true">
+      <div class="view-header">
+        <div class="view-title">Scores — Rounds</div>
+        <div class="leaderboard-summary" id="leaderboardSummary">
+          Total Wins: Player A 0 — Player B 0
         </div>
-        <div class="player-meta">
-          <input class="name" id="nameB" value="Player B">
-          <div class="streak" id="streakB">🔥 0</div>
-        </div>
-      </div>
-      <div class="card-bottom">
-        <div class="score" id="scoreB">0</div>
-        <div class="card-actions">
-          <button class="accent" id="btnB">+1 Punch</button>
-          <button class="ghost" id="minusB">−1</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="toolbar">
-    <button class="ghost" id="undoBtn">↶ Undo</button>
-    <button class="danger" id="resetBtn">⟳ Reset</button>
-    <button class="ghost" id="nextRound">Next Round ▶</button>
-  </div>
-
-  <!-- Event log moved to Data modal -->
-
-  <div class="confetti" id="confetti"></div>
-
-  <!-- Leaderboard (hidden by default) -->
-  <div class="leaderboard-wrap" id="leaderboardWrap">
-    <div class="leaderboard card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-  <div style="font-weight:800">Scores</div>
         <div>
-          <button class="ghost" id="clearBoard">Clear</button>
-          <button class="ghost" id="closeBoard">Close</button>
+          <button class="back-btn" id="closeFull">Back</button>
         </div>
       </div>
-      <div id="miniList" style="display:flex;flex-direction:column;gap:8px;">
-        <!-- compact per-round rows inserted here -->
+      <div class="leaderboard-grid">
+        <div class="leaderboard-col" style="flex: 1">
+          <h4 style="margin-top: 0">Rounds</h4>
+          <!-- header: avatars & names -->
+          <div
+            id="scoresHeader"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 12px;
+            "
+          >
+            <div style="text-align: left; display: flex; gap: 10px; align-items: center">
+              <img
+                id="headerAvatarA"
+                src=""
+                style="
+                  width: 56px;
+                  height: 56px;
+                  border-radius: 8px;
+                  object-fit: cover;
+                  border: 2px solid rgba(255, 255, 255, 0.06);
+                "
+                alt="A"
+              />
+              <div style="font-weight: 800" id="headerNameA">Player A</div>
+            </div>
+            <!-- center is intentionally empty; H4 above is the 'Rounds' label -->
+            <div
+              style="
+                text-align: right;
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                justify-content: flex-end;
+              "
+            >
+              <div style="font-weight: 800" id="headerNameB">Player B</div>
+              <img
+                id="headerAvatarB"
+                src=""
+                style="
+                  width: 56px;
+                  height: 56px;
+                  border-radius: 8px;
+                  object-fit: cover;
+                  border: 2px solid rgba(255, 255, 255, 0.06);
+                "
+                alt="B"
+              />
+            </div>
+          </div>
+          <div
+            id="fullList"
+            style="
+              display: flex;
+              flex-direction: column;
+              gap: 10px;
+              max-height: 60vh;
+              overflow: auto;
+            "
+          ></div>
+          <div
+            id="scoresTotals"
+            style="
+              margin-top: 12px;
+              padding-top: 12px;
+              border-top: 1px solid rgba(255, 255, 255, 0.04);
+            "
+          ></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Fullscreen Leaderboard View -->
-  <div class="leaderboard-view" id="leaderboardView" role="dialog" aria-modal="true">
-    <div class="view-header">
-      <div class="view-title">Scores — Rounds</div>
-      <div class="leaderboard-summary" id="leaderboardSummary">Total Wins: Player A 0 — Player B 0</div>
+    <!-- Rules Modal -->
+    <div class="modal" id="rulesModal" role="dialog" aria-modal="true" style="display: none">
+      <div class="modal-card card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+          "
+        >
+          <div style="font-weight: 900">Game Rules</div>
+          <button class="back-btn" id="closeRules">Close</button>
+        </div>
+        <div id="rulesContent" style="font-size: 14px; color: var(--muted); line-height: 1.4">
+          <!-- rules injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Data & Event Log Modal -->
+    <div class="modal" id="dataModal" role="dialog" aria-modal="true" style="display: none">
+      <div class="modal-card card">
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+          "
+        >
+          <div style="font-weight: 900">Data & Log</div>
+          <div style="display: flex; gap: 8px; align-items: center">
+            <button class="back-btn" id="exportData">Export</button>
+            <button class="back-btn" id="importBtn">Import</button>
+            <input type="file" id="importFile" accept="application/json" style="display: none" />
+            <button class="back-btn" id="clearData">Clear</button>
+            <button class="back-btn" id="closeData">Close</button>
+          </div>
+        </div>
+        <div style="font-size: 13px; color: var(--muted); margin-bottom: 8px">
+          Export will download the full game state (JSON). Import will replace the current state if
+          compatible. Logs are preserved unless cleared.
+        </div>
+        <div class="backup-panel" id="backupPanel">
+          <h4>Automatic backups</h4>
+          <label class="backup-toggle">
+            <input type="checkbox" id="autoBackupToggle" checked />
+            <span>Enable automatic backups (stored in IndexedDB)</span>
+          </label>
+          <div class="backup-status" id="backupStatusText">Automatic backups are initializing…</div>
+          <div class="backup-meta" id="backupMetaText">No backups saved yet.</div>
+          <div class="backup-actions">
+            <button class="back-btn" id="downloadBackupBtn">Download backup</button>
+            <button class="back-btn ghost" id="restoreBackupBtn">Restore backup</button>
+          </div>
+        </div>
+        <div style="max-height: 60vh; overflow: auto">
+          <ul
+            id="modalLog"
+            style="
+              list-style: none;
+              padding: 0;
+              margin: 0;
+              display: flex;
+              flex-direction: column;
+              gap: 8px;
+            "
+          ></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="update-banner" id="updateBanner" role="status" aria-live="polite">
       <div>
-        <button class="back-btn" id="closeFull">Back</button>
-      </div>
-    </div>
-    <div class="leaderboard-grid">
-      <div class="leaderboard-col" style="flex:1">
-        <h4 style="margin-top:0">Rounds</h4>
-        <!-- header: avatars & names -->
-        <div id="scoresHeader" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div style="text-align:left;display:flex;gap:10px;align-items:center">
-            <img id="headerAvatarA" src="" style="width:56px;height:56px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="A">
-            <div style="font-weight:800" id="headerNameA">Player A</div>
-          </div>
-          <!-- center is intentionally empty; H4 above is the 'Rounds' label -->
-          <div style="text-align:right;display:flex;gap:10px;align-items:center;justify-content:flex-end">
-            <div style="font-weight:800" id="headerNameB">Player B</div>
-            <img id="headerAvatarB" src="" style="width:56px;height:56px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="B">
-          </div>
-        </div>
-        <div id="fullList" style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow:auto"></div>
-        <div id="scoresTotals" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.04);"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Rules Modal -->
-  <div class="modal" id="rulesModal" role="dialog" aria-modal="true" style="display:none">
-    <div class="modal-card card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-weight:900">Game Rules</div>
-        <button class="back-btn" id="closeRules">Close</button>
-      </div>
-      <div id="rulesContent" style="font-size:14px; color:var(--muted); line-height:1.4">
-        <!-- rules injected by JS -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Data & Event Log Modal -->
-  <div class="modal" id="dataModal" role="dialog" aria-modal="true" style="display:none">
-    <div class="modal-card card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-weight:900">Data & Log</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="back-btn" id="exportData">Export</button>
-          <button class="back-btn" id="importBtn">Import</button>
-          <input type="file" id="importFile" accept="application/json" style="display:none">
-          <button class="back-btn" id="clearData">Clear</button>
-          <button class="back-btn" id="closeData">Close</button>
+        <strong>Update ready</strong>
+        <div id="updateBannerText" style="font-size: 13px; color: var(--muted)">
+          A new version is available. Refresh to apply the latest fixes.
         </div>
       </div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Export will download the full game state (JSON). Import will replace the current state if compatible. Logs are preserved unless cleared.</div>
-      <div class="backup-panel" id="backupPanel">
-        <h4>Automatic backups</h4>
-        <label class="backup-toggle">
-          <input type="checkbox" id="autoBackupToggle" checked>
-          <span>Enable automatic backups (stored in IndexedDB)</span>
-        </label>
-        <div class="backup-status" id="backupStatusText">Automatic backups are initializing…</div>
-        <div class="backup-meta" id="backupMetaText">No backups saved yet.</div>
-        <div class="backup-actions">
-          <button class="back-btn" id="downloadBackupBtn">Download backup</button>
-          <button class="back-btn ghost" id="restoreBackupBtn">Restore backup</button>
-        </div>
-      </div>
-      <div style="max-height:60vh; overflow:auto;">
-        <ul id="modalLog" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px"></ul>
+      <div class="update-actions">
+        <button class="ghost" id="dismissUpdate">Later</button>
+        <button id="refreshUpdate">Refresh</button>
       </div>
     </div>
-  </div>
 
-  <div class="update-banner" id="updateBanner" role="status" aria-live="polite">
-    <div>
-      <strong>Update ready</strong>
-      <div id="updateBannerText" style="font-size:13px;color:var(--muted);">A new version is available. Refresh to apply the latest fixes.</div>
-    </div>
-    <div class="update-actions">
-      <button class="ghost" id="dismissUpdate">Later</button>
-      <button id="refreshUpdate">Refresh</button>
-    </div>
-  </div>
-
-  <script src="/app-version.js"></script>
-  <script type="module" src="/src/main.js"></script>
-</body>
+    <script src="/app-version.js"></script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>

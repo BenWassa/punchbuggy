@@ -1,3 +1,3 @@
 module.exports = {
-  publicDir: 'public'
+  publicDir: 'public',
 };

@@ -13,11 +13,13 @@ No punchbacks.
 
 All runtime consumers read a single source of truth from `app-version.js` (now located in `public/app-version.js`), which the service worker also imports. The PWA manifest mirrors that value so app stores detect the release.
 
-1. Bump the version string in `app-version.js`.
-2. Mirror that version in `public/manifest.webmanifest` and add a changelog entry.
-3. `git commit -m "chore: release x.y.z"` and push to `main`.
-4. Deploy the static bundle and open the app once to confirm the update banner appears.
-5. After 30 seconds the banner auto-refreshes unless dismissed; verify backups still report OK in the Data & Log modal.
+1. Run `npm install` (first time or after dependency changes).
+2. Run checks: `npm run lint` / `npm run format` if configured, plus any tests.
+3. Bump the version using `npm run bump -- x.y.z "Release notes"` and review the changelog entry.
+4. `npm run build` to generate `dist/`.
+5. `git commit -m "chore: release x.y.z"` and push to `main`.
+6. Deploy the static bundle and open the app once to confirm the update banner appears.
+7. After 30 seconds the banner auto-refreshes unless dismissed; verify backups still report OK in the Data & Log modal.
 
 ## Dev tips
 
