@@ -42,8 +42,8 @@ console.log('[PunchBuggy] Version info:', {
 function render() {
   $('#scoreA').textContent = state.players.A.score;
   $('#scoreB').textContent = state.players.B.score;
-  $('#streakA').textContent = `🔥 ${state.players.A.streak}`;
-  $('#streakB').textContent = `🔥 ${state.players.B.streak}`;
+  updateStreakBadge($('#streakA'), state.players.A.streak);
+  updateStreakBadge($('#streakB'), state.players.B.streak);
   $('#nameA').value = state.players.A.name;
   $('#nameB').value = state.players.B.name;
   if (state.players.A.avatar) $('#avatarA').src = state.players.A.avatar;
@@ -76,6 +76,21 @@ function render() {
   }
   renderModalLog();
   save();
+}
+
+const STREAK_CLASSES = ['smolder', 'burning', 'inferno'];
+
+function updateStreakBadge(el, streak) {
+  if (!el) return;
+  el.classList.remove(...STREAK_CLASSES);
+  el.innerHTML = `<span class="fire-icon">🔥</span> ${streak} Streak`;
+  if (streak >= 10) {
+    el.classList.add('inferno');
+  } else if (streak >= 5) {
+    el.classList.add('burning');
+  } else if (streak >= 3) {
+    el.classList.add('smolder');
+  }
 }
 
 function renderModalLog() {
