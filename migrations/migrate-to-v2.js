@@ -1,22 +1,8 @@
 // Lightweight in-app migration helper for schema v2.0.0
-// - Creates a timestamped backup of the existing `punchBuggy` localStorage key
 // - Detects simple legacy shapes and normalizes them
 // - Writes migrated state back to localStorage with schemaVersion: '2.0.0'
 
 (function (global) {
-  function backupRawState(raw) {
-    try {
-      const key = 'punchBuggy_backup_' + Date.now();
-      localStorage.setItem(key, raw);
-      // also keep a pointer to the latest backup for UI/debugging
-      localStorage.setItem('punchBuggy_last_backup', key);
-      return key;
-    } catch (err) {
-      console.warn('Backup failed', err);
-      return null;
-    }
-  }
-
   function migrate(parsed) {
     // Defensive defaults
     if (!parsed || typeof parsed !== 'object') return parsed;
@@ -81,16 +67,13 @@
       if (parsed && parsed.schemaVersion === '2.0.0')
         return { migrated: false, reason: 'already-v2' };
 
-      // backup raw data
-      const backupKey = backupRawState(raw);
-
       // perform migration
       const next = migrate(parsed);
 
       // write back
       localStorage.setItem('punchBuggy', JSON.stringify(next));
 
-      return { migrated: true, backupKey: backupKey, nextState: next };
+      return { migrated: true, nextState: next };
     } catch (err) {
       console.error('Migration failed', err);
       return { migrated: false, reason: 'exception', error: err };

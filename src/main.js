@@ -1,5 +1,4 @@
 import './styles/app.css';
-import './auto-backup.js';
 import '../migrations/migrate-to-v2.js';
 
 const $ = (sel) => document.querySelector(sel);
@@ -12,9 +11,8 @@ const state = {
   // track rounds: {winner:'A'|'B'|'T', scoreA: number, scoreB: number}
   roundWinners: [],
   history: [],
+  undoStack: [],
 };
-
-const AutoBackup = window.AutoBackup || window.PunchBuggyAutoBackup || window.PunchBuggyBackup;
 
 // Version display: show the *running* version (persisted in localStorage on first load)
 // rather than the newly-fetched version from app-version.js, so users see the current version
@@ -255,10 +253,8 @@ function renderLeaderboard() {
 }
 
 function save() {
-  localStorage.setItem('punchBuggy', JSON.stringify(state));
-  if (AutoBackup && typeof AutoBackup.handleStoreSave === 'function') {
-    AutoBackup.handleStoreSave('auto');
-  }
+  const { undoStack, ...persisted } = state;
+  localStorage.setItem('punchBuggy', JSON.stringify(persisted));
 }
 function load() {
   const s = localStorage.getItem('punchBuggy');
@@ -277,6 +273,7 @@ function load() {
     }
     Object.assign(state, parsed);
   }
+  state.undoStack = [];
   render();
 }
 
@@ -286,6 +283,7 @@ function log(msg) {
 }
 
 function score(p, d = 1) {
+  pushUndoState();
   const other = p === 'A' ? 'B' : 'A';
   state.players[p].score = Math.max(0, state.players[p].score + d);
 
@@ -315,6 +313,12 @@ function score(p, d = 1) {
   render();
 }
 
+function pushUndoState() {
+  const { undoStack, ...snapshot } = state;
+  undoStack.push(JSON.parse(JSON.stringify(snapshot)));
+  if (undoStack.length > 50) undoStack.shift();
+}
+
 function reset() {
   if (confirm('Reset entire game? This will also clear round history.')) {
     state.round = 1;
@@ -329,7 +333,11 @@ function reset() {
 }
 
 function undo() {
-  if (state.history.length > 0) state.history.pop();
+  if (!state.undoStack.length) return;
+  const prev = state.undoStack.pop();
+  const { undoStack, ...rest } = state;
+  Object.assign(state, prev);
+  state.undoStack = undoStack;
   render();
 }
 function recordRoundWinner() {
@@ -406,6 +414,10 @@ function toggleMenu(force) {
   const shouldOpen = typeof force === 'boolean' ? force : !menuPanel.classList.contains('open');
   menuPanel.classList.toggle('open', shouldOpen);
   menuPanel.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+  menuPanel.inert = !shouldOpen;
+  if (!shouldOpen && menuBtn && menuPanel.contains(document.activeElement)) {
+    menuBtn.focus();
+  }
 }
 if (menuBtn) {
   menuBtn.onclick = () => toggleMenu();
@@ -436,11 +448,6 @@ $('#dataBtn').onclick = () => {
   toggleMenu(false);
   $('#dataModal').style.display = 'flex';
   renderModalLog();
-  if (typeof updateBackupUi === 'function') {
-    updateBackupUi(
-      AutoBackup && AutoBackup.getStatus ? AutoBackup.getStatus() : { code: 'unsupported' }
-    );
-  }
 };
 $('#closeData').onclick = () => {
   $('#dataModal').style.display = 'none';
@@ -454,43 +461,16 @@ async function clearAllAppData() {
   state.roundWinners = [];
   render();
 
-  // Remove localStorage data and backups.
+  // Remove localStorage data.
   try {
     localStorage.removeItem('punchBuggy');
-    localStorage.removeItem('punchBuggy_last_backup');
-    localStorage.removeItem('punchbuggy-auto-backup-enabled');
-    localStorage.removeItem('punchbuggy-auto-backup-meta');
-    const keysToRemove = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith('punchBuggy_backup_')) keysToRemove.push(key);
-    }
-    keysToRemove.forEach((key) => localStorage.removeItem(key));
   } catch (err) {
     console.warn('Failed to clear localStorage', err);
-  }
-
-  // Remove IndexedDB auto-backups if available.
-  if (window.indexedDB && AutoBackup && AutoBackup.DB_NAME) {
-    try {
-      await new Promise((resolve, reject) => {
-        const req = indexedDB.deleteDatabase(AutoBackup.DB_NAME);
-        req.onsuccess = () => resolve();
-        req.onerror = () => reject(req.error);
-        req.onblocked = () => resolve();
-      });
-    } catch (err) {
-      console.warn('Failed to clear IndexedDB backups', err);
-    }
-  }
-
-  if (typeof updateBackupUi === 'function' && AutoBackup && AutoBackup.getStatus) {
-    updateBackupUi(AutoBackup.getStatus());
   }
 }
 
 $('#clearData').onclick = () => {
-  if (confirm('Clear all game data (rounds, scores, history, names, avatars)?')) {
+  if (confirm('Delete all game data (rounds, scores, history, names, avatars)?')) {
     clearAllAppData();
   }
 };
@@ -512,7 +492,7 @@ $('#exportData').onclick = () => {
 // Import - parse file and normalize various export shapes (supports older shape and `rounds`-style exports)
 function normalizeImportedState(parsed) {
   if (!parsed || typeof parsed !== 'object') return { error: 'invalid' };
-  // Support backup wrapper shape: { app, createdAt, version, data }
+  // Support wrapped export shape: { app, createdAt, version, data }
   const source = parsed.data && typeof parsed.data === 'object' ? parsed.data : parsed;
 
   const out = {};
@@ -622,168 +602,6 @@ $('#importFile').onchange = async (e) => {
   e.target.value = '';
 };
 
-const backupStatusEl = $('#backupStatusText');
-const backupMetaEl = $('#backupMetaText');
-const autoBackupToggle = $('#autoBackupToggle');
-const downloadBackupBtn = $('#downloadBackupBtn');
-const restoreBackupBtn = $('#restoreBackupBtn');
-
-function describeBackupIso(iso) {
-  if (!iso) return null;
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return null;
-  const diff = Date.now() - date.getTime();
-  if (diff < 30 * 1000) return 'just now';
-  if (diff < 60 * 60 * 1000) {
-    const mins = Math.round(diff / 60000);
-    return `${mins} minute${mins === 1 ? '' : 's'} ago`;
-  }
-  if (diff < 24 * 60 * 60 * 1000) {
-    const hours = Math.round(diff / 3600000);
-    return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-  }
-  return date.toLocaleString();
-}
-
-function updateBackupUi(status) {
-  if (!backupStatusEl) return;
-  const data = status || {};
-  const metadata = data.metadata || {};
-  if (typeof data.enabled === 'boolean' && autoBackupToggle) {
-    autoBackupToggle.checked = data.enabled;
-  }
-  backupStatusEl.textContent =
-    data.message ||
-    (data.enabled === false ? 'Automatic backups are disabled.' : 'Automatic backups ready.');
-  if (backupMetaEl) {
-    const details = [];
-    if (data.code === 'unsupported') {
-      details.push('This browser does not support IndexedDB-based backups.');
-    } else {
-      if (metadata.currentBackupDate) {
-        const desc = describeBackupIso(metadata.currentBackupDate);
-        if (desc) details.push(`Current backup saved ${desc}`);
-      }
-      if (metadata.previousBackupDate) {
-        const desc = describeBackupIso(metadata.previousBackupDate);
-        if (desc) details.push(`Previous backup saved ${desc}`);
-      }
-      if (metadata.oldestBackupDate) {
-        const desc = describeBackupIso(metadata.oldestBackupDate);
-        if (desc) details.push(`Oldest backup saved ${desc}`);
-      }
-      if (!metadata.currentBackupDate && data.enabled !== false) {
-        details.push('No backups have been created yet.');
-      }
-      if (data.code === 'error' && data.error) {
-        const errText = data.error && data.error.message ? data.error.message : String(data.error);
-        details.push(`Error: ${errText}`);
-      }
-    }
-    backupMetaEl.textContent = details.join(' • ');
-  }
-  const disabled = data.code === 'unsupported' || data.enabled === false;
-  if (downloadBackupBtn) downloadBackupBtn.disabled = disabled;
-  if (restoreBackupBtn) restoreBackupBtn.disabled = disabled || !(metadata.backupCount > 0);
-}
-
-function applyRestoredState(snapshot) {
-  if (!snapshot || typeof snapshot !== 'object') return;
-  const defaults = {
-    round: 1,
-    players: {
-      A: { name: 'Player A', score: 0, streak: 0, avatar: '' },
-      B: { name: 'Player B', score: 0, streak: 0, avatar: '' },
-    },
-    roundWinners: [],
-    history: [],
-  };
-  const next = Object.assign({}, defaults, snapshot);
-  const nextPlayers = snapshot && snapshot.players ? snapshot.players : {};
-  next.players = Object.assign({}, defaults.players, nextPlayers);
-  next.players.A = Object.assign({}, defaults.players.A, nextPlayers.A || {});
-  next.players.B = Object.assign({}, defaults.players.B, nextPlayers.B || {});
-  next.roundWinners = Array.isArray(snapshot && snapshot.roundWinners)
-    ? snapshot.roundWinners.slice()
-    : [];
-  next.history = Array.isArray(snapshot && snapshot.history) ? snapshot.history.slice() : [];
-  Object.assign(state, next);
-  render();
-}
-
-if (!AutoBackup || !AutoBackup.SUPPORTED) {
-  updateBackupUi({
-    code: 'unsupported',
-    message: 'Automatic backups are unavailable in this browser.',
-    enabled: false,
-  });
-  if (autoBackupToggle) autoBackupToggle.disabled = true;
-  if (downloadBackupBtn) downloadBackupBtn.disabled = true;
-  if (restoreBackupBtn) restoreBackupBtn.disabled = true;
-} else {
-  if (autoBackupToggle) {
-    autoBackupToggle.addEventListener('change', (e) => {
-      try {
-        AutoBackup.setEnabled(e.target.checked);
-      } catch (err) {
-        console.error('AutoBackup toggle failed', err);
-        e.target.checked = !e.target.checked;
-      }
-    });
-  }
-  if (downloadBackupBtn) {
-    downloadBackupBtn.onclick = async () => {
-      try {
-        await AutoBackup.manualBackup();
-      } catch (err) {
-        console.error('Manual backup failed', err);
-        alert('Failed to download backup: ' + (err && err.message ? err.message : err));
-      }
-    };
-  }
-  if (restoreBackupBtn) {
-    restoreBackupBtn.onclick = async () => {
-      try {
-        const backups = await AutoBackup.listBackups();
-        if (!backups.length) {
-          alert('No backups available to restore yet.');
-          return;
-        }
-        const labels = { current: 'Current', previous: 'Previous', oldest: 'Oldest' };
-        const options = backups.map((item, idx) => {
-          const desc = describeBackupIso(item.savedAt) || item.savedAt || 'unknown time';
-          return `${idx + 1}. ${labels[item.key] || item.key} — saved ${desc}`;
-        });
-        const choice = prompt(`Restore which backup?\n${options.join('\n')}\nEnter a number:`, '1');
-        if (!choice) return;
-        const index = parseInt(choice, 10) - 1;
-        if (Number.isNaN(index) || index < 0 || index >= backups.length) {
-          alert('Invalid selection.');
-          return;
-        }
-        const selected = backups[index];
-        const when = describeBackupIso(selected.savedAt) || selected.savedAt || 'an unknown time';
-        if (
-          !confirm(
-            `Restore the ${labels[selected.key] || selected.key} backup from ${when}? This will replace your current game data.`
-          )
-        )
-          return;
-        await AutoBackup.restoreFromBackup(selected.key);
-        alert('Backup restored successfully.');
-      } catch (err) {
-        console.error('Restore backup failed', err);
-        alert('Failed to restore backup: ' + (err && err.message ? err.message : err));
-      }
-    };
-  }
-  AutoBackup.init({
-    getState: () => state,
-    applyState: applyRestoredState,
-    onStatusChange: updateBackupUi,
-  });
-  updateBackupUi(AutoBackup.getStatus());
-}
 $('#closeRules').onclick = () => {
   $('#rulesModal').style.display = 'none';
 };
@@ -934,7 +752,7 @@ function setupServiceWorkerUpdates() {
     });
 }
 
-// Run in-app migration if needed (creates a backup key in localStorage)
+// Run in-app migration if needed
 try {
   if (
     window.PunchBuggyMigrations &&
@@ -942,17 +760,13 @@ try {
   ) {
     const result = window.PunchBuggyMigrations.migrateIfNeeded();
     if (result && result.migrated) {
-      // notify user in data modal log and backup UI
+      // notify user in data modal log
       const logEl = document.getElementById('modalLog');
       if (logEl)
         logEl.insertAdjacentHTML(
           'beforeend',
-          `<li>Migrated local data to schema v2.0.0 — backup key: ${result.backupKey || 'unknown'}</li>`
+          '<li>Migrated local data to schema v2.0.0.</li>'
         );
-      const backupMeta = document.getElementById('backupMetaText');
-      if (backupMeta && result.backupKey) {
-        backupMeta.textContent = `A backup was created: ${result.backupKey}`;
-      }
     }
   }
 } catch (err) {

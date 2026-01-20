@@ -235,52 +235,22 @@
     <!-- Data & Event Log Modal -->
     <div class="modal" id="dataModal" role="dialog" aria-modal="true" style="display: none">
       <div class="modal-card card">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-          "
-        >
-          <div style="font-weight: 900">Data & Log</div>
-          <div style="display: flex; gap: 8px; align-items: center">
+        <div class="modal-header">
+          <div class="modal-title">Data & Log</div>
+          <div class="modal-actions">
             <button class="back-btn" id="exportData">Export</button>
             <button class="back-btn" id="importBtn">Import</button>
             <input type="file" id="importFile" accept="application/json" style="display: none" />
-            <button class="back-btn" id="clearData">Clear</button>
+            <button class="back-btn danger" id="clearData">Delete all</button>
             <button class="back-btn" id="closeData">Close</button>
           </div>
         </div>
-        <div style="font-size: 13px; color: var(--muted); margin-bottom: 8px">
-          Export will download the full game state (JSON). Import will replace the current state if
-          compatible. Logs are preserved unless cleared.
+        <div class="modal-subtitle">
+          Export downloads the full game state (JSON). Import replaces the current state if
+          compatible. Delete all clears rounds, scores, history, names, and avatars.
         </div>
-        <div class="backup-panel" id="backupPanel">
-          <h4>Automatic backups</h4>
-          <label class="backup-toggle">
-            <input type="checkbox" id="autoBackupToggle" checked />
-            <span>Enable automatic backups (stored in IndexedDB)</span>
-          </label>
-          <div class="backup-status" id="backupStatusText">Automatic backups are initializing…</div>
-          <div class="backup-meta" id="backupMetaText">No backups saved yet.</div>
-          <div class="backup-actions">
-            <button class="back-btn" id="downloadBackupBtn">Download backup</button>
-            <button class="back-btn ghost" id="restoreBackupBtn">Restore backup</button>
-          </div>
-        </div>
-        <div style="max-height: 60vh; overflow: auto">
-          <ul
-            id="modalLog"
-            style="
-              list-style: none;
-              padding: 0;
-              margin: 0;
-              display: flex;
-              flex-direction: column;
-              gap: 8px;
-            "
-          ></ul>
+        <div class="modal-body">
+          <ul id="modalLog" class="modal-log"></ul>
         </div>
       </div>
     </div>
