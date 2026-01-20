@@ -11,6 +11,22 @@
   --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
   --radius: 16px;
   --update-banner-offset: 0px;
+  --p1-base: #1a4d40;
+  --p1-accent: #5be2b0;
+  --p1-glow: rgba(91, 226, 176, 0.22);
+  --p1-gradient: linear-gradient(
+    180deg,
+    rgba(22, 39, 58, 0.85) 0%,
+    rgba(26, 77, 64, 0.45) 100%
+  );
+  --p2-base: #1e2a4a;
+  --p2-accent: #8aa8ff;
+  --p2-glow: rgba(138, 168, 255, 0.22);
+  --p2-gradient: linear-gradient(
+    180deg,
+    rgba(22, 39, 58, 0.85) 0%,
+    rgba(30, 42, 74, 0.45) 100%
+  );
 }
 * {
   box-sizing: border-box;
@@ -264,8 +280,10 @@ header {
 .players {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   flex: 1;
+  overflow-y: auto;
+  padding-bottom: 4px;
 }
 .card {
   background: linear-gradient(160deg, var(--panel), var(--panel-2));
@@ -277,20 +295,69 @@ header {
   align-items: stretch;
   gap: 6px;
 }
-.card-top {
+.players-section {
+  padding: 4px;
+}
+.player-card {
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px;
+  gap: 12px;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  background: var(--p1-gradient);
+}
+.player-card.p1 {
+  border-top: 1px solid rgba(91, 226, 176, 0.22);
+  background: var(--p1-gradient);
+}
+.player-card.p2 {
+  border-top: 1px solid rgba(138, 168, 255, 0.22);
+  background: var(--p2-gradient);
+}
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.player-info {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.name-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.card-emote {
+  font-size: 20px;
+  opacity: 0.7;
+  min-width: 20px;
+  text-align: right;
+}
+.card-emote:empty {
+  display: none;
+}
+.card-body {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card-footer {
+  margin-top: auto;
 }
 .avatar-wrapper {
   position: relative;
   display: inline-block;
 }
 .avatar {
-  width: 62px;
-  height: 62px;
-  border-radius: 16px;
-  border: 2px solid #2f4170;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.12);
   object-fit: cover;
   cursor: pointer;
   position: relative;
@@ -299,10 +366,16 @@ header {
     width 0.2s,
     height 0.2s;
 }
+.player-card.p1 .avatar {
+  border-color: var(--p1-accent);
+}
+.player-card.p2 .avatar {
+  border-color: var(--p2-accent);
+}
 .player-crown {
   position: absolute;
-  top: -6px;
-  right: -6px;
+  top: -8px;
+  right: -8px;
   width: 28px;
   height: 28px;
   display: none;
@@ -317,8 +390,8 @@ header {
 }
 @media (min-width: 700px) {
   .avatar {
-    width: 78px;
-    height: 78px;
+    width: 56px;
+    height: 56px;
   }
 }
 .avatar:hover {
@@ -328,11 +401,11 @@ header {
   position: absolute;
   bottom: 0;
   right: 0;
-  background: #22c997;
+  background: rgba(255, 255, 255, 0.12);
   color: #fff;
   border-radius: 50%;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -355,9 +428,9 @@ header {
   flex: 1;
   min-width: 0;
 }
-.name {
+.player-input {
   font-size: 16px;
-  font-weight: 800;
+  font-weight: 700;
   text-align: left;
   background: transparent;
   border: none;
@@ -367,26 +440,76 @@ header {
   padding: 0;
   width: 100%;
 }
-.score {
-  font-size: 36px;
-  font-weight: 900;
+.streak-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.score-display {
+  font-size: 64px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -2px;
   text-align: left;
   transition:
     transform 0.3s,
     color 0.3s,
     font-size 0.2s;
 }
-@media (min-width: 700px) {
-  .score {
-    font-size: 34px;
-  }
+.player-card.p1 .score-display {
+  color: var(--p1-accent);
+  text-shadow: 0 0 30px var(--p1-glow);
+}
+.player-card.p2 .score-display {
+  color: var(--p2-accent);
+  text-shadow: 0 0 30px var(--p2-glow);
 }
 .score.bump {
   animation: scoreBump 0.5s ease;
 }
-.streak {
-  font-size: 12px;
+.minus-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--muted);
+  font-size: 20px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.minus-btn:active {
+  background: rgba(255, 255, 255, 0.12);
+}
+.punch-btn {
+  width: 100%;
+  padding: 18px;
+  border-radius: 16px;
+  border: none;
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  transition:
+    transform 0.1s,
+    filter 0.1s;
+}
+.punch-btn:active {
+  transform: scale(0.98);
+  filter: brightness(0.92);
+}
+.player-card.p1 .punch-btn {
+  background: var(--p1-accent);
+  color: #0b1a15;
+  box-shadow: 0 8px 20px var(--p1-glow);
+}
+.player-card.p2 .punch-btn {
+  background: var(--p2-accent);
+  color: #0b1226;
+  box-shadow: 0 8px 20px var(--p2-glow);
 }
 
 @keyframes scoreBump {
@@ -435,21 +558,6 @@ button {
   border-radius: var(--radius);
   cursor: pointer;
   transition: all 0.2s;
-}
-.card-bottom {
-  display: grid;
-  grid-template-columns: 0.8fr 1.2fr;
-  align-items: center;
-  gap: 6px;
-}
-.card-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-.card button {
-  padding: 8px 6px;
-  font-size: 13px;
 }
 .accent {
   background: linear-gradient(180deg, #22c997, #1aa97a);
@@ -521,11 +629,17 @@ button {
     margin: 0 auto;
   }
   .players {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-direction: row;
+    align-items: stretch;
   }
   .toolbar {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (min-width: 600px) and (min-height: 500px) {
+  .players {
+    flex-direction: row;
+    align-items: stretch;
   }
 }
 
