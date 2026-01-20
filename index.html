@@ -31,10 +31,25 @@
       color:var(--text); background: var(--bg);
       display:flex; flex-direction:column; padding:12px; padding-top:calc(12px + var(--update-banner-offset, 0px)); gap:12px;
     }
+    @supports (orientation: landscape) {
+      @media (orientation: landscape) {
+        body::before {
+          content: 'Portrait mode only';
+          position: fixed; inset: 0; z-index: 999;
+          display: flex; align-items: center; justify-content: center;
+          background: rgba(0,0,0,0.95);
+          color: var(--text); font-size: 20px; font-weight: 700;
+          text-align: center; padding: 20px;
+        }
+      }
+    }
 
     header{
       text-align:center; font-weight:800; font-size:22px; padding:8px;
-      position:relative;
+      position:sticky; top:0; z-index:50; background:linear-gradient(180deg,var(--bg),var(--bg));
+      backdrop-filter:blur(8px); border-bottom:1px solid rgba(255,255,255,0.08);
+      box-shadow:0 2px 8px rgba(0,0,0,0.3);
+      display:flex; flex-direction:column; gap:8px; margin:-12px -12px 0 -12px; padding:8px 12px; margin-bottom:12px;
     }
 
     .version-tag{
@@ -88,18 +103,21 @@
     .backup-toggle{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); }
     .backup-toggle input{ width:18px; height:18px; }
 
-    .players{ display:flex; flex-direction:column; gap:14px; flex:1 }
+    .players{ display:flex; flex-direction:column; gap:12px; flex:1 }
     .card{
       background:linear-gradient(160deg,var(--panel),var(--panel-2));
       border-radius:var(--radius); box-shadow:var(--shadow);
-      padding:14px; display:flex; flex-direction:column; align-items:center; gap:10px;
+      padding:12px; display:flex; flex-direction:column; align-items:center; gap:8px;
     }
     .avatar-wrapper{ position:relative; display:inline-block }
     .avatar{
       width:100px; height:100px; border-radius:50%; border:2px solid #2f4170;
-      object-fit:cover; cursor:pointer; position:relative; transition: transform .2s
+      object-fit:cover; cursor:pointer; position:relative; transition: transform .2s, width .2s, height .2s
     }
       .player-crown{ position:absolute; top:-6px; right:-6px; width:28px; height:28px; display:none; align-items:center; justify-content:center; font-size:18px; background:linear-gradient(180deg,#ffd166,#ffb347); color:#2b180d; border-radius:50%; box-shadow:0 6px 18px rgba(0,0,0,0.35); border:2px solid rgba(255,255,255,0.12) }
+    @media(min-width:700px){
+      .avatar{ width:75px; height:75px; }
+    }
     .avatar:hover{ transform: scale(1.05) }
     .upload-label{
       position:absolute; bottom:0; right:0; background:#22c997; color:#fff;
@@ -114,7 +132,10 @@
       font-size:20px; font-weight:700; text-align:center; background:transparent;
       border:none; outline:none; color:var(--text); margin:4px 0
     }
-    .score{ font-size:42px; font-weight:900; transition: transform .3s, color .3s }
+    .score{ font-size:42px; font-weight:900; transition: transform .3s, color .3s, font-size .2s }
+    @media(min-width:700px){
+      .score{ font-size:34px; }
+    }
     .score.bump{ animation: scoreBump .5s ease }
     .streak{ font-size:14px; color:var(--muted) }
 
@@ -126,15 +147,20 @@
 
     button{
       width:100%; padding:16px; font-size:18px; font-weight:700;
-      border:none; border-radius:var(--radius); cursor:pointer;
+      border:none; border-radius:var(--radius); cursor:pointer; transition: all .2s;
+    }
+    .card button{ padding:14px; font-size:16px; }
+    @media(min-width:700px){
+      .card button{ flex:1; min-width:0; }
     }
     .accent{ background:linear-gradient(180deg,#22c997,#1aa97a); color:#fff }
     .danger{ background:linear-gradient(180deg,#ff7c7c,#ff4d4d); color:#fff }
     .ghost{ background:transparent; border:1px solid #2a3966; color:var(--text) }
 
     .roundbar{
-      text-align:center; font-weight:700; padding:10px;
-      border-radius:var(--radius); background:#111832;
+      text-align:center; font-weight:700; padding:8px 12px;
+      border-radius:0; background:transparent; font-size:14px; color:var(--muted);
+      border-top:1px solid rgba(255,255,255,0.04); margin:0; order:-1;
     }
 
     .log{
@@ -150,13 +176,20 @@
 
     .toolbar{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px }
 
-    @media(min-width:700px){ body{ max-width:420px; margin:0 auto } }
+    @media(min-width:700px){
+      body{ max-width:520px; margin:0 auto }
+      .players{ flex-direction:row; gap:12px; }
+      .card{ flex:1; }
+      .toolbar{ grid-template-columns:repeat(6,1fr); }
+      .name{ font-size:16px; }
+      .streak{ font-size:12px; }
+    }
 
-    .confetti{ position:fixed; inset:0; pointer-events:none; }
+    .confetti{ position:fixed; inset:0; pointer-events:none; z-index:30; }
     .piece{ position:absolute; width:8px; height:12px }
 
     /* Leaderboard styles */
-    .leaderboard-wrap{ display:none; position:fixed; left:12px; right:12px; bottom:80px; z-index:40 }
+    .leaderboard-wrap{ display:none; position:fixed; left:12px; right:12px; bottom:80px; z-index:45 }
     .leaderboard{ display:flex; gap:8px; justify-content:space-between; align-items:center; padding:10px; border-radius:12px; background:linear-gradient(180deg,#081025, #0f1726); box-shadow:var(--shadow)}
     .leaderboard .col{ display:flex; flex-direction:column; align-items:center; gap:8px; min-width:120px }
     .leaderboard h4{ margin:0; font-size:12px; color:var(--muted) }
@@ -232,7 +265,7 @@
   .avatar-sm img{ width:100%; height:100%; object-fit:cover; display:block }
   .crown{ position:absolute; top:-6px; right:-6px; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px; background:linear-gradient(180deg,#ffd166,#ffb347); color:#2b180d; border-radius:50%; box-shadow:0 6px 12px rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.12) }
   /* Modals */
-  .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:80; background:linear-gradient(180deg, rgba(2,6,12,0.6), rgba(2,6,12,0.85)); }
+  .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:85; background:linear-gradient(180deg, rgba(2,6,12,0.6), rgba(2,6,12,0.85)); }
   .modal-card{ width:calc(100% - 48px); max-width:720px; padding:16px; border-radius:14px; box-shadow:0 12px 48px rgba(0,0,0,0.6); }
   @media(min-width:700px){ .modal-card{ padding:24px } }
   </style>  
@@ -243,6 +276,7 @@
       <div class="title-main">Punch Buggy</div>
     </div>
     <span class="version-tag">v<span id="appVersion">—</span></span>
+    <div class="roundbar">Round <span id="round">1</span> • <span id="lead">Tied</span></div>
   </header>
 
   <div class="players">
@@ -282,8 +316,6 @@
       <button class="ghost" id="minusB">−1</button>
     </div>
   </div>
-
-  <div class="roundbar">Round <span id="round">1</span> • <span id="lead">Tied</span></div>
 
   <div class="toolbar">
     <button class="ghost" id="undoBtn">↶ Undo</button>
