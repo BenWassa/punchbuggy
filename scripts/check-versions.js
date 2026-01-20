@@ -10,8 +10,8 @@ function readFile(p){
 }
 
 const files = {
-  appVersionCandidates: ['app-version.js', 'src/app-version.js'],
-  manifest: 'manifest.webmanifest',
+  appVersionCandidates: ['public/app-version.js', 'app-version.js', 'src/app-version.js'],
+  manifest: 'public/manifest.webmanifest',
   changelog: 'CHANGELOG.md',
 };
 

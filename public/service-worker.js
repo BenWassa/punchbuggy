@@ -1,4 +1,4 @@
-importScripts('./src/app-version.js');
+importScripts('./app-version.js');
 
 const APP_VERSION = self.PUNCHBUGGY_APP_VERSION || 'dev';
 const CACHE_NAME = `punchbuggy-cache-${APP_VERSION}`;
@@ -9,8 +9,7 @@ const APP_SHELL = [
   './index.html',
   './manifest.webmanifest',
   './service-worker.js',
-  './src/app-version.js',
-  './src/auto-backup.js',
+  './app-version.js',
   './icons/punchbuggy.svg'
 ].map(path => new URL(path, self.location).toString());
 
