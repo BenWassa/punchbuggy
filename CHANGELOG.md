@@ -2,9 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.1.0] - 2026-01-20
+## [3.1.0] - 2026-02-01
 
-- TBD
+- Fix: Prevent silent service worker updates on mobile by gating page reloads behind update banner display. Updates now only apply with user confirmation or auto-timer, ensuring the banner is always shown before refreshing.
 
 ## [3.0.1] - 2026-01-20
 

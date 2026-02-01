@@ -1,5 +1,5 @@
 import './styles/app.css';
-import '../migrations/migrate-to-v2.js';
+import '../archive/migrations/migrate-to-v2.js';
 
 const $ = (sel) => document.querySelector(sel);
 const state = {
@@ -630,7 +630,6 @@ function setupServiceWorkerUpdates() {
   const root = document.documentElement;
   let waitingWorker = null;
   let autoReloadTimer = null;
-  let refreshing = false;
 
   function applyBannerOffset() {
     if (!banner || banner.style.display === 'none') return;
@@ -656,8 +655,6 @@ function setupServiceWorkerUpdates() {
   function requestRefresh() {
     if (waitingWorker) {
       const worker = waitingWorker;
-      // mark that a refresh was explicitly requested so controllerchange will reload
-      refreshing = true;
       // Update the running version in localStorage so after reload the UI shows the new version
       localStorage.setItem(
         'punchBuggy_running_version',
@@ -715,8 +712,8 @@ function setupServiceWorkerUpdates() {
   };
 
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    // Only reload the page when we explicitly requested the refresh (refreshing === true).
-    if (!refreshing) return;
+    // Only reload the page when an update was pending (banner was shown).
+    if (!waitingWorker) return;
     // proceed with reload
     window.location.reload();
   });
