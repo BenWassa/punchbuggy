@@ -139,15 +139,17 @@
         transition: opacity 600ms ease-out;
         pointer-events: auto;
         display: block;
+        filter: brightness(0.1);
+        animation: splashBrighten 3s ease-out forwards;
       }
 
-      /* Overlay gradient */
-      #splashOverlay::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, rgba(11, 15, 26, 0.95), rgba(11, 15, 26, 0.5));
-        z-index: 1;
+      @keyframes splashBrighten {
+        0% {
+          filter: brightness(0.1);
+        }
+        100% {
+          filter: brightness(1);
+        }
       }
 
       #splashOverlay.hidden {
@@ -1535,7 +1537,6 @@
     <!-- Splash screen overlay - shown while content loads -->
     <div id="splashOverlay" style="background-image: url('./punchbuggy_splash.jpg');"></div>
 
-    <script src="./app-version.js"></script>
     <script>
       // --- JS from main.js (Embedded) ---
       const setAppHeight = () => {
@@ -1655,6 +1656,15 @@
         loader.onerror = finish;
         loader.src = highSrc;
       };
+      
+      // Load title image immediately for faster display
+      window.addEventListener("DOMContentLoaded", () => {
+        const titleImg = document.querySelector(".app-title-img");
+        if (titleImg) {
+          lazyLoadHighResImage(titleImg);
+        }
+      });
+      
       const setAvatarSrc = (selector, src) => {
         const img = getEl(selector);
         if (!img) return;

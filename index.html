@@ -139,15 +139,17 @@
         transition: opacity 600ms ease-out;
         pointer-events: auto;
         display: block;
+        filter: brightness(0.1);
+        animation: splashBrighten 3s ease-out forwards;
       }
 
-      /* Overlay gradient */
-      #splashOverlay::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, rgba(11, 15, 26, 0.95), rgba(11, 15, 26, 0.5));
-        z-index: 1;
+      @keyframes splashBrighten {
+        0% {
+          filter: brightness(0.1);
+        }
+        100% {
+          filter: brightness(1);
+        }
       }
 
       #splashOverlay.hidden {
@@ -355,7 +357,9 @@
       .app-title-img.lazy-title {
         filter: blur(4px);
         opacity: 0.4;
-        transition: opacity 0.4s ease, filter 0.4s ease;
+        transition:
+          opacity 0.4s ease,
+          filter 0.4s ease;
       }
       .app-title-img.lazy-title.loaded {
         filter: none;
@@ -1169,7 +1173,7 @@
           </svg>
         </button>
         <div class="app-title">
-        <img
+          <img
             class="app-title-img lazy-title"
             src="/punchbuggy_title_low.png"
             data-high="/punchbuggy_title.png"
@@ -1253,11 +1257,7 @@
           </div>
           <div class="score-stack">
             <div id="scoreA" class="score-display">0</div>
-            <div
-              id="streakA"
-              class="streak-badge"
-              style="display: none;"
-            ></div>
+            <div id="streakA" class="streak-badge" style="display: none"></div>
           </div>
         </div>
         <div class="card-footer">
@@ -1327,11 +1327,7 @@
           </div>
           <div class="score-stack">
             <div id="scoreB" class="score-display">0</div>
-            <div
-              id="streakB"
-              class="streak-badge"
-              style="display: none;"
-            ></div>
+            <div id="streakB" class="streak-badge" style="display: none"></div>
           </div>
         </div>
         <div class="card-footer">
@@ -1533,9 +1529,11 @@
     </div>
 
     <!-- Splash screen overlay - shown while content loads -->
-    <div id="splashOverlay" style="background-image: url('./punchbuggy_splash.jpg');"></div>
+    <div
+      id="splashOverlay"
+      style="background-image: url(&quot;./punchbuggy_splash.jpg&quot;)"
+    ></div>
 
-    <script src="./public/app-version.js"></script>
     <script>
       // --- JS from main.js (Embedded) ---
       const setAppHeight = () => {
@@ -1590,7 +1588,7 @@
         clearTimeout(splashTimeout);
         hideSplash();
       });
-      
+
       // Fallback: hide splash immediately if script reaches here (content already loaded)
       if (document.readyState !== "loading") {
         hideSplash();
@@ -1655,6 +1653,15 @@
         loader.onerror = finish;
         loader.src = highSrc;
       };
+
+      // Load title image immediately for faster display
+      window.addEventListener("DOMContentLoaded", () => {
+        const titleImg = document.querySelector(".app-title-img");
+        if (titleImg) {
+          lazyLoadHighResImage(titleImg);
+        }
+      });
+
       const setAvatarSrc = (selector, src) => {
         const img = getEl(selector);
         if (!img) return;
@@ -2004,7 +2011,8 @@
 
         if (d > 0) {
           state.players[p].punched = 0;
-          state.players[other].punched = (state.players[other].punched || 0) + 1;
+          state.players[other].punched =
+            (state.players[other].punched || 0) + 1;
           state.players[p].streak++;
           state.players[other].streak = 0;
 
