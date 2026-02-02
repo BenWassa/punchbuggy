@@ -1308,14 +1308,18 @@
       function renderModalLog() {
         const list = $("#modalLog");
         if (!list) return;
-        list.innerHTML = state.history
+        list.innerHTML = "";
+        state.history
           .slice()
           .reverse()
-          .map(
-            (e) =>
-              `<li style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.03)">${e}</li>`,
-          )
-          .join("");
+          .forEach((entry) => {
+            const item = document.createElement("li");
+            item.style.padding = "8px";
+            item.style.borderRadius = "8px";
+            item.style.background = "rgba(255,255,255,0.03)";
+            item.textContent = entry;
+            list.appendChild(item);
+          });
       }
 
       function renderLeaderboard() {
