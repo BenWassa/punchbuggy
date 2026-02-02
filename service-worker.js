@@ -1,6 +1,4 @@
-importScripts("./app-version.js");
-
-const APP_VERSION = self.PUNCHBUGGY_APP_VERSION || "dev";
+const APP_VERSION = "3.3.1";
 const CACHE_NAME = `punchbuggy-cache-${APP_VERSION}`;
 const DEV_HOSTS = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
 const IS_DEV_HOST = DEV_HOSTS.has(self.location.hostname);

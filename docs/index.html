@@ -12,7 +12,7 @@
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
-    <link rel="manifest" href="/assets/manifest-DijBI4gc.webmanifest" />
+    <link rel="manifest" href="/assets/manifest-3O8VcEq4.webmanifest" />
     <link
       rel="icon"
       type="image/png"
@@ -37,7 +37,7 @@
         --plasma: #ffffff;
         --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
         --radius: 20px; /* Slightly rounder for modern feel */
-        --splash-image: url("./punchbuggy_splash.jpg");
+        --splash-image: url("/punchbuggy_splash.png");
         --p1-base: #1a4d40;
         --p1-accent: #5be2b0;
         --p1-glow: rgba(91, 226, 176, 0.22);
@@ -237,7 +237,7 @@
         flex: 1; /* Grow to fill screen */
         overflow-y: auto;
         min-height: 0; /* Important for nested flex scroll */
-        padding-bottom: 80px; /* Space for Toolbar */
+        padding-bottom: 100px; /* Increased space for Toolbar */
       }
 
       /* Player Card - Refactored for Vertical Stretch */
@@ -251,9 +251,9 @@
         /* Flex properties to fill space */
         display: flex;
         flex-direction: column;
-        flex: 1;
+        flex: 0 0 auto; /* Don't grow, only use needed space */
         justify-content: space-between;
-        min-height: 160px; /* Minimum height for safety */
+        min-height: 0; /* Remove min-height constraint */
       }
 
       .player-card.p1 {
@@ -272,6 +272,7 @@
         justify-content: space-between;
         gap: 12px;
         flex: 0 0 auto;
+        padding: 12px 0; /* 20% enlarged vertical spacing */
       }
       .player-info {
         display: flex;
@@ -294,8 +295,8 @@
         align-items: center;
         justify-content: flex-end;
         gap: 12px;
-        flex: 2; /* Takes up most space */
-        padding: 6px 0;
+        flex: 1; /* Reduced from 2 to 1 (50% removal) */
+        padding: 16px 0; /* 10% gap spacing */
         width: 100%;
       }
       .score-display {
@@ -312,6 +313,7 @@
       .card-footer {
         flex: 0 0 auto;
         margin-top: 8px;
+        padding: 12px 0; /* 20% enlarged vertical spacing */
         display: flex;
         flex-direction: row;
         gap: 12px;
@@ -326,8 +328,8 @@
         flex-shrink: 0;
       }
       .avatar {
-        width: 96px; /* Wider enough for the card while matching portrait uploads */
-        height: 144px; /* Portrait 2:3 ratio keeps images taller than wide */
+        width: 80px; /* Reduced from 96px */
+        height: 120px; /* Reduced from 144px - maintains 2:3 ratio */
         aspect-ratio: 2 / 3;
         border-radius: 18px;
         border: 2px solid rgba(255, 255, 255, 0.12);
@@ -357,7 +359,9 @@
       .app-title-img.lazy-title {
         filter: blur(4px);
         opacity: 0.4;
-        transition: opacity 0.4s ease, filter 0.4s ease;
+        transition:
+          opacity 0.4s ease,
+          filter 0.4s ease;
       }
       .app-title-img.lazy-title.loaded {
         filter: none;
@@ -1171,7 +1175,7 @@
           </svg>
         </button>
         <div class="app-title">
-        <img
+          <img
             class="app-title-img lazy-title"
             src="/punchbuggy_title_low.png"
             data-high="/punchbuggy_title.png"
@@ -1255,11 +1259,7 @@
           </div>
           <div class="score-stack">
             <div id="scoreA" class="score-display">0</div>
-            <div
-              id="streakA"
-              class="streak-badge"
-              style="display: none;"
-            ></div>
+            <div id="streakA" class="streak-badge" style="display: none"></div>
           </div>
         </div>
         <div class="card-footer">
@@ -1329,11 +1329,7 @@
           </div>
           <div class="score-stack">
             <div id="scoreB" class="score-display">0</div>
-            <div
-              id="streakB"
-              class="streak-badge"
-              style="display: none;"
-            ></div>
+            <div id="streakB" class="streak-badge" style="display: none"></div>
           </div>
         </div>
         <div class="card-footer">
@@ -1535,7 +1531,15 @@
     </div>
 
     <!-- Splash screen overlay - shown while content loads -->
-    <div id="splashOverlay" style="background-image: url('./punchbuggy_splash.jpg');"></div>
+    <div
+      id="splashOverlay"
+      style="background-image: url(&quot;/assets/punchbuggy_splash-Bpp-ds4i.jpg&quot;)"
+    ></div>
+
+    <script>
+      // Set app version for menu and service worker
+      window.PUNCHBUGGY_APP_VERSION = "3.3.1";
+    </script>
 
     <script>
       // --- JS from main.js (Embedded) ---
@@ -1591,7 +1595,7 @@
         clearTimeout(splashTimeout);
         hideSplash();
       });
-      
+
       // Fallback: hide splash immediately if script reaches here (content already loaded)
       if (document.readyState !== "loading") {
         hideSplash();
@@ -1656,7 +1660,7 @@
         loader.onerror = finish;
         loader.src = highSrc;
       };
-      
+
       // Load title image immediately for faster display
       window.addEventListener("DOMContentLoaded", () => {
         const titleImg = document.querySelector(".app-title-img");
@@ -1664,7 +1668,7 @@
           lazyLoadHighResImage(titleImg);
         }
       });
-      
+
       const setAvatarSrc = (selector, src) => {
         const img = getEl(selector);
         if (!img) return;
@@ -2014,7 +2018,8 @@
 
         if (d > 0) {
           state.players[p].punched = 0;
-          state.players[other].punched = (state.players[other].punched || 0) + 1;
+          state.players[other].punched =
+            (state.players[other].punched || 0) + 1;
           state.players[p].streak++;
           state.players[other].streak = 0;
 
@@ -2166,6 +2171,19 @@
         }
       }
       if (menuBtn) menuBtn.onclick = () => toggleMenu();
+
+      // Close menu when clicking outside of it
+      document.addEventListener("click", (e) => {
+        if (
+          menuPanel &&
+          menuPanel.classList.contains("open") &&
+          !menuPanel.contains(e.target) &&
+          menuBtn &&
+          !menuBtn.contains(e.target)
+        ) {
+          toggleMenu(false);
+        }
+      });
 
       onClick("#closeData", () => {
         setDisplay("#dataModal", "none");
