@@ -10,14 +10,11 @@ const APP_SHELL = [
   './manifest.webmanifest',
   './service-worker.js',
   './src/app-version.js',
-  './src/auto-backup.js',
   './icons/punchbuggy.svg'
 ].map(path => new URL(path, self.location).toString());
 
 self.addEventListener('install', event => {
-  if (IS_DEV_HOST) {
-    self.skipWaiting();
-  }
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL))
   );

@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.0] - 2026-02-02
+- Major UI refresh: new player layout, leaderboard presentation, and streamlined modals.
+- Remove auto backups + migration workflow and related UI text.
+- Silent service worker updates with versioned cache busting (no update banner).
+
 ## [2.2.0] - 2025-10-27
 - Fix import to accept backup wrapper files (restore from AutoBackup downloads).
 - Sync UI version tag with active build after updates.

@@ -1,1269 +1,1404 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0b0f1a" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" type="image/svg+xml" sizes="any" href="icons/punchbuggy.svg" />
-  <title>Punch Buggy — Mobile</title>
+  <title>Punch Buggy</title>
   <style>
-    :root{
+    /* --- CSS from app.css (Refactored for Layout) --- */
+    :root {
       --bg: #0b0f1a;
       --panel: #121829ee;
       --panel-2: #0f1524aa;
       --text: #e6ecff;
       --muted: #97a3c0;
       --accent: #5be2b0;
-      --accent-2:#8aa8ff;
+      --accent-2: #8aa8ff;
       --danger: #ff6b6b;
       --gold: #ffd166;
-      --shadow: 0 6px 20px rgba(0,0,0,.35);
-      --radius: 16px;
-      --update-banner-offset: 0px;
+      --ember: #ff6b6b;
+      --fire: #ff9f43;
+      --plasma: #ffffff;
+      --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+      --radius: 20px; /* Slightly rounder for modern feel */
+      --p1-base: #1a4d40;
+      --p1-accent: #5be2b0;
+      --p1-glow: rgba(91, 226, 176, 0.22);
+      --p1-gradient: linear-gradient(180deg, rgba(22, 39, 58, 0.85) 0%, rgba(26, 77, 64, 0.45) 100%);
+      --p2-base: #1e2a4a;
+      --p2-accent: #8aa8ff;
+      --p2-glow: rgba(138, 168, 255, 0.22);
+      --p2-gradient: linear-gradient(180deg, rgba(22, 39, 58, 0.85) 0%, rgba(30, 42, 74, 0.45) 100%);
+
+      /* Safe area variables */
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 20px);
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; font-family: "Sora","Avenir Next","Gill Sans","Trebuchet MS",sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(120% 80% at 18% 0%, #15254a 0%, #0b0f1a 55%, #070e1d 100%);
-      display:flex; flex-direction:column; padding:12px; padding-top:calc(12px + var(--update-banner-offset, 0px)); padding-bottom:calc(62px + 12px);
-      gap:8px; min-height:100svh; overflow:hidden;
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none; /* App-like feel */
     }
-    @supports (orientation: landscape) {
-      @media (orientation: landscape) {
-        body::before {
-          content: 'Portrait mode only';
-          position: fixed; inset: 0; z-index: 999;
-          display: flex; align-items: center; justify-content: center;
-          background: rgba(0,0,0,0.95);
-          color: var(--text); font-size: 20px; font-weight: 700;
-          text-align: center; padding: 20px;
-        }
-      }
+    input {
+      user-select: auto;
+    }
+    html, body {
+      height: 100%;
+      overflow: hidden; /* Prevent body scroll, handle inside containers */
+    }
+    body {
+      margin: 0;
+      font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(120% 80% at 18% 0%, #15254a 0%, #0b0f1a 55%, #070e1d 100%);
+      display: flex;
+      flex-direction: column;
+      padding: 12px;
+      padding-top: calc(12px + var(--sat));
+      padding-bottom: calc(12px + var(--sab));
+      gap: 16px; /* Increased gap */
     }
 
-    header{
-      text-align:center; font-weight:800; font-size:22px;
-      position:relative; z-index:50;
-      background:linear-gradient(180deg, rgba(8,12,22,0.92), rgba(8,12,22,0.6));
-      backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.08);
-      box-shadow:0 10px 22px rgba(0,0,0,0.35);
-      display:flex; flex-direction:column; gap:8px; padding:12px; border-radius:18px;
+    /* Header */
+    header {
+      flex: 0 0 auto;
+      text-align: center;
+      position: relative;
+      z-index: 50;
+      background: linear-gradient(180deg, rgba(8, 12, 22, 0.92), rgba(8, 12, 22, 0.6));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+      padding: 12px;
+      border-radius: 18px;
+    }
+    .topbar {
+      display: grid;
+      grid-template-columns: 48px 1fr 48px;
+      align-items: center;
+      gap: 12px;
+    }
+    .icon-btn {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .icon-btn:active {
+      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.14);
     }
 
-    .topbar{ display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:12px }
-    .icon-btn{
-      width:42px; height:42px; display:grid; place-items:center;
-      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
-      border-radius:12px; color:var(--text); font-size:18px; cursor:pointer;
-      line-height:1; padding:0; text-align:center;
-      transition: transform .2s ease, background .2s ease;
-    }
-    .icon-btn:hover{ transform:translateY(-1px); background:rgba(255,255,255,0.14); }
-
-    .menu-panel{
-      position:absolute; top:60px; left:12px; z-index:60;
-      width:210px; padding:12px; border-radius:14px;
-      background:linear-gradient(160deg, rgba(12,20,40,0.98), rgba(9,16,32,0.96));
-      border:1px solid rgba(255,255,255,0.08); box-shadow:0 12px 30px rgba(0,0,0,0.45);
-      display:none; flex-direction:column; gap:10px;
-    }
-    .menu-panel.open{ display:flex; }
-    .menu-title{ font-size:12px; text-transform:uppercase; letter-spacing:0.12em; color:var(--muted); }
-    .menu-section{ display:flex; flex-direction:column; gap:8px; }
-    .menu-btn{
-      padding:10px 12px; border-radius:10px; font-weight:700; font-size:14px;
-      border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.04);
-      color:var(--text); cursor:pointer; text-align:left;
-    }
-    .menu-meta{
-      font-size:12px; color:var(--muted); padding-top:6px; border-top:1px solid rgba(255,255,255,0.06);
+    /* Main Player Container - Refactored for Flex Growth */
+    .players {
+      display: flex;
+      flex-direction: column;
+      gap: 16px; /* Spacing between cards */
+      flex: 1; /* Grow to fill screen */
+      overflow-y: auto;
+      min-height: 0; /* Important for nested flex scroll */
+      padding-bottom: 80px; /* Space for Toolbar */
     }
 
-    .update-banner{
-      position:fixed; top:12px; top:calc(env(safe-area-inset-top, 0px) + 12px); z-index:100;
-      left:50%; transform:translateX(-50%);
-      width:calc(100% - 24px); max-width:520px;
-      display:none; flex-direction:column; align-items:stretch;
-      padding:14px 16px; border-radius:14px; background:linear-gradient(135deg,#12213f,#102542);
-      box-shadow:0 8px 24px rgba(0,0,0,0.45); gap:12px;
+    /* Player Card - Refactored for Vertical Stretch */
+    .player-card {
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+      /* Flex properties to fill space */
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      justify-content: space-between;
+      min-height: 200px; /* Minimum height for safety */
     }
 
-    .update-banner strong{ font-size:14px; display:block; }
-
-    .update-actions{ display:flex; gap:8px; flex-wrap:wrap; width:100%; }
-
-    .update-banner button{
-      padding:12px 16px; border-radius:999px; border:none; cursor:pointer; font-weight:700;
-      background:linear-gradient(180deg,#22c997,#1aa97a); color:#fff; flex:1 1 140px;
+    .player-card.p1 {
+      border-top: 1px solid rgba(91, 226, 176, 0.22);
+      background: var(--p1-gradient);
+    }
+    .player-card.p2 {
+      border-top: 1px solid rgba(138, 168, 255, 0.22);
+      background: var(--p2-gradient);
     }
 
-    .update-banner .ghost{
-      background:transparent; border:1px solid rgba(91,226,176,0.5); color:var(--muted);
+    /* Card Internals */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex: 0 0 auto;
+    }
+    .player-info {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      width: 100%;
+    }
+    .name-box {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
     }
 
-    @media (min-width: 520px){
-      .update-banner{
-        flex-direction:row; align-items:center;
-      }
-      .update-banner strong{ font-size:15px; }
-      .update-actions{ width:auto; flex-wrap:nowrap; }
-      .update-banner button{ flex:0 0 auto; padding:10px 20px; }
+    /* Body now grows to push Score to center */
+    .card-body {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex: 2; /* Takes up most space */
+      padding: 10px 0;
     }
 
-    .backup-panel{
-      margin-top:12px; padding:12px; border-radius:12px;
-      background:linear-gradient(180deg,rgba(15,22,40,0.9),rgba(12,19,34,0.9));
-      display:flex; flex-direction:column; gap:10px;
+    .card-footer {
+      flex: 0 0 auto;
+      margin-top: auto;
     }
 
-    .backup-panel h4{ margin:0; font-size:14px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); }
-    .backup-status{ font-size:14px; line-height:1.4; color:var(--text); }
-    .backup-meta{ font-size:12px; color:var(--muted); }
-    .backup-actions{ display:flex; gap:8px; flex-wrap:wrap; }
-    .backup-actions button{ flex:1; min-width:140px; font-size:14px; padding:10px; }
-    .backup-toggle{ display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); }
-    .backup-toggle input{ width:18px; height:18px; }
+    /* Avatars */
+    .avatar-wrapper {
+      position: relative;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .avatar {
+      width: 64px; /* Larger avatar for tall screens */
+      height: 64px;
+      border-radius: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      object-fit: cover;
+      background: rgba(0,0,0,0.2);
+    }
+    .player-card.p1 .avatar { border-color: var(--p1-accent); }
+    .player-card.p2 .avatar { border-color: var(--p2-accent); }
 
-    .players{ display:flex; flex-direction:column; gap:8px; flex:1; }
-    .card{
-      background:linear-gradient(160deg,var(--panel),var(--panel-2));
-      border-radius:var(--radius); box-shadow:var(--shadow);
-      padding:10px; display:flex; flex-direction:column; align-items:stretch; gap:6px;
-    }
-    .card-top{ display:flex; align-items:center; gap:10px }
-    .avatar-wrapper{ position:relative; display:inline-block }
-    .avatar{
-      width:62px; height:62px; border-radius:16px; border:2px solid #2f4170;
-      object-fit:cover; cursor:pointer; position:relative; transition: transform .2s, width .2s, height .2s
-    }
-      .player-crown{ position:absolute; top:-6px; right:-6px; width:28px; height:28px; display:none; align-items:center; justify-content:center; font-size:18px; background:linear-gradient(180deg,#ffd166,#ffb347); color:#2b180d; border-radius:50%; box-shadow:0 6px 18px rgba(0,0,0,0.35); border:2px solid rgba(255,255,255,0.12) }
-    @media(min-width:700px){
-      .avatar{ width:78px; height:78px; }
-    }
-    .avatar:hover{ transform: scale(1.05) }
-    .upload-label{
-      position:absolute; bottom:0; right:0; background:#22c997; color:#fff;
-      border-radius:50%; width:32px; height:32px; display:flex; align-items:center;
-      justify-content:center; cursor:pointer; font-size:18px; box-shadow:0 2px 8px rgba(0,0,0,.3)
-    }
-    .upload-label svg{
-      width:18px; height:18px; display:block;
-    }
-    .upload-input{ display:none }
-    .player-meta{ display:flex; flex-direction:column; gap:4px; flex:1; min-width:0 }
-    .name{
-      font-size:16px; font-weight:800; text-align:left; background:transparent;
-      border:none; outline:none; color:var(--text); margin:0; padding:0; width:100%;
-    }
-    .score{ font-size:36px; font-weight:900; text-align:left; transition: transform .3s, color .3s, font-size .2s }
-    @media(min-width:700px){ .score{ font-size:34px; } }
-    .score.bump{ animation: scoreBump .5s ease }
-    .streak{ font-size:12px; color:var(--muted) }
-
-    @keyframes scoreBump{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.2)} }
-    @keyframes shake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
-    .card.winner{ animation: winPulse .6s ease }
-    .card.loser{ animation: shake .5s ease }
-    @keyframes winPulse{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }
-
-    button{
-      width:100%; padding:12px; font-size:16px; font-weight:700;
-      border:none; border-radius:var(--radius); cursor:pointer; transition: all .2s;
-    }
-    .card-bottom{ display:grid; grid-template-columns:0.8fr 1.2fr; align-items:center; gap:6px }
-    .card-actions{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:6px }
-    .card button{ padding:8px 6px; font-size:13px; }
-    .accent{ background:linear-gradient(180deg,#22c997,#1aa97a); color:#fff }
-    .danger{ background:linear-gradient(180deg,#ff7c7c,#ff4d4d); color:#fff }
-    .ghost{ background:transparent; border:1px solid #2a3966; color:var(--text) }
-
-    .roundbar{
-      text-align:center; font-weight:700; padding:6px 10px;
-      border-radius:10px; background:rgba(255,255,255,0.04); font-size:13px; color:var(--muted);
-      border:1px solid rgba(255,255,255,0.05); margin:0;
+    .player-crown {
+      position: absolute;
+      top: -10px;
+      left: -10px; /* Moved to left for better visual */
+      width: 32px;
+      height: 32px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: linear-gradient(180deg, #ffd166, #ffb347);
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      z-index: 10;
     }
 
-    .log{
-      flex:1; overflow:auto; background:#0b1226; border-radius:var(--radius);
-      padding:10px; font-size:13px
+    .upload-label {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      background: #2a3966;
+      color: #fff;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255,255,255,0.2);
     }
-    .log h3{ margin:0 0 6px 0; font-size:12px; color:var(--muted) }
-    .log ul{
-      list-style:none; margin:0; padding:0; display:flex;
-      flex-direction:column; gap:6px
+    .upload-input { display: none; }
+
+    /* Typography & Inputs */
+    .player-input {
+      font-size: 20px; /* Larger font */
+      font-weight: 700;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      width: 100%;
+      padding: 4px 0;
     }
-    .log li{ padding:6px 8px; border-radius:8px; background:rgba(255,255,255,.05) }
-
-    .toolbar{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; position:fixed; bottom:12px; left:12px; right:12px; z-index:40; }
-
-    @media(min-width:700px){
-      body{ max-width:520px; margin:0 auto }
-      .players{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); }
-      .toolbar{ grid-template-columns:repeat(3,1fr); }
+    .player-input:focus {
+        background: rgba(255,255,255,0.05);
+        border-radius: 4px;
     }
 
-    .confetti{ position:fixed; inset:0; pointer-events:none; z-index:30; }
-    .piece{ position:absolute; width:8px; height:12px }
+    /* Score */
+    .score-display {
+      font-size: 96px; /* Huge score */
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -4px;
+      flex: 1;
+    }
+    .player-card.p1 .score-display {
+      color: var(--p1-accent);
+      text-shadow: 0 0 30px var(--p1-glow);
+    }
+    .player-card.p2 .score-display {
+      color: var(--p2-accent);
+      text-shadow: 0 0 30px var(--p2-glow);
+    }
+    .score.bump { animation: scoreBump 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); }
 
-    /* Leaderboard styles */
-    .leaderboard-wrap{ display:none; position:fixed; left:12px; right:12px; bottom:80px; z-index:45 }
-    .leaderboard{ display:flex; gap:10px; justify-content:space-between; align-items:center; padding:12px; border-radius:12px; background:linear-gradient(180deg,#081025, #0f1726); box-shadow:var(--shadow)}
-    .leaderboard .col{ display:flex; flex-direction:column; align-items:center; gap:8px; min-width:120px }
-    .leaderboard h4{ margin:0; font-size:12px; color:var(--muted) }
-    .tokens{ display:flex; gap:6px; flex-wrap:wrap; justify-content:center }
-    .token{ width:20px; height:20px; border-radius:4px; display:inline-grid; place-items:center; font-size:12px; font-weight:800; color:#071024 }
-    .token.win{ background:var(--gold); color:#081025; box-shadow:0 4px 10px rgba(255,209,102,.12) }
-    .token.lose{ background:transparent; border:2px solid rgba(255,255,255,.06); color:var(--muted); position:relative }
-    .token.lose::after{ content:''; position:absolute; left:-6px; right:-6px; top:50%; height:2px; background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent); transform:rotate(-12deg) }
-    .leader-actions{ display:flex; gap:8px }
+    /* Buttons */
+    .minus-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      font-size: 24px;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .minus-btn:active { background: rgba(255, 255, 255, 0.15); transform: scale(0.9); }
 
-    @media(min-width:700px){ .leaderboard-wrap{ left:50%; transform:translateX(-50%); width:420px } }
-  /* Fullscreen leaderboard view */
-  .leaderboard-view{
-    display:none; position:fixed; inset:0; z-index:60;
-    background: linear-gradient(135deg, #0a0e1a 0%, #0f1524 50%, #071024 100%);
-    padding:12px; overflow:auto; backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .leaderboard-view .view-header{
-    display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px;
-    padding:12px; background: rgba(255,255,255,0.05); border-radius:16px;
-    border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-  }
-    .view-title{
-    font-weight:900; font-size:20px; color: var(--accent); text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    flex:1; text-align:center;
-  }
-    /* App title styling */
-    .app-title{ display:flex; flex-direction:column; align-items:center; gap:4px }
-  .title-main{ font-weight:900; font-size:28px; background:linear-gradient(90deg,var(--accent),var(--accent-2)); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow: 0 6px 18px rgba(10,12,24,0.6); }
-  .back-btn{
-    padding:10px 16px; border-radius:12px; background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-    border: 1px solid rgba(255,255,255,0.15); color:var(--text); font-weight:700;
-    transition: all 0.2s ease; cursor:pointer;
-  }
-  .back-btn:hover{ background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1)); transform: scale(1.05); }
-  .leaderboard-summary{
-    text-align:center; margin-bottom:16px; font-size:18px; font-weight:600; color:var(--text);
-    background: rgba(255,255,255,0.05); padding:12px; border-radius:12px;
-    border: 1px solid rgba(255,255,255,0.08);
-  }
-  .leaderboard-grid{ display:flex; gap:20px; flex-direction:column }
-  @media(min-width:700px){ .leaderboard-grid{ flex-direction:row } }
-  .leaderboard-col{
-    flex:1; background: linear-gradient(135deg, rgba(11,18,38,0.9), rgba(7,16,34,0.9));
-    padding:12px; border-radius:16px; border: 1px solid rgba(255,255,255,0.1);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.4); transition: transform 0.2s ease;
-  }
-  .leaderboard-col:hover{ transform: translateY(-2px); }
-  .leaderboard-col h4{ margin:0 0 12px 0; font-size:16px; color:var(--accent); text-align:center; font-weight:700; display:block; width:100%; }
-  .leaderboard-col { text-align:center }
-  .tokens-full{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center }
-  .token.full{
-    width:48px; height:48px; border-radius:8px; display:inline-grid; place-items:center; font-size:16px; font-weight:800;
-    transition: all 0.2s ease; cursor:default;
-  }
-  .token.full.win{
-    background: linear-gradient(135deg, #ffd166, #ffb347); color:#2d1b0f;
-    box-shadow: 0 4px 12px rgba(255,209,102,0.3); border: 2px solid rgba(255,255,255,0.2);
-  }
-  .token.full.lose{
-    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-    border: 2px solid rgba(255,255,255,0.1); color:var(--muted);
-    position:relative;
-  }
-  .token.full.lose::after{
-    content:''; position:absolute; left:-8px; right:-8px; top:50%; height:3px;
-    background: linear-gradient(90deg, transparent, rgba(255,107,107,0.6), transparent);
-    transform: rotate(-15deg); border-radius: 2px;
-  }
-  .token.full:hover{ transform: scale(1.1); }
-  .avatar-sm{ width:46px; height:46px; border-radius:8px; overflow:hidden; position:relative }
-  .avatar-sm img{ width:100%; height:100%; object-fit:cover; display:block }
-  .crown{ position:absolute; top:-6px; right:-6px; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:12px; background:linear-gradient(180deg,#ffd166,#ffb347); color:#2b180d; border-radius:50%; box-shadow:0 6px 12px rgba(0,0,0,0.25); border:1px solid rgba(255,255,255,0.12) }
-  /* Modals */
-  .modal{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:85; background:linear-gradient(180deg, rgba(2,6,12,0.6), rgba(2,6,12,0.85)); }
-  .modal-card{ width:calc(100% - 24px); max-width:720px; padding:12px; border-radius:14px; box-shadow:0 12px 48px rgba(0,0,0,0.6); }
-  @media(min-width:700px){ .modal-card{ padding:16px } }
-  </style>  
+    .punch-btn {
+      width: 100%;
+      padding: 24px; /* Taller button */
+      border-radius: 20px;
+      border: none;
+      font-weight: 800;
+      font-size: 20px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.1s, filter 0.1s;
+      position: relative;
+      overflow: hidden;
+    }
+    .punch-btn:active { transform: scale(0.97); filter: brightness(0.9); }
+    .player-card.p1 .punch-btn { background: var(--p1-accent); color: #0b1a15; box-shadow: 0 12px 30px var(--p1-glow); }
+    .player-card.p2 .punch-btn { background: var(--p2-accent); color: #0b1226; box-shadow: 0 12px 30px var(--p2-glow); }
+
+    /* Streak Badges */
+    .streak-badge {
+      font-size: 14px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .streak-badge.smolder { color: var(--ember); border: 1px solid rgba(255, 107, 107, 0.2); box-shadow: 0 0 10px rgba(255, 107, 107, 0.1) inset; }
+    .streak-badge.burning { color: #ffd32a; background: rgba(255, 159, 67, 0.12); border: 1px solid rgba(255, 159, 67, 0.5); }
+    .streak-badge.inferno { color: var(--plasma); background: linear-gradient(135deg, rgba(255, 77, 77, 0.3), rgba(255, 159, 67, 0.3)); border: 1px solid rgba(255, 255, 255, 0.6); }
+
+    /* Animations */
+    @keyframes scoreBump { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    @keyframes winPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+    .card.winner { animation: winPulse 0.4s ease; z-index: 5; }
+
+    /* Bottom Toolbar */
+    .toolbar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.5fr; /* Uneven grid for better utility */
+      gap: 12px;
+      position: fixed;
+      bottom: 20px;
+      bottom: calc(12px + var(--sab));
+      left: 12px;
+      right: 12px;
+      z-index: 40;
+    }
+
+    button.tool-btn {
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 18px;
+      border: none;
+      cursor: pointer;
+    }
+    .accent { background: linear-gradient(180deg, #22c997, #1aa97a); color: #fff; box-shadow: 0 4px 15px rgba(34, 201, 151, 0.4); }
+    .danger { background: linear-gradient(180deg, #ff7c7c, #ff4d4d); color: #fff; }
+    .ghost { background: rgba(18, 24, 41, 0.9); border: 1px solid rgba(255, 255, 255, 0.15); color: var(--text); backdrop-filter: blur(8px); }
+    .ghost:active { background: rgba(255,255,255,0.1); }
+
+    /* Menus & Modals */
+    .menu-panel {
+      position: absolute;
+      top: 70px;
+      left: 12px;
+      z-index: 60;
+      width: 220px;
+      padding: 8px;
+      border-radius: 16px;
+      background: rgba(12, 20, 40, 0.98);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      backdrop-filter: blur(12px);
+    }
+    .menu-panel.open { display: flex; animation: slideDown 0.2s ease-out; }
+    .menu-btn {
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 15px;
+      background: transparent;
+      color: var(--text);
+      border: none;
+      text-align: left;
+      cursor: pointer;
+    }
+    .menu-btn:hover { background: rgba(255,255,255,0.05); }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 90;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+      padding: 20px;
+    }
+    .modal-card {
+      background: #151b2e;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 500px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      max-height: 80vh;
+    }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .modal-title { font-size: 20px; font-weight: 800; }
+    .modal-body { overflow-y: auto; flex: 1; }
+
+    /* App Title */
+    .app-title { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+    .title-main {
+      font-weight: 900;
+      font-size: 20px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      letter-spacing: 1px;
+    }
+    #appVersion { font-size: 10px; opacity: 0.6; font-family: monospace; margin-top: 4px; }
+
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Fullscreen Leaderboard Overrides */
+    .leaderboard-view {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: #0b0f1a;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .leaderboard-view h2 { margin-top: 0; }
+
+    .lb-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 8px 0 16px;
+      background: linear-gradient(180deg, rgba(11, 15, 26, 0.98), rgba(11, 15, 26, 0.6));
+      backdrop-filter: blur(8px);
+    }
+    .matchup-card {
+      background: linear-gradient(180deg, rgba(18, 26, 43, 0.95), rgba(12, 20, 36, 0.9));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+    }
+    .matchup-header {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .players-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+    }
+    .player {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.18);
+    }
+    .player.p1 { border: 1px solid rgba(91, 226, 176, 0.25); }
+    .player.p2 { border: 1px solid rgba(138, 168, 255, 0.25); }
+    .avatar-lg {
+      width: 72px;
+      height: 72px;
+      border-radius: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      object-fit: cover;
+    }
+    .crown-icon {
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      background: linear-gradient(180deg, #ffd166, #ffb347);
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+    .avatar-container {
+      position: relative;
+    }
+    .player-name { font-weight: 700; }
+    .big-score {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+    .player.p1 .big-score { color: var(--p1-accent); }
+    .player.p2 .big-score { color: var(--p2-accent); }
+    .vs-divider {
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      font-size: 12px;
+    }
+    .meter-container { margin-top: 16px; }
+    .meter-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .meter-bar {
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+      display: flex;
+    }
+    .meter-fill-p1 { background: linear-gradient(90deg, #1aa97a, #5be2b0); }
+    .meter-fill-p2 { background: linear-gradient(90deg, #4b6bff, #8aa8ff); }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .stat-box {
+      background: rgba(15, 20, 33, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-label { font-size: 12px; color: var(--muted); }
+    .stat-value { font-size: 20px; font-weight: 800; }
+
+    .round-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .round-item {
+      display: grid;
+      grid-template-columns: 56px 1fr 64px;
+      gap: 12px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .round-item.win-a { border-color: rgba(91, 226, 176, 0.3); }
+    .round-item.win-b { border-color: rgba(138, 168, 255, 0.3); }
+    .round-item.tie { border-color: rgba(255, 255, 255, 0.1); }
+    .round-num { font-weight: 700; color: var(--muted); }
+    .round-scores {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 700;
+    }
+    .score-val.p1.winner { color: var(--p1-accent); }
+    .score-val.p2.winner { color: var(--p2-accent); }
+    .score-val.dim { opacity: 0.6; }
+    .round-divider { color: var(--muted); }
+    .round-badge {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .round-badge span {
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .badge-a { background: rgba(91, 226, 176, 0.2); color: var(--p1-accent); }
+    .badge-b { background: rgba(138, 168, 255, 0.2); color: var(--p2-accent); }
+    .badge-tie { background: rgba(255, 255, 255, 0.12); color: var(--muted); }
+
+    .modal-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+    .modal-log { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+  </style>
 </head>
 <body>
-  <header>
-    <div class="topbar">
-      <button class="icon-btn" id="menuBtn" aria-label="Menu">☰</button>
-      <div class="app-title">
-        <div class="title-main">Punch Buggy</div>
-      </div>
-      <button class="icon-btn" id="leaderboardBtn" aria-label="Scores">🏆</button>
-    </div>
-    <div class="roundbar">Round <span id="round">1</span> • <span id="lead">Tied</span></div>
-    <div class="menu-panel" id="menuPanel" aria-hidden="true">
-      <div class="menu-section">
-        <div class="menu-title">Menu</div>
-        <button class="menu-btn" id="dataBtn">&#x1F4BE; Data & Log</button>
-        <button class="menu-btn" id="rulesBtn">❓ Rules</button>
-      </div>
-      <div class="menu-meta">Version v<span id="appVersion">—</span></div>
-    </div>
-  </header>
 
-  <div class="players">
-    <div class="card" data-player="A">
-      <div class="card-top">
-        <div class="avatar-wrapper">
-  <img class="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%2316273a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>A</text></svg>" alt="Player A" id="avatarA" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%2316273a\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>A</text></svg>'">
-        <span class="player-crown" id="crownA">👑</span>
-        <label class="upload-label" for="uploadA" aria-label="Change Player A avatar">
-          <svg class="upload-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="currentColor" d="M4 6h3l1-1h8l1 1h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm8 3.5a4.5 4.5 0 1 0 4.5 4.5A4.5 4.5 0 0 0 12 9.5zm0 1.5a3 3 0 1 1-3 3 3 3 0 0 1 3-3z"/>
-          </svg>
-        </label>
-        <input type="file" class="upload-input" id="uploadA" accept="image/*">
+<header>
+  <div class="topbar">
+    <button id="menuBtn" class="icon-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+    <div class="app-title">
+        <span class="title-main">PUNCH BUGGY</span>
+        <span id="appVersion"></span>
+    </div>
+    <button id="leaderboardBtn" class="icon-btn">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+    </button>
+  </div>
+</header>
+
+<nav id="menuPanel" class="menu-panel">
+    <button id="rulesBtn" class="menu-btn">📋 Rules</button>
+    <button id="dataBtn" class="menu-btn">💾 Data & Logs</button>
+    <button id="clearBoard" class="menu-btn">🗑 Clear History</button>
+</nav>
+
+<main class="players">
+    <!-- Player A -->
+    <div class="card player-card p1" data-player="A">
+        <div class="card-header">
+             <div class="player-info">
+                 <div class="avatar-wrapper">
+                     <img id="avatarA" class="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%231a4d40'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50' y='65' font-size='40' text-anchor='middle' fill='%235be2b0'%3EA%3C/text%3E%3C/svg%3E" />
+                     <div id="crownA" class="player-crown">👑</div>
+                     <label class="upload-label" for="uploadA">
+                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                     </label>
+                     <input type="file" id="uploadA" class="upload-input" accept="image/*">
+                 </div>
+                 <div class="name-box">
+                     <input id="nameA" class="player-input" value="Player A">
+                     <div id="streakA" class="streak-badge">0 Streak</div>
+                 </div>
+             </div>
         </div>
-        <div class="player-meta">
-          <input class="name" id="nameA" value="Player A">
-          <div class="streak" id="streakA">🔥 0</div>
+        <div class="card-body">
+             <div id="scoreA" class="score-display">0</div>
+             <button id="minusA" class="minus-btn">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+             </button>
         </div>
-      </div>
-      <div class="card-bottom">
-        <div class="score" id="scoreA">0</div>
-        <div class="card-actions">
-          <button class="accent" id="btnA">+1 Punch</button>
-          <button class="ghost" id="minusA">−1</button>
+        <div class="card-footer">
+             <button id="btnA" class="punch-btn">PUNCH!</button>
         </div>
-      </div>
     </div>
 
-    <div class="card" data-player="B">
-      <div class="card-top">
-        <div class="avatar-wrapper">
-  <img class="avatar" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%' height='100%' fill='%2316273a'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>B</text></svg>" alt="Player B" id="avatarB" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%\' height=\'100%\' fill=\'%2316273a\'/><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>B</text></svg>'">
-        <span class="player-crown" id="crownB">👑</span>
-        <label class="upload-label" for="uploadB" aria-label="Change Player B avatar">
-          <svg class="upload-icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="currentColor" d="M4 6h3l1-1h8l1 1h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm8 3.5a4.5 4.5 0 1 0 4.5 4.5A4.5 4.5 0 0 0 12 9.5zm0 1.5a3 3 0 1 1-3 3 3 3 0 0 1 3-3z"/>
-          </svg>
-        </label>
-        <input type="file" class="upload-input" id="uploadB" accept="image/*">
+    <!-- Player B -->
+    <div class="card player-card p2" data-player="B">
+        <div class="card-header">
+             <div class="player-info">
+                 <div class="avatar-wrapper">
+                     <img id="avatarB" class="avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%231e2a4a'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50' y='65' font-size='40' text-anchor='middle' fill='%238aa8ff'%3EB%3C/text%3E%3C/svg%3E" />
+                     <div id="crownB" class="player-crown">👑</div>
+                     <label class="upload-label" for="uploadB">
+                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                     </label>
+                     <input type="file" id="uploadB" class="upload-input" accept="image/*">
+                 </div>
+                 <div class="name-box">
+                     <input id="nameB" class="player-input" value="Player B">
+                     <div id="streakB" class="streak-badge">0 Streak</div>
+                 </div>
+             </div>
         </div>
-        <div class="player-meta">
-          <input class="name" id="nameB" value="Player B">
-          <div class="streak" id="streakB">🔥 0</div>
+        <div class="card-body">
+             <div id="scoreB" class="score-display">0</div>
+             <button id="minusB" class="minus-btn">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+             </button>
         </div>
-      </div>
-      <div class="card-bottom">
-        <div class="score" id="scoreB">0</div>
-        <div class="card-actions">
-          <button class="accent" id="btnB">+1 Punch</button>
-          <button class="ghost" id="minusB">−1</button>
+        <div class="card-footer">
+             <button id="btnB" class="punch-btn">PUNCH!</button>
         </div>
-      </div>
+    </div>
+</main>
+
+<div class="toolbar">
+    <button id="resetBtn" class="tool-btn danger">Reset</button>
+    <button id="undoBtn" class="tool-btn ghost">Undo</button>
+    <button id="nextRound" class="tool-btn accent">Next Round</button>
+</div>
+
+<!-- Modals -->
+<div id="rulesModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">Game Rules</div>
+      <button id="closeRules" class="icon-btn">✕</button>
+    </div>
+    <div id="rulesContent" class="modal-body" style="font-size: 14px; line-height: 1.6; color: var(--muted);"></div>
+  </div>
+</div>
+
+<div id="dataModal" class="modal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title">Data & Logs</div>
+      <button id="closeData" class="icon-btn">✕</button>
+    </div>
+    <div class="modal-subtitle">Current session history and data management.</div>
+    <div class="modal-body" style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 12px; margin-bottom: 16px;">
+       <ul id="modalLog" class="modal-log"></ul>
+    </div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="exportData" class="tool-btn ghost" style="flex:1; font-size:14px; padding:12px;">Export JSON</button>
+        <button id="importBtn" class="tool-btn ghost" style="flex:1; font-size:14px; padding:12px;">Import JSON</button>
+        <input type="file" id="importFile" style="display:none" accept=".json">
+        <button id="clearData" class="tool-btn danger" style="flex:1; font-size:14px; padding:12px;">Wipe All</button>
+    </div>
+  </div>
+</div>
+
+<div id="leaderboardView" class="leaderboard-view">
+  <div class="lb-header" style="margin-bottom: 20px; display:flex; justify-content:space-between; align-items:center;">
+    <h2 style="margin:0;">Leaderboard</h2>
+    <button id="closeFull" class="icon-btn">✕</button>
+  </div>
+
+  <div class="matchup-card">
+    <div class="matchup-header">Head to Head</div>
+    <div class="players-row">
+        <div class="player p1" id="lbPlayerA">
+            <div class="avatar-container">
+               <img id="lbAvatarA" class="avatar-lg" src="" style="width:64px;height:64px;border-radius:16px;background:#333;">
+               <div id="lbCrownA" class="crown-icon" style="display:none">👑</div>
+            </div>
+            <div id="lbNameA" class="player-name" style="margin-top:8px;">Player A</div>
+            <div id="lbWinsA" class="big-score">0</div>
+        </div>
+        <div class="vs-divider">VS</div>
+        <div class="player p2" id="lbPlayerB">
+            <div class="avatar-container">
+               <img id="lbAvatarB" class="avatar-lg" src="" style="width:64px;height:64px;border-radius:16px;background:#333;">
+               <div id="lbCrownB" class="crown-icon" style="display:none">👑</div>
+            </div>
+            <div id="lbNameB" class="player-name" style="margin-top:8px;">Player B</div>
+            <div id="lbWinsB" class="big-score">0</div>
+        </div>
+    </div>
+    <div class="meter-container">
+        <div class="meter-labels">
+            <span id="lbPercentA">50%</span>
+            <span id="lbPercentB">50%</span>
+        </div>
+        <div class="meter-bar">
+            <div id="lbMeterA" class="meter-fill-p1" style="width:50%"></div>
+            <div id="lbMeterB" class="meter-fill-p2" style="width:50%"></div>
+        </div>
     </div>
   </div>
 
-  <div class="toolbar">
-    <button class="ghost" id="undoBtn">↶ Undo</button>
-    <button class="danger" id="resetBtn">⟳ Reset</button>
-    <button class="ghost" id="nextRound">Next Round ▶</button>
+  <div class="stats-grid" style="margin-top:16px;">
+     <div class="stat-box">
+       <div class="stat-label">Rounds</div>
+       <div class="stat-value" id="lbTotalRounds">0</div>
+     </div>
+     <div class="stat-box">
+       <div class="stat-label">Punches</div>
+       <div class="stat-value" id="lbTotalPunches">0</div>
+     </div>
+     <div class="stat-box">
+       <div class="stat-label">Ties</div>
+       <div class="stat-value" id="lbTotalTies">0</div>
+     </div>
   </div>
 
-  <!-- Event log moved to Data modal -->
+  <h3 style="margin-top:24px; margin-bottom:12px; font-size:16px; color:var(--muted);">Round History</h3>
+  <div id="roundList" class="round-list"></div>
+</div>
 
-  <div class="confetti" id="confetti"></div>
+<script src="src/app-version.js"></script>
+<script>
+// --- JS from main.js (Embedded) ---
 
-  <!-- Leaderboard (hidden by default) -->
-  <div class="leaderboard-wrap" id="leaderboardWrap">
-    <div class="leaderboard card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-  <div style="font-weight:800">Scores</div>
-        <div>
-          <button class="ghost" id="clearBoard">Clear</button>
-          <button class="ghost" id="closeBoard">Close</button>
-        </div>
-      </div>
-      <div id="miniList" style="display:flex;flex-direction:column;gap:8px;">
-        <!-- compact per-round rows inserted here -->
-      </div>
-    </div>
-  </div>
+const $ = (sel) => document.querySelector(sel);
+const warnMissing = (sel) => console.warn(`[PunchBuggy] Missing element for selector: ${sel}`);
+const getEl = (sel) => {
+  const el = $(sel);
+  if (!el) warnMissing(sel);
+  return el;
+};
+const setText = (sel, text) => {
+  const el = getEl(sel);
+  if (el) el.textContent = text;
+};
+const setValue = (sel, value) => {
+  const el = getEl(sel);
+  if (el) el.value = value;
+};
+const setSrc = (sel, value) => {
+  const el = getEl(sel);
+  if (el) el.src = value;
+};
+const setDisplay = (sel, value) => {
+  const el = getEl(sel);
+  if (el) el.style.display = value;
+};
+const onClick = (sel, handler) => {
+  const el = getEl(sel);
+  if (el) el.onclick = handler;
+};
+const onChange = (sel, handler) => {
+  const el = getEl(sel);
+  if (el) el.onchange = handler;
+};
+const safeStorageGet = (key) => {
+  try {
+    return localStorage.getItem(key);
+  } catch (err) {
+    console.warn(`[PunchBuggy] Failed to read localStorage key "${key}"`, err);
+    return null;
+  }
+};
+const safeStorageSet = (key, value) => {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (err) {
+    console.warn(`[PunchBuggy] Failed to write localStorage key "${key}"`, err);
+    return false;
+  }
+};
+const safeStorageRemove = (key) => {
+  try {
+    localStorage.removeItem(key);
+    return true;
+  } catch (err) {
+    console.warn(`[PunchBuggy] Failed to remove localStorage key "${key}"`, err);
+    return false;
+  }
+};
+const state = {
+  round: 1,
+  players: {
+    A: { name: 'Player A', score: 0, streak: 0, avatar: '' },
+    B: { name: 'Player B', score: 0, streak: 0, avatar: '' },
+  },
+  roundWinners: [],
+  history: [],
+  undoStack: [],
+};
 
-  <!-- Fullscreen Leaderboard View -->
-  <div class="leaderboard-view" id="leaderboardView" role="dialog" aria-modal="true">
-    <div class="view-header">
-      <div class="view-title">Scores — Rounds</div>
-      <div class="leaderboard-summary" id="leaderboardSummary">Total Wins: Player A 0 — Player B 0</div>
-      <div>
-        <button class="back-btn" id="closeFull">Back</button>
-      </div>
-    </div>
-    <div class="leaderboard-grid">
-      <div class="leaderboard-col" style="flex:1">
-        <h4 style="margin-top:0">Rounds</h4>
-        <!-- header: avatars & names -->
-        <div id="scoresHeader" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <div style="text-align:left;display:flex;gap:10px;align-items:center">
-            <img id="headerAvatarA" src="" style="width:56px;height:56px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="A">
-            <div style="font-weight:800" id="headerNameA">Player A</div>
-          </div>
-          <!-- center is intentionally empty; H4 above is the 'Rounds' label -->
-          <div style="text-align:right;display:flex;gap:10px;align-items:center;justify-content:flex-end">
-            <div style="font-weight:800" id="headerNameB">Player B</div>
-            <img id="headerAvatarB" src="" style="width:56px;height:56px;border-radius:8px;object-fit:cover;border:2px solid rgba(255,255,255,0.06)" alt="B">
-          </div>
-        </div>
-        <div id="fullList" style="display:flex;flex-direction:column;gap:10px;max-height:60vh;overflow:auto"></div>
-        <div id="scoresTotals" style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.04);"></div>
-      </div>
-    </div>
-  </div>
+const versionEl = getEl('#appVersion');
+if (versionEl) {
+  const storedVersion = safeStorageGet('punchBuggy_running_version');
+  const appVersion = window.PUNCHBUGGY_APP_VERSION || 'unknown';
+  const currentVersion = storedVersion || appVersion || '—';
+  versionEl.textContent = `v${currentVersion}`;
+  if (!storedVersion || (appVersion && storedVersion !== appVersion)) {
+    safeStorageSet('punchBuggy_running_version', appVersion);
+    versionEl.textContent = `v${appVersion}`;
+  }
+}
 
-  <!-- Rules Modal -->
-  <div class="modal" id="rulesModal" role="dialog" aria-modal="true" style="display:none">
-    <div class="modal-card card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-weight:900">Game Rules</div>
-        <button class="back-btn" id="closeRules">Close</button>
-      </div>
-      <div id="rulesContent" style="font-size:14px; color:var(--muted); line-height:1.4">
-        <!-- rules injected by JS -->
-      </div>
-    </div>
-  </div>
+function render() {
+  setText('#scoreA', state.players.A.score);
+  setText('#scoreB', state.players.B.score);
+  updateStreakBadge(getEl('#streakA'), state.players.A.streak);
+  updateStreakBadge(getEl('#streakB'), state.players.B.streak);
+  setValue('#nameA', state.players.A.name);
+  setValue('#nameB', state.players.B.name);
+  if (state.players.A.avatar) setSrc('#avatarA', state.players.A.avatar);
+  if (state.players.B.avatar) setSrc('#avatarB', state.players.B.avatar);
 
-  <!-- Data & Event Log Modal -->
-  <div class="modal" id="dataModal" role="dialog" aria-modal="true" style="display:none">
-    <div class="modal-card card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <div style="font-weight:900">Data & Log</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <button class="back-btn" id="exportData">Export</button>
-          <button class="back-btn" id="importBtn">Import</button>
-          <input type="file" id="importFile" accept="application/json" style="display:none">
-          <button class="back-btn" id="clearData">Clear</button>
-          <button class="back-btn" id="closeData">Close</button>
-        </div>
-      </div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Export will download the full game state (JSON). Import will replace the current state if compatible. Logs are preserved unless cleared.</div>
-      <div class="backup-panel" id="backupPanel">
-        <h4>Automatic backups</h4>
-        <label class="backup-toggle">
-          <input type="checkbox" id="autoBackupToggle" checked>
-          <span>Enable automatic backups (stored in IndexedDB)</span>
-        </label>
-        <div class="backup-status" id="backupStatusText">Automatic backups are initializing…</div>
-        <div class="backup-meta" id="backupMetaText">No backups saved yet.</div>
-        <div class="backup-actions">
-          <button class="back-btn" id="downloadBackupBtn">Download backup</button>
-          <button class="back-btn ghost" id="restoreBackupBtn">Restore backup</button>
-        </div>
-      </div>
-      <div style="max-height:60vh; overflow:auto;">
-        <ul id="modalLog" style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px"></ul>
-      </div>
-    </div>
-  </div>
+  // Note: #round and #lead logic was in original JS but no HTML elements for them were found in main UI scope
+  // If needed, they could be added to header.
 
-  <div class="update-banner" id="updateBanner" role="status" aria-live="polite">
-    <div>
-      <strong>Update ready</strong>
-      <div id="updateBannerText" style="font-size:13px;color:var(--muted);">A new version is available. Refresh to apply the latest fixes.</div>
-    </div>
-    <div class="update-actions">
-      <button class="ghost" id="dismissUpdate">Later</button>
-      <button id="refreshUpdate">Refresh</button>
-    </div>
-  </div>
+  renderLeaderboard();
 
-  <script src="src/app-version.js"></script>
-  <script src="src/auto-backup.js"></script>
-  <script src="migrations/migrate-to-v2.js"></script>
-  <script>
-    const $=sel=>document.querySelector(sel);
-    const state={
-      round:1,
-      players:{
-        A:{name:'Player A',score:0,streak:0,avatar:''},
-        B:{name:'Player B',score:0,streak:0,avatar:''}
-      },
-  // track rounds: {winner:'A'|'B'|'T', scoreA: number, scoreB: number}
-  roundWinners:[],
-      history:[]
-    };
+  const leader =
+    state.players.A.score === state.players.B.score
+      ? null
+      : state.players.A.score > state.players.B.score
+        ? 'A'
+        : 'B';
+  if (leader === 'A') {
+    setDisplay('#crownA', 'flex');
+    setDisplay('#crownB', 'none');
+  } else if (leader === 'B') {
+    setDisplay('#crownB', 'flex');
+    setDisplay('#crownA', 'none');
+  } else {
+    setDisplay('#crownA', 'none');
+    setDisplay('#crownB', 'none');
+  }
+  renderModalLog();
+  save();
+}
 
-    const AutoBackup = window.AutoBackup || window.PunchBuggyAutoBackup || window.PunchBuggyBackup;
-    
-    // Version display: show the *running* version (persisted in localStorage on first load)
-    // rather than the newly-fetched version from app-version.js, so users see the current version
-    // until they explicitly click Refresh to apply the update.
-    const versionEl = $('#appVersion');
-    if(versionEl){
-      const storedVersion = localStorage.getItem('punchBuggy_running_version');
-      const appVersion = window.PUNCHBUGGY_APP_VERSION || 'unknown';
-      const currentVersion = storedVersion || appVersion || '—';
-      versionEl.textContent = currentVersion;
-      // Persist or sync the running version so the UI reflects the active build.
-      if(!storedVersion || (appVersion && storedVersion !== appVersion)){
-        localStorage.setItem('punchBuggy_running_version', appVersion);
-        versionEl.textContent = appVersion;
+const STREAK_CLASSES = ['smolder', 'burning', 'inferno'];
+
+function updateStreakBadge(el, streak) {
+  if (!el) return;
+  el.classList.remove(...STREAK_CLASSES);
+  el.innerHTML = `<span class="fire-icon">🔥</span> ${streak} Streak`;
+  if (streak >= 10) {
+    el.classList.add('inferno');
+  } else if (streak >= 5) {
+    el.classList.add('burning');
+  } else if (streak >= 3) {
+    el.classList.add('smolder');
+  }
+}
+
+function renderModalLog() {
+  const list = $('#modalLog');
+  if (!list) return;
+  list.innerHTML = state.history
+    .slice()
+    .reverse()
+    .map(
+      (e) => `<li style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.03)">${e}</li>`
+    )
+    .join('');
+}
+
+function renderLeaderboard() {
+  const rounds = state.roundWinners
+    .map((r) => {
+      if (!r) return null;
+      if (typeof r === 'string') {
+        if (r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
+        if (r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
+        return { winner: 'T', scoreA: 0, scoreB: 0 };
       }
-    }
-    
-    // Console logging: print version details on page load for debugging
-    console.log('[PunchBuggy] Version info:', {
-      runningVersion: localStorage.getItem('punchBuggy_running_version'),
-      fetchedVersion: window.PUNCHBUGGY_APP_VERSION,
-      autoApplyEnabled: window.PUNCHBUGGY_AUTO_APPLY_UPDATES
-    });
+      return r;
+    })
+    .filter(Boolean);
 
-    function render(){
-      $('#scoreA').textContent=state.players.A.score;
-      $('#scoreB').textContent=state.players.B.score;
-      $('#streakA').textContent=`🔥 ${state.players.A.streak}`;
-      $('#streakB').textContent=`🔥 ${state.players.B.streak}`;
-      $('#nameA').value=state.players.A.name;
-      $('#nameB').value=state.players.B.name;
-      if(state.players.A.avatar) $('#avatarA').src=state.players.A.avatar;
-      if(state.players.B.avatar) $('#avatarB').src=state.players.B.avatar;
-      $('#round').textContent=state.round;
-  const diff=state.players.A.score-state.players.B.score;
-  $('#lead').textContent=diff===0?"Tied":diff>0?`${state.players.A.name} +${diff}`:`${state.players.B.name} +${Math.abs(diff)}`;
-      renderLeaderboard();
-      // show crown on current leader avatar
-      const leader = state.players.A.score === state.players.B.score ? null : (state.players.A.score > state.players.B.score ? 'A' : 'B');
-      if(leader==='A'){ $('#crownA').style.display='flex'; $('#crownB').style.display='none'; }
-      else if(leader==='B'){ $('#crownB').style.display='flex'; $('#crownA').style.display='none'; }
-      else { $('#crownA').style.display='none'; $('#crownB').style.display='none'; }
-      renderModalLog();
-      save();
-    }
+  let totalA = 0;
+  let totalB = 0;
+  let winsA = 0;
+  let winsB = 0;
+  let ties = 0;
+  rounds.forEach((r) => {
+    totalA += r.scoreA;
+    totalB += r.scoreB;
+    if (r.winner === 'A') winsA++;
+    else if (r.winner === 'B') winsB++;
+    else ties++;
+  });
 
-    function renderModalLog(){
-      const list = $('#modalLog');
-      if(!list) return;
-      list.innerHTML = state.history.slice().reverse().map(e=>`<li style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.03)">${e}</li>`).join('');
-    }
+  const totalPunches = totalA + totalB;
+  const winTotal = winsA + winsB;
+  const percentA = winTotal ? Math.round((winsA / winTotal) * 100) : 50;
+  const percentB = 100 - percentA;
 
-    function renderLeaderboard(){
-      // normalize legacy entries (strings) into objects
-      const rounds = state.roundWinners.map(r=>{
-        if(!r) return null;
-        if(typeof r === 'string'){
-          // legacy: 'A'|'B'|'T' - we don't have scores, use 0-0 placeholder
-          if(r==='A') return {winner:'A', scoreA:0, scoreB:0};
-          if(r==='B') return {winner:'B', scoreA:0, scoreB:0};
-          return {winner:'T', scoreA:0, scoreB:0};
-        }
-        return r;
-      }).filter(Boolean);
+  const avatarAEl = $('#avatarA');
+  const avatarBEl = $('#avatarB');
+  const avatarA = state.players.A.avatar || (avatarAEl ? avatarAEl.src : '');
+  const avatarB = state.players.B.avatar || (avatarBEl ? avatarBEl.src : '');
 
-  const currentScore = `${state.players.A.score} — ${state.players.B.score}`;
-  const leader = state.players.A.score === state.players.B.score ? 'Tied' : (state.players.A.score > state.players.B.score ? state.players.A.name : state.players.B.name);
+  if ($('#lbAvatarA')) $('#lbAvatarA').src = avatarA;
+  if ($('#lbAvatarB')) $('#lbAvatarB').src = avatarB;
+  if ($('#lbNameA')) $('#lbNameA').textContent = state.players.A.name;
+  if ($('#lbNameB')) $('#lbNameB').textContent = state.players.B.name;
+  if ($('#lbWinsA')) $('#lbWinsA').textContent = winsA;
+  if ($('#lbWinsB')) $('#lbWinsB').textContent = winsB;
+  if ($('#lbPercentA')) $('#lbPercentA').textContent = `${percentA}%`;
+  if ($('#lbPercentB')) $('#lbPercentB').textContent = `${percentB}%`;
+  if ($('#lbMeterA')) $('#lbMeterA').style.width = `${percentA}%`;
+  if ($('#lbMeterB')) $('#lbMeterB').style.width = `${percentB}%`;
+  if ($('#lbTotalRounds')) $('#lbTotalRounds').textContent = rounds.length;
+  if ($('#lbTotalTies')) $('#lbTotalTies').textContent = ties;
+  if ($('#lbTotalPunches')) $('#lbTotalPunches').textContent = totalPunches;
 
-      // small card: compact per-round rows
-      const mini = $('#miniList');
-      mini.innerHTML = '';
-      rounds.forEach((r, idx)=>{
-        const row = document.createElement('div');
-        row.style.display='flex'; row.style.alignItems='center'; row.style.justifyContent='space-between'; row.style.gap='12px';
-        row.style.padding='8px'; row.style.borderRadius='10px';
-        row.style.background='linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005))';
-        const left = document.createElement('div'); left.style.display='flex'; left.style.alignItems='center'; left.style.gap='10px';
-        const badge = document.createElement('div'); badge.className='token'; badge.textContent = idx+1; badge.style.width='34px'; badge.style.height='34px'; badge.style.fontSize='14px';
-        const title = document.createElement('div'); title.style.fontWeight='700'; title.textContent = r.winner==='T'? 'Tie' : (r.winner==='A'? state.players.A.name : state.players.B.name);
-        left.appendChild(badge); left.appendChild(title);
-        const score = document.createElement('div'); score.style.fontWeight='800'; score.textContent = `${r.scoreA} — ${r.scoreB}`;
-        if(r.winner==='A') row.style.borderLeft='4px solid rgba(93,212,162,0.9)';
-        else if(r.winner==='B') row.style.borderLeft='4px solid rgba(138,168,255,0.9)';
-        mini.appendChild(row);
-        row.appendChild(left); row.appendChild(score);
+  const playerAEl = $('#lbPlayerA');
+  const playerBEl = $('#lbPlayerB');
+  if (playerAEl) playerAEl.classList.toggle('winner', winsA > winsB);
+  if (playerBEl) playerBEl.classList.toggle('winner', winsB > winsA);
+  if ($('#lbCrownA')) $('#lbCrownA').style.display = winsA > winsB ? 'block' : 'none';
+  if ($('#lbCrownB')) $('#lbCrownB').style.display = winsB > winsA ? 'block' : 'none';
+
+  const roundList = $('#roundList');
+  if (roundList) {
+    roundList.innerHTML = '';
+    rounds
+      .slice()
+      .reverse()
+      .forEach((r, idx) => {
+        const roundNumber = rounds.length - idx;
+        const item = document.createElement('div');
+        const winClass = r.winner === 'A' ? 'win-a' : r.winner === 'B' ? 'win-b' : 'tie';
+        item.className = `round-item ${winClass}`;
+
+        const roundNum = document.createElement('div');
+        roundNum.className = 'round-num';
+        roundNum.textContent = `#${roundNumber}`;
+
+        const scores = document.createElement('div');
+        scores.className = 'round-scores';
+
+        const scoreA = document.createElement('span');
+        scoreA.className = `score-val p1 ${r.scoreA > r.scoreB ? 'winner' : 'dim'}`;
+        scoreA.textContent = r.scoreA;
+
+        const divider = document.createElement('span');
+        divider.className = 'round-divider';
+        divider.textContent = '—';
+
+        const scoreB = document.createElement('span');
+        scoreB.className = `score-val p2 ${r.scoreB > r.scoreA ? 'winner' : 'dim'}`;
+        scoreB.textContent = r.scoreB;
+
+        scores.appendChild(scoreA);
+        scores.appendChild(divider);
+        scores.appendChild(scoreB);
+
+        const badge = document.createElement('div');
+        badge.className = 'round-badge';
+        const badgeLabel = document.createElement('span');
+        badgeLabel.className =
+          r.winner === 'A' ? 'badge-a' : r.winner === 'B' ? 'badge-b' : 'badge-tie';
+        badgeLabel.textContent = r.winner === 'T' ? 'TIE' : 'WIN';
+        badge.appendChild(badgeLabel);
+
+        item.appendChild(roundNum);
+        item.appendChild(scores);
+        item.appendChild(badge);
+        roundList.appendChild(item);
       });
+  }
+}
 
-      // full view: simple scores list (A | Round | B)
-      const full = $('#fullList');
-      if(full) full.innerHTML = '';
-      // totals
-      let totalA = 0, totalB = 0, winsA = 0, winsB = 0;
-      rounds.forEach((r, idx)=>{
-        totalA += r.scoreA; totalB += r.scoreB;
-        if(r.winner==='A') winsA++; else if(r.winner==='B') winsB++;
-
-        const row = document.createElement('div');
-        row.style.display='grid'; row.style.gridTemplateColumns='1fr auto 1fr'; row.style.alignItems='center';
-        row.style.padding='10px 12px'; row.style.borderRadius='10px'; row.style.marginBottom='6px';
-        row.style.background='linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
-
-        const aCol = document.createElement('div'); aCol.style.textAlign='left'; aCol.style.fontWeight='800'; aCol.style.fontSize='16px';
-        aCol.textContent = r.scoreA;
-        const mid = document.createElement('div'); mid.style.textAlign='center'; mid.style.color='var(--muted)'; mid.style.fontWeight='700'; mid.textContent = `Round ${idx+1}`;
-        const bCol = document.createElement('div'); bCol.style.textAlign='right'; bCol.style.fontWeight='800'; bCol.style.fontSize='16px';
-        bCol.textContent = r.scoreB;
-
-        // highlight winning score
-        if(r.winner==='A'){
-          aCol.style.color = 'var(--gold)'; aCol.style.fontSize='20px';
-        } else if(r.winner==='B'){
-          bCol.style.color = 'var(--gold)'; bCol.style.fontSize='20px';
-        } else { // tie
-          aCol.style.color = 'var(--muted)'; bCol.style.color = 'var(--muted)';
-        }
-
-        row.appendChild(aCol); row.appendChild(mid); row.appendChild(bCol);
-        full.appendChild(row);
-      });
-
-      // header avatars & names
-      if($('#headerAvatarA')) $('#headerAvatarA').src = state.players.A.avatar || $('#avatarA').src;
-      if($('#headerAvatarB')) $('#headerAvatarB').src = state.players.B.avatar || $('#avatarB').src;
-      if($('#headerNameA')) $('#headerNameA').textContent = state.players.A.name;
-      if($('#headerNameB')) $('#headerNameB').textContent = state.players.B.name;
-
-      // totals area
-      const totals = $('#scoresTotals');
-      if(totals){
-        totals.innerHTML = '';
-        const totalsRow = document.createElement('div'); totalsRow.style.display='grid'; totalsRow.style.gridTemplateColumns='1fr auto 1fr'; totalsRow.style.alignItems='center'; totalsRow.style.padding='12px'; totalsRow.style.borderRadius='10px'; totalsRow.style.marginTop='8px'; totalsRow.style.background='linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))';
-        const left = document.createElement('div'); left.style.textAlign='left'; left.innerHTML = `<div style="font-size:14px;color:var(--muted)">${state.players.A.name} Total</div><div style="font-weight:900;font-size:18px">${totalA}</div>`;
-        const mid = document.createElement('div'); mid.style.textAlign='center'; mid.innerHTML = `<div style="font-size:14px;color:var(--muted)">Rounds</div><div style="font-weight:900;font-size:18px">${rounds.length}</div>`;
-        const right = document.createElement('div'); right.style.textAlign='right'; right.innerHTML = `<div style="font-size:14px;color:var(--muted)">Wins</div><div style="font-weight:900;font-size:18px">${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB}</div>`;
-        totalsRow.appendChild(left); totalsRow.appendChild(mid); totalsRow.appendChild(right);
-        totals.appendChild(totalsRow);
-      }
-      // update summary now that totals are available
-  $('#leaderboardSummary').innerHTML = `<div style="font-weight:700">Rounds: ${rounds.length} — Live: ${currentScore}</div><div style="font-size:13px;color:var(--muted);margin-top:6px">Wins: ${state.players.A.name} ${winsA} — ${state.players.B.name} ${winsB} &nbsp; • &nbsp; Totals: ${state.players.A.name} ${totalA} — ${state.players.B.name} ${totalB}</div>`;
-
-  // header avatars/names (keep in sync)
-  if($('#headerAvatarA')) $('#headerAvatarA').src = state.players.A.avatar || $('#avatarA').src;
-  if($('#headerAvatarB')) $('#headerAvatarB').src = state.players.B.avatar || $('#avatarB').src;
-  if($('#headerNameA')) $('#headerNameA').textContent = state.players.A.name;
-  if($('#headerNameB')) $('#headerNameB').textContent = state.players.B.name;
-    }
-
-    function save(){
-      localStorage.setItem('punchBuggy',JSON.stringify(state));
-      if(AutoBackup && typeof AutoBackup.handleStoreSave==='function'){
-        AutoBackup.handleStoreSave('auto');
-      }
-    }
-    function load(){
-      const s=localStorage.getItem('punchBuggy');
-      if(s){
-        const parsed = JSON.parse(s);
-        // migrate roundWinners legacy strings to objects
-        if(parsed.roundWinners && Array.isArray(parsed.roundWinners)){
-          parsed.roundWinners = parsed.roundWinners.map(r=>{
-            if(typeof r === 'string'){
-              if(r==='A') return {winner:'A',scoreA:0,scoreB:0};
-              if(r==='B') return {winner:'B',scoreA:0,scoreB:0};
-              return {winner:'T',scoreA:0,scoreB:0};
+function save() {
+  const { undoStack, ...persisted } = state;
+  const payload = JSON.stringify(persisted);
+  if (!safeStorageSet('punchBuggy', payload)) {
+    console.warn('[PunchBuggy] Save failed (localStorage may be full or unavailable).');
+  }
+}
+function load() {
+  const s = safeStorageGet('punchBuggy');
+  if (s) {
+    try {
+      const parsed = JSON.parse(s);
+      if (parsed && typeof parsed === 'object') {
+        if (parsed.roundWinners && Array.isArray(parsed.roundWinners)) {
+          parsed.roundWinners = parsed.roundWinners.map((r) => {
+            if (typeof r === 'string') {
+              if (r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
+              if (r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
+              return { winner: 'T', scoreA: 0, scoreB: 0 };
             }
             return r;
           });
         }
-        Object.assign(state,parsed);
+        Object.assign(state, parsed);
       }
-      render();
+    } catch (err) {
+      console.warn('[PunchBuggy] Failed to parse saved game state, clearing storage.', err);
+      safeStorageRemove('punchBuggy');
     }
+  }
+  state.undoStack = [];
+  render();
+}
 
-    function log(msg){state.history.push(msg);render();}
+function log(msg) {
+  state.history.push(msg);
+  render();
+}
 
-    function score(p,d=1){
-      const other=p==='A'?'B':'A';
-      state.players[p].score=Math.max(0,state.players[p].score+d);
+function score(p, d = 1) {
+  pushUndoState();
+  const other = p === 'A' ? 'B' : 'A';
+  state.players[p].score = Math.max(0, state.players[p].score + d);
 
-      if(d>0){
-        state.players[p].streak++;
-        state.players[other].streak=0;
+  if (d > 0) {
+    state.players[p].streak++;
+    state.players[other].streak = 0;
 
-        // Winner animation
-        $(`.card[data-player="${p}"]`).classList.add('winner');
-        setTimeout(()=>$(`.card[data-player="${p}"]`).classList.remove('winner'),600);
+    const winnerCard = $(`.card[data-player="${p}"]`);
+    if (winnerCard) {
+      winnerCard.classList.add('winner');
+      setTimeout(() => winnerCard.classList.remove('winner'), 600);
+    }
+    const loserCard = $(`.card[data-player="${other}"]`);
+    if (loserCard) {
+      loserCard.classList.add('loser');
+      setTimeout(() => loserCard.classList.remove('loser'), 500);
+    }
+    const scoreEl = $(`#score${p}`);
+    if (scoreEl) {
+      scoreEl.classList.add('bump');
+      setTimeout(() => scoreEl.classList.remove('bump'), 500);
+    }
+    log(`${state.players[p].name} spotted a bug! +1`);
+  } else {
+    state.players[p].streak = 0;
+    log(`${state.players[p].name} correction: -1`);
+  }
 
-        // Loser animation
-        $(`.card[data-player="${other}"]`).classList.add('loser');
-        setTimeout(()=>$(`.card[data-player="${other}"]`).classList.remove('loser'),500);
+  render();
+}
 
-        // Score bump
-        $(`#score${p}`).classList.add('bump');
-        setTimeout(()=>$(`#score${p}`).classList.remove('bump'),500);
+function pushUndoState() {
+  const { undoStack, ...snapshot } = state;
+  undoStack.push(JSON.parse(JSON.stringify(snapshot)));
+  if (undoStack.length > 50) undoStack.shift();
+}
 
-        log(`${state.players[p].name} spotted a bug! +1`);
+function reset() {
+  if (confirm('Reset entire game? This will also clear round history.')) {
+    state.round = 1;
+    Object.values(state.players).forEach((p) => {
+      p.score = 0;
+      p.streak = 0;
+    });
+    state.history = [];
+    state.roundWinners = [];
+    render();
+  }
+}
 
-        // Confetti on milestones
-        if(state.players[p].score%5===0) confetti();
+function undo() {
+  if (!state.undoStack.length) return;
+  const prev = state.undoStack.pop();
+  const { undoStack, ...rest } = state;
+  Object.assign(state, prev);
+  state.undoStack = undoStack;
+  render();
+}
+function recordRoundWinner() {
+  const a = state.players.A.score;
+  const b = state.players.B.score;
+  const playerAName = state.players && state.players.A ? state.players.A.name : 'Player A';
+  const playerBName = state.players && state.players.B ? state.players.B.name : 'Player B';
+  let win = 'T';
+  if (a > b) win = 'A';
+  else if (b > a) win = 'B';
+  state.roundWinners.push({ winner: win, scoreA: a, scoreB: b });
+  if (win === 'T') log(`🤝 Round ${state.round} tied ${a}-${b}`);
+  else if (win === 'A') log(`🏆 ${playerAName} won Round ${state.round} ${a}-${b}`);
+  else log(`🏆 ${playerBName} won Round ${state.round} ${b}-${a}`);
+}
 
-        // Extra celebration on first lead takeover
-        if(state.players[p].score>state.players[other].score && state.players[p].score-state.players[other].score===1){
-          setTimeout(()=>confetti(),200);
-        }
+function nextRound() {
+  recordRoundWinner();
+  state.round++;
+  Object.values(state.players).forEach((p) => {
+    p.score = 0;
+    p.streak = 0;
+  });
+  log(`🏁 Round ${state.round} started!`);
+  render();
+}
+
+function handleImageUpload(player, file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    state.players[player].avatar = e.target.result;
+    render();
+  };
+  reader.onerror = () => {
+    console.warn('[PunchBuggy] Avatar upload failed', reader.error);
+    alert('Failed to read the image file. Please try a smaller image.');
+  };
+  reader.readAsDataURL(file);
+}
+
+onClick('#btnA', () => score('A', 1));
+onClick('#btnB', () => score('B', 1));
+onClick('#minusA', () => score('A', -1));
+onClick('#minusB', () => score('B', -1));
+onClick('#resetBtn', reset);
+onClick('#undoBtn', undo);
+onClick('#nextRound', nextRound);
+
+onClick('#clearBoard', () => {
+  if (confirm('Clear round history?')) {
+    state.roundWinners = [];
+    render();
+  }
+});
+
+function openFullLeaderboard() {
+  document.body.style.overflow = 'hidden';
+  setDisplay('#leaderboardView', 'block');
+  renderLeaderboard();
+}
+function closeFullLeaderboard() {
+  document.body.style.overflow = '';
+  setDisplay('#leaderboardView', 'none');
+}
+onClick('#leaderboardBtn', () => openFullLeaderboard());
+onClick('#closeFull', () => closeFullLeaderboard());
+
+const menuPanel = getEl('#menuPanel');
+const menuBtn = getEl('#menuBtn');
+function toggleMenu(force) {
+  if (!menuPanel) return;
+  const shouldOpen = typeof force === 'boolean' ? force : !menuPanel.classList.contains('open');
+  menuPanel.classList.toggle('open', shouldOpen);
+  menuPanel.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+  menuPanel.inert = !shouldOpen;
+  if (!shouldOpen && menuBtn && menuPanel.contains(document.activeElement)) {
+    menuBtn.focus();
+  }
+}
+if (menuBtn) menuBtn.onclick = () => toggleMenu();
+
+const rules = [
+  'Objective: Spot the VW Beetle (or other agreed target) first to score a point.',
+  'Scoring: First player to call it gets +1. Use the correction (-1) for false calls.',
+  'Rounds: Press Next Round to record the round winner and start fresh scores for the next round.',
+  'Streaks: Consecutive correct calls increase your streak but do not change round scoring.',
+  'Safety: Keep your eyes on the road. No taking photos or reaching for phones while driving.',
+  'Fair Play: Disputes are resolved by mutual agreement; use -1 for honest corrections.',
+  'Tie Rounds: If both players have equal scores when Next Round is pressed, the round is recorded as a tie.',
+  'Customization: Change player names or avatars before/after rounds. Avatars are local only.',
+];
+onClick('#rulesBtn', () => {
+  toggleMenu(false);
+  const el = getEl('#rulesContent');
+  if (!el) return;
+  el.innerHTML =
+    '<ol style="margin:0;padding-left:18px">' +
+    rules.map((r) => `<li style="margin-bottom:8px">${r}</li>`).join('') +
+    '</ol>';
+  setDisplay('#rulesModal', 'flex');
+});
+
+onClick('#dataBtn', () => {
+  toggleMenu(false);
+  setDisplay('#dataModal', 'flex');
+  renderModalLog();
+});
+onClick('#closeData', () => {
+  setDisplay('#dataModal', 'none');
+});
+
+async function clearAllAppData() {
+  state.round = 1;
+  state.players.A = { name: 'Player A', score: 0, streak: 0, avatar: '' };
+  state.players.B = { name: 'Player B', score: 0, streak: 0, avatar: '' };
+  state.history = [];
+  state.roundWinners = [];
+  render();
+  safeStorageRemove('punchBuggy');
+  safeStorageRemove('punchBuggy_running_version');
+  setDisplay('#dataModal', 'none');
+}
+
+onClick('#clearData', () => {
+  if (confirm('Delete all game data (rounds, scores, history, names, avatars)?')) {
+    clearAllAppData();
+  }
+});
+
+onClick('#exportData', () => {
+  const payload = JSON.stringify(state, null, 2);
+  const blob = new Blob([payload], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `punchbuggy-export-${Date.now()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+function normalizeImportedState(parsed) {
+  if (!parsed || typeof parsed !== 'object') return { error: 'invalid' };
+  const source = parsed.data && typeof parsed.data === 'object' ? parsed.data : parsed;
+  const out = {};
+  out.players = {
+    A: { name: 'Player A', score: 0, streak: 0, avatar: '' },
+    B: { name: 'Player B', score: 0, streak: 0, avatar: '' },
+  };
+
+  if (source.players && typeof source.players === 'object') {
+    ['A', 'B'].forEach((k) => {
+      const p = source.players[k] || {};
+      const name =
+        typeof p.name === 'string' && p.name.trim() ? p.name.trim() : out.players[k].name;
+      const avatar = typeof p.avatar === 'string' ? p.avatar : '';
+      let score = 0,
+        streak = 0;
+      if (p.current && typeof p.current === 'object') {
+        score = Number(p.current.score) || 0;
+        streak = Number(p.current.streak) || 0;
       } else {
-        state.players[p].streak=0;
-        log(`${state.players[p].name} correction: -1`);
+        score = Number(p.score) || 0;
+        streak = Number(p.streak) || 0;
       }
+      out.players[k] = { name, score, streak, avatar };
+    });
+  }
 
-      render();
-    }
+  if (Number.isFinite(Number(source.round)))
+    out.round = Math.max(1, Math.round(Number(source.round)));
+  else if (
+    source.rounds &&
+    source.rounds.current &&
+    Number.isFinite(Number(source.rounds.current.number))
+  )
+    out.round = Math.max(1, Math.round(Number(source.rounds.current.number)));
+  else out.round = 1;
 
-    function reset(){
-      if(confirm('Reset entire game? This will also clear round history.')){
-        state.round=1;
-        Object.values(state.players).forEach(p=>{p.score=0;p.streak=0});
-        state.history=[];
-        state.roundWinners=[];
-        render();
-      }
-    }
-
-    function undo(){if(state.history.length>0)state.history.pop();render();}
-    function recordRoundWinner(){
-      const a=state.players.A.score; const b=state.players.B.score;
-      let win='T';
-      if(a>b) win='A'; else if(b>a) win='B';
-      state.roundWinners.push({ winner: win, scoreA: a, scoreB: b });
-      if(win==='T') log(`🤝 Round ${state.round} tied ${a}-${b}`);
-      else if(win==='A') log(`🏆 ${state.players.A.name} won Round ${state.round} ${a}-${b}`);
-      else log(`🏆 ${state.players.B.name} won Round ${state.round} ${b}-${a}`);
-    }
-
-    function nextRound(){
-      // record current winner, then bump round and reset scores
-      recordRoundWinner();
-      state.round++;
-      Object.values(state.players).forEach(p=>{p.score=0;p.streak=0});
-      log(`🏁 Round ${state.round} started!`);
-      render();
-    }
-
-    function confetti(){
-      const root=$('#confetti');
-      root.innerHTML='';
-      for(let i=0;i<50;i++){
-        const d=document.createElement('div');
-        d.className='piece';
-        d.style.left=Math.random()*100+'%';
-        d.style.top='-10px';
-        d.style.background=['#5be2b0','#8aa8ff','#ffd166','#ff6b6b'][Math.floor(Math.random()*4)];
-        d.style.transform=`rotate(${Math.random()*360}deg)`;
-        root.appendChild(d);
-        d.animate([
-          {top:'-10px',opacity:1},
-          {top:'110%',opacity:0}
-        ],{duration:1500+Math.random()*1000,easing:'cubic-bezier(.25,.46,.45,.94)'});
-        setTimeout(()=>d.remove(),3000);
-      }
-    }
-
-    function handleImageUpload(player,file){
-      if(!file||!file.type.startsWith('image/'))return;
-      const reader=new FileReader();
-      reader.onload=e=>{
-        state.players[player].avatar=e.target.result;
-        render();
-      };
-      reader.readAsDataURL(file);
-    }
-
-    $('#btnA').onclick=()=>score('A',1);
-    $('#btnB').onclick=()=>score('B',1);
-    $('#minusA').onclick=()=>score('A',-1);
-    $('#minusB').onclick=()=>score('B',-1);
-    $('#resetBtn').onclick=reset;
-    $('#undoBtn').onclick=undo;
-    $('#nextRound').onclick=nextRound;
-    // bottom nav and leaderboard controls
-    function toggleLeaderboard(show){
-      const wrap = $('#leaderboardWrap');
-      wrap.style.display = show? 'block' : 'none';
-    }
-
-    $('#clearBoard').onclick=()=>{ if(confirm('Clear round history?')){ state.roundWinners=[]; render(); } };
-    $('#closeBoard').onclick=()=>toggleLeaderboard(false);
-    // fullscreen leaderboard controls
-    function openFullLeaderboard(){
-      document.body.style.overflow='hidden';
-      $('#leaderboardView').style.display='block';
-      renderLeaderboard();
-    }
-    function closeFullLeaderboard(){
-      document.body.style.overflow='hidden';
-      $('#leaderboardView').style.display='none';
-    }
-    $('#leaderboardBtn').onclick=()=>openFullLeaderboard();
-    $('#closeFull').onclick=()=>closeFullLeaderboard();
-    const menuPanel = $('#menuPanel');
-    const menuBtn = $('#menuBtn');
-    function toggleMenu(force){
-      if(!menuPanel) return;
-      const shouldOpen = typeof force === 'boolean' ? force : !menuPanel.classList.contains('open');
-      menuPanel.classList.toggle('open', shouldOpen);
-      menuPanel.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
-    }
-    if(menuBtn){
-      menuBtn.onclick = ()=>toggleMenu();
-    }
-    // Rules content (concise, comprehensive)
-    const rules = [
-      'Objective: Spot the VW Beetle (or other agreed target) first to score a point.',
-      'Scoring: First player to call it gets +1. Use the correction (-1) for false calls.',
-      'Rounds: Press Next Round to record the round winner and start fresh scores for the next round.',
-      'Streaks: Consecutive correct calls increase your streak but do not change round scoring.',
-      'Safety: Keep your eyes on the road. No taking photos or reaching for phones while driving.',
-      'Fair Play: Disputes are resolved by mutual agreement; use -1 for honest corrections.',
-      'Milestones: Every 5 points triggers a celebration (confetti).',
-      'Tie Rounds: If both players have equal scores when Next Round is pressed, the round is recorded as a tie.',
-      'Customization: Change player names or avatars before/after rounds. Avatars are local only.'
-    ];
-    $('#rulesBtn').onclick=()=>{
-      toggleMenu(false);
-      const el = $('#rulesContent');
-      el.innerHTML = '<ol style="margin:0;padding-left:18px">' + rules.map(r=>`<li style="margin-bottom:8px">${r}</li>`).join('') + '</ol>';
-      $('#rulesModal').style.display='flex';
-    };
-
-    // Data modal handlers (export/import/log/clear)
-    $('#dataBtn').onclick=()=>{
-      toggleMenu(false);
-      $('#dataModal').style.display='flex';
-      renderModalLog();
-      if(typeof updateBackupUi==='function'){ updateBackupUi(AutoBackup && AutoBackup.getStatus ? AutoBackup.getStatus() : {code:'unsupported'}); }
-    };
-    $('#closeData').onclick=()=>{ $('#dataModal').style.display='none'; };
-    async function clearAllAppData(){
-      // Reset in-memory state first so UI clears immediately.
-      state.round = 1;
-      state.players.A = { name: 'Player A', score: 0, streak: 0, avatar: '' };
-      state.players.B = { name: 'Player B', score: 0, streak: 0, avatar: '' };
-      state.history = [];
-      state.roundWinners = [];
-      render();
-
-      // Remove localStorage data and backups.
-      try{
-        localStorage.removeItem('punchBuggy');
-        localStorage.removeItem('punchBuggy_last_backup');
-        localStorage.removeItem('punchbuggy-auto-backup-enabled');
-        localStorage.removeItem('punchbuggy-auto-backup-meta');
-        const keysToRemove = [];
-        for(let i = 0; i < localStorage.length; i++){
-          const key = localStorage.key(i);
-          if(key && key.startsWith('punchBuggy_backup_')) keysToRemove.push(key);
+  out.roundWinners = [];
+  if (source.rounds && Array.isArray(source.rounds.history)) {
+    out.roundWinners = source.rounds.history.map((r) => {
+      const winner = r && r.winner ? r.winner : 'T';
+      const scoreA = r && r.scores && Number.isFinite(Number(r.scores.A)) ? Number(r.scores.A) : 0;
+      const scoreB = r && r.scores && Number.isFinite(Number(r.scores.B)) ? Number(r.scores.B) : 0;
+      return { winner, scoreA, scoreB };
+    });
+  } else if (Array.isArray(source.roundWinners)) {
+    out.roundWinners = source.roundWinners
+      .map((r) => {
+        if (typeof r === 'string') {
+          if (r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
+          if (r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
+          return { winner: 'T', scoreA: 0, scoreB: 0 };
         }
-        keysToRemove.forEach(key => localStorage.removeItem(key));
-      }catch(err){
-        console.warn('Failed to clear localStorage', err);
-      }
+        return r;
+      })
+      .filter(Boolean);
+  }
 
-      // Remove IndexedDB auto-backups if available.
-      if(window.indexedDB && AutoBackup && AutoBackup.DB_NAME){
-        try{
-          await new Promise((resolve, reject)=>{
-            const req = indexedDB.deleteDatabase(AutoBackup.DB_NAME);
-            req.onsuccess = () => resolve();
-            req.onerror = () => reject(req.error);
-            req.onblocked = () => resolve();
-          });
-        }catch(err){
-          console.warn('Failed to clear IndexedDB backups', err);
-        }
+  if (Array.isArray(source.history)) {
+    out.history = source.history.map((h) => {
+      if (typeof h === 'string') return h;
+      if (h && h.message) return h.message;
+      try {
+        return JSON.stringify(h);
+      } catch (e) {
+        return String(h);
       }
+    });
+  } else {
+    out.history = [];
+  }
+  return out;
+}
 
-      if(typeof updateBackupUi === 'function' && AutoBackup && AutoBackup.getStatus){
-        updateBackupUi(AutoBackup.getStatus());
-      }
+onClick('#importBtn', () => {
+  const input = getEl('#importFile');
+  if (input) input.click();
+});
+onChange('#importFile', async (e) => {
+  const f = e.target.files && e.target.files[0];
+  if (!f) return;
+  try {
+    const text = await f.text();
+    const parsed = JSON.parse(text);
+    const normalized = normalizeImportedState(parsed);
+    if (normalized && normalized.error) {
+      alert('Invalid file: could not parse import');
+      e.target.value = '';
+      return;
     }
-
-    $('#clearData').onclick=()=>{
-      if(confirm('Clear all game data (rounds, scores, history, names, avatars)?')){
-        clearAllAppData();
-      }
-    };
-
-    // Export state as JSON file
-    $('#exportData').onclick=()=>{
-      const payload = JSON.stringify(state, null, 2);
-      const blob = new Blob([payload], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download = `punchbuggy-export-${Date.now()}.json`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    };
-
-    // Import - parse file and normalize various export shapes (supports older shape and `rounds`-style exports)
-    function normalizeImportedState(parsed){
-      if(!parsed || typeof parsed !== 'object') return { error: 'invalid' };
-      // Support backup wrapper shape: { app, createdAt, version, data }
-      const source = (parsed.data && typeof parsed.data === 'object') ? parsed.data : parsed;
-
-      const out = {};
-      // Players: support both flat {players.A.score} and nested {players.A.current.score}
-      out.players = {
-        A: { name: 'Player A', score: 0, streak: 0, avatar: '' },
-        B: { name: 'Player B', score: 0, streak: 0, avatar: '' }
-      };
-
-      if(source.players && typeof source.players === 'object'){
-        ['A','B'].forEach(k=>{
-          const p = source.players[k] || {};
-          const name = typeof p.name === 'string' && p.name.trim() ? p.name.trim() : out.players[k].name;
-          const avatar = typeof p.avatar === 'string' ? p.avatar : '';
-          let score = 0, streak = 0;
-          if(p.current && typeof p.current === 'object'){
-            score = Number(p.current.score) || 0;
-            streak = Number(p.current.streak) || 0;
-          } else {
-            score = Number(p.score) || 0;
-            streak = Number(p.streak) || 0;
-          }
-          out.players[k] = { name, score, streak, avatar };
-        });
-      }
-
-      // Round number: prefer top-level `round`, fallback to `rounds.current.number`
-      if(Number.isFinite(Number(source.round))) out.round = Math.max(1, Math.round(Number(source.round)));
-      else if(source.rounds && source.rounds.current && Number.isFinite(Number(source.rounds.current.number))) out.round = Math.max(1, Math.round(Number(source.rounds.current.number)));
-      else out.round = 1;
-
-      // Round winners: try to map from `rounds.history` if present, otherwise use roundWinners if available
-      out.roundWinners = [];
-      if(source.rounds && Array.isArray(source.rounds.history)){
-        out.roundWinners = source.rounds.history.map(r=>{
-          const winner = r && r.winner ? r.winner : 'T';
-          const scoreA = r && r.scores && Number.isFinite(Number(r.scores.A)) ? Number(r.scores.A) : 0;
-          const scoreB = r && r.scores && Number.isFinite(Number(r.scores.B)) ? Number(r.scores.B) : 0;
-          return { winner, scoreA, scoreB };
-        });
-      } else if(Array.isArray(source.roundWinners)){
-        out.roundWinners = source.roundWinners.map(r=>{
-          if(typeof r === 'string'){
-            if(r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
-            if(r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
-            return { winner: 'T', scoreA: 0, scoreB: 0 };
-          }
-          return r;
-        }).filter(Boolean);
-      }
-
-      // History: accept array of log objects or strings
-      if(Array.isArray(source.history)){
-        out.history = source.history.map(h=>{
-          if(typeof h === 'string') return h;
-          if(h && h.message) return h.message;
-          try{ return JSON.stringify(h); }catch(e){ return String(h); }
-        });
-      } else {
-        out.history = [];
-      }
-
-      // optional: preserve schemaVersion if present
-      const schemaVersion = source.schemaVersion || parsed.schemaVersion;
-      if(schemaVersion) out.schemaVersion = schemaVersion;
-
-      return out;
+    if (!confirm('Importing will replace your current game state. Continue?')) {
+      e.target.value = '';
+      return;
     }
+    Object.assign(state, normalized);
+    render();
+    alert('Import successful');
+  } catch (err) {
+    alert('Failed to import: ' + (err && err.message ? err.message : String(err)));
+  }
+  e.target.value = '';
+});
 
-    $('#importBtn').onclick=()=>$('#importFile').click();
-    $('#importFile').onchange = async (e)=>{
-      const f = e.target.files && e.target.files[0];
-      if(!f) return;
-      try{
-        const text = await f.text();
-        const parsed = JSON.parse(text);
-        const normalized = normalizeImportedState(parsed);
-        if(normalized && normalized.error){ alert('Invalid file: could not parse import'); e.target.value=''; return; }
-        if(!confirm('Importing will replace your current game state. Continue?')) { e.target.value=''; return; }
-        Object.assign(state, normalized);
-        render();
-        alert('Import successful');
-      }catch(err){ alert('Failed to import: ' + (err && err.message ? err.message : String(err))); }
-      e.target.value='';
-    };
+onClick('#closeRules', () => {
+  setDisplay('#rulesModal', 'none');
+});
+onChange('#nameA', (e) => {
+  state.players.A.name = e.target.value;
+  render();
+});
+onChange('#nameB', (e) => {
+  state.players.B.name = e.target.value;
+  render();
+});
+onChange('#uploadA', (e) => handleImageUpload('A', e.target.files[0]));
+onChange('#uploadB', (e) => handleImageUpload('B', e.target.files[0]));
 
-    const backupStatusEl = $('#backupStatusText');
-    const backupMetaEl = $('#backupMetaText');
-    const autoBackupToggle = $('#autoBackupToggle');
-    const downloadBackupBtn = $('#downloadBackupBtn');
-    const restoreBackupBtn = $('#restoreBackupBtn');
-
-    function describeBackupIso(iso){
-      if(!iso) return null;
-      const date = new Date(iso);
-      if(Number.isNaN(date.getTime())) return null;
-      const diff = Date.now() - date.getTime();
-      if(diff < 30 * 1000) return 'just now';
-      if(diff < 60 * 60 * 1000){
-        const mins = Math.round(diff / 60000);
-        return `${mins} minute${mins===1?'':'s'} ago`;
-      }
-      if(diff < 24 * 60 * 60 * 1000){
-        const hours = Math.round(diff / 3600000);
-        return `${hours} hour${hours===1?'':'s'} ago`;
-      }
-      return date.toLocaleString();
-    }
-
-    function updateBackupUi(status){
-      if(!backupStatusEl) return;
-      const data = status || {};
-      const metadata = data.metadata || {};
-      if(typeof data.enabled === 'boolean' && autoBackupToggle){
-        autoBackupToggle.checked = data.enabled;
-      }
-      backupStatusEl.textContent = data.message || (data.enabled === false ? 'Automatic backups are disabled.' : 'Automatic backups ready.');
-      if(backupMetaEl){
-        const details = [];
-        if(data.code === 'unsupported'){
-          details.push('This browser does not support IndexedDB-based backups.');
-        }else{
-          if(metadata.currentBackupDate){
-            const desc = describeBackupIso(metadata.currentBackupDate);
-            if(desc) details.push(`Current backup saved ${desc}`);
-          }
-          if(metadata.previousBackupDate){
-            const desc = describeBackupIso(metadata.previousBackupDate);
-            if(desc) details.push(`Previous backup saved ${desc}`);
-          }
-          if(metadata.oldestBackupDate){
-            const desc = describeBackupIso(metadata.oldestBackupDate);
-            if(desc) details.push(`Oldest backup saved ${desc}`);
-          }
-          if(!metadata.currentBackupDate && data.enabled !== false){
-            details.push('No backups have been created yet.');
-          }
-          if(data.code === 'error' && data.error){
-            const errText = data.error && data.error.message ? data.error.message : String(data.error);
-            details.push(`Error: ${errText}`);
-          }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('./service-worker.js')
+      .then((reg) => {
+        if (reg.waiting) {
+          reg.waiting.postMessage({ type: 'SKIP_WAITING' });
         }
-        backupMetaEl.textContent = details.join(' • ');
-      }
-      const disabled = data.code === 'unsupported' || data.enabled === false;
-      if(downloadBackupBtn) downloadBackupBtn.disabled = disabled;
-      if(restoreBackupBtn) restoreBackupBtn.disabled = disabled || !(metadata.backupCount > 0);
-    }
-
-    function applyRestoredState(snapshot){
-      if(!snapshot || typeof snapshot !== 'object') return;
-      const defaults = {
-        round: 1,
-        players: {
-          A: { name: 'Player A', score: 0, streak: 0, avatar: '' },
-          B: { name: 'Player B', score: 0, streak: 0, avatar: '' }
-        },
-        roundWinners: [],
-        history: []
-      };
-      const next = Object.assign({}, defaults, snapshot);
-      const nextPlayers = snapshot && snapshot.players ? snapshot.players : {};
-      next.players = Object.assign({}, defaults.players, nextPlayers);
-      next.players.A = Object.assign({}, defaults.players.A, nextPlayers.A || {});
-      next.players.B = Object.assign({}, defaults.players.B, nextPlayers.B || {});
-      next.roundWinners = Array.isArray(snapshot && snapshot.roundWinners) ? snapshot.roundWinners.slice() : [];
-      next.history = Array.isArray(snapshot && snapshot.history) ? snapshot.history.slice() : [];
-      Object.assign(state, next);
-      render();
-    }
-
-    if(!AutoBackup || !AutoBackup.SUPPORTED){
-      updateBackupUi({ code:'unsupported', message:'Automatic backups are unavailable in this browser.', enabled:false });
-      if(autoBackupToggle) autoBackupToggle.disabled = true;
-      if(downloadBackupBtn) downloadBackupBtn.disabled = true;
-      if(restoreBackupBtn) restoreBackupBtn.disabled = true;
-    }else{
-      if(autoBackupToggle){
-        autoBackupToggle.addEventListener('change', e=>{
-          try{
-            AutoBackup.setEnabled(e.target.checked);
-          }catch(err){
-            console.error('AutoBackup toggle failed', err);
-            e.target.checked = !e.target.checked;
-          }
-        });
-      }
-      if(downloadBackupBtn){
-        downloadBackupBtn.onclick = async ()=>{
-          try{
-            await AutoBackup.manualBackup();
-          }catch(err){
-            console.error('Manual backup failed', err);
-            alert('Failed to download backup: ' + (err && err.message ? err.message : err));
-          }
-        };
-      }
-      if(restoreBackupBtn){
-        restoreBackupBtn.onclick = async ()=>{
-          try{
-            const backups = await AutoBackup.listBackups();
-            if(!backups.length){
-              alert('No backups available to restore yet.');
-              return;
-            }
-            const labels = { current: 'Current', previous: 'Previous', oldest: 'Oldest' };
-            const options = backups.map((item, idx)=>{
-              const desc = describeBackupIso(item.savedAt) || item.savedAt || 'unknown time';
-              return `${idx+1}. ${labels[item.key] || item.key} — saved ${desc}`;
-            });
-            const choice = prompt(`Restore which backup?\n${options.join('\n')}\nEnter a number:`, '1');
-            if(!choice) return;
-            const index = parseInt(choice,10) - 1;
-            if(Number.isNaN(index) || index < 0 || index >= backups.length){
-              alert('Invalid selection.');
-              return;
-            }
-            const selected = backups[index];
-            const when = describeBackupIso(selected.savedAt) || selected.savedAt || 'an unknown time';
-            if(!confirm(`Restore the ${labels[selected.key] || selected.key} backup from ${when}? This will replace your current game data.`)) return;
-            await AutoBackup.restoreFromBackup(selected.key);
-            alert('Backup restored successfully.');
-          }catch(err){
-            console.error('Restore backup failed', err);
-            alert('Failed to restore backup: ' + (err && err.message ? err.message : err));
-          }
-        };
-      }
-      AutoBackup.init({ getState: ()=>state, applyState: applyRestoredState, onStatusChange: updateBackupUi });
-      updateBackupUi(AutoBackup.getStatus());
-    }
-    $('#closeRules').onclick=()=>{ $('#rulesModal').style.display='none'; };
-    $('#nameA').onchange=e=>{state.players.A.name=e.target.value;render()};
-    $('#nameB').onchange=e=>{state.players.B.name=e.target.value;render()};
-    $('#uploadA').onchange=e=>handleImageUpload('A',e.target.files[0]);
-    $('#uploadB').onchange=e=>handleImageUpload('B',e.target.files[0]);
-
-    function setupServiceWorkerUpdates(){
-      if(!('serviceWorker' in navigator)) return;
-      // Dev flag: set to `false` to require manual refresh. Set to `true` to re-enable auto-apply.
-      // Default intentionally `false` so users must click Refresh to apply updates.
-      window.PUNCHBUGGY_AUTO_APPLY_UPDATES = window.PUNCHBUGGY_AUTO_APPLY_UPDATES === undefined ? false : !!window.PUNCHBUGGY_AUTO_APPLY_UPDATES;
-      
-      const banner = $('#updateBanner');
-      const bannerText = $('#updateBannerText');
-      const refreshBtn = $('#refreshUpdate');
-      const dismissBtn = $('#dismissUpdate');
-      const root = document.documentElement;
-      let waitingWorker = null;
-      let autoReloadTimer = null;
-      let refreshing = false;
-
-      function applyBannerOffset(){
-        if(!banner || banner.style.display === 'none') return;
-        const update = ()=>{
-          const height = banner.getBoundingClientRect().height || 0;
-          if(root) root.style.setProperty('--update-banner-offset', `${Math.ceil(height + 16)}px`);
-        };
-        if(window.requestAnimationFrame){
-          requestAnimationFrame(()=>requestAnimationFrame(update));
-        }else{
-          setTimeout(update,0);
-        }
-      }
-
-      function hideBanner(){
-        if(autoReloadTimer) clearTimeout(autoReloadTimer);
-        autoReloadTimer = null;
-        if(banner) banner.style.display = 'none';
-        waitingWorker = null;
-        if(root) root.style.setProperty('--update-banner-offset','0px');
-      }
-
-      function requestRefresh(){
-        if(waitingWorker){
-          const worker = waitingWorker;
-          // mark that a refresh was explicitly requested so controllerchange will reload
-          refreshing = true;
-          // Update the running version in localStorage so after reload the UI shows the new version
-          localStorage.setItem('punchBuggy_running_version', window.PUNCHBUGGY_APP_VERSION || 'unknown');
-          console.log('[PunchBuggy] Update requested, new version will be:', window.PUNCHBUGGY_APP_VERSION);
-          hideBanner();
-          worker.postMessage({type:'SKIP_WAITING'});
-        }
-      }
-
-      function showBanner(worker){
-        waitingWorker = worker;
-        if(!banner) return;
-        if(bannerText){
-          const version = window.PUNCHBUGGY_APP_VERSION || 'latest';
-          bannerText.textContent = `Version ${version} is ready. Refresh to load the latest updates.`;
-        }
-        banner.style.display = 'flex';
-        applyBannerOffset();
-        if(autoReloadTimer) clearTimeout(autoReloadTimer);
-        // Only schedule auto-apply when explicitly enabled.
-        if(window.PUNCHBUGGY_AUTO_APPLY_UPDATES){
-          autoReloadTimer = setTimeout(()=>{
-            if(waitingWorker){
-              requestRefresh();
-            }
-          }, 30000);
-        } else {
-          autoReloadTimer = null;
-        }
-      }
-
-      if(refreshBtn) refreshBtn.onclick=()=>requestRefresh();
-      if(dismissBtn) dismissBtn.onclick=()=>hideBanner();
-      window.addEventListener('resize', applyBannerOffset);
-
-      // Debug helper: allow manual banner show from console during testing.
-      // Usage: window.DEBUG_showUpdateBanner('Optional message');
-      window.DEBUG_showUpdateBanner = function(versionText){
-        try{
-          if(!banner) return;
-          if(bannerText) bannerText.textContent = versionText || `Version ${window.PUNCHBUGGY_APP_VERSION || 'latest'} is ready. Refresh to load the latest updates.`;
-          banner.style.display = 'flex';
-          applyBannerOffset();
-        }catch(err){ console.warn('DEBUG_showUpdateBanner failed', err); }
-      };
-
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        // Only reload the page when we explicitly requested the refresh (refreshing === true).
-        if(!refreshing) return;
-        // proceed with reload
-        window.location.reload();
-      });
-
-      navigator.serviceWorker.register('/service-worker.js').then(reg=>{
-        if(reg.waiting){
-          showBanner(reg.waiting);
-        }
-        reg.addEventListener('updatefound', ()=>{
+        reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
-          if(!newWorker) return;
-          newWorker.addEventListener('statechange', ()=>{
-            if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
-              showBanner(newWorker);
+          if (!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
             }
           });
         });
-        setInterval(()=>{
-          if(document.visibilityState === 'visible'){
-            reg.update();
-          }
-        }, 5 * 60 * 1000);
-      }).catch(err=>{
-        console.error('Service worker registration failed:', err);
-      });
-    }
+      })
+      .catch((err) => console.warn('[PunchBuggy] Service worker registration failed', err));
+  });
+}
 
-    // Run in-app migration if needed (creates a backup key in localStorage)
-    try{
-      if(window.PunchBuggyMigrations && typeof window.PunchBuggyMigrations.migrateIfNeeded === 'function'){
-        const result = window.PunchBuggyMigrations.migrateIfNeeded();
-        if(result && result.migrated){
-          // notify user in data modal log and backup UI
-          const logEl = document.getElementById('modalLog');
-          if(logEl) logEl.insertAdjacentHTML('beforeend', `<li>Migrated local data to schema v2.0.0 — backup key: ${result.backupKey || 'unknown'}</li>`);
-          const backupMeta = document.getElementById('backupMetaText');
-          if(backupMeta && result.backupKey){ backupMeta.textContent = `A backup was created: ${result.backupKey}`; }
-        }
-      }
-    }catch(err){ console.error('Migration call failed', err); }
+load();
 
-    load();
-    setupServiceWorkerUpdates();
-  </script>
+</script>
 </body>
 </html>
