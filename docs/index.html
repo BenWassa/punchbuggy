@@ -119,14 +119,10 @@
         text-align: center;
         position: relative;
         z-index: 50;
-        background: linear-gradient(
-          180deg,
-          rgba(8, 12, 22, 0.92),
-          rgba(8, 12, 22, 0.6)
-        );
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+        background: rgba(12, 17, 33, 0.9);
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(12px);
         padding: 12px;
         border-radius: 18px;
       }
@@ -196,7 +192,7 @@
       /* Card Internals */
       .card-header {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         justify-content: space-between;
         gap: 12px;
         flex: 0 0 auto;
@@ -239,11 +235,12 @@
 
       .card-footer {
         flex: 0 0 auto;
-        margin-top: auto;
+        margin-top: 8px;
         display: flex;
-        flex-direction: column;
-        gap: 10px;
-        align-items: flex-end;
+        flex-direction: row;
+        gap: 12px;
+        align-items: center;
+        justify-content: flex-end;
       }
 
       /* Avatars */
@@ -253,8 +250,9 @@
         flex-shrink: 0;
       }
       .avatar {
-        width: 96px; /* Larger avatar for tall screens */
-        height: 96px;
+        width: 96px; /* Wider enough for the card while matching portrait uploads */
+        height: 144px; /* Portrait 2:3 ratio keeps images taller than wide */
+        aspect-ratio: 2 / 3;
         border-radius: 18px;
         border: 2px solid rgba(255, 255, 255, 0.12);
         object-fit: cover;
@@ -321,12 +319,25 @@
       }
 
       /* Score */
+      .score-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        min-width: 160px;
+        width: 100%;
+        max-width: 240px;
+      }
       .score-display {
         font-size: 96px; /* Huge score */
         font-weight: 800;
         line-height: 1;
         letter-spacing: -4px;
-        flex: 1;
+        flex: 0 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
       }
       .player-card.p1 .score-display {
         color: var(--p1-accent);
@@ -360,7 +371,8 @@
       }
 
       .punch-btn {
-        width: 100%;
+        flex: 1 1 auto;
+        min-width: 180px;
         padding: 24px; /* Taller button */
         border-radius: 20px;
         border: none;
@@ -397,18 +409,17 @@
         font-weight: 800;
         display: inline-flex;
         align-items: center;
+        justify-content: center;
         gap: 8px;
         padding: 8px 16px;
         border-radius: 12px;
         background: rgba(0, 0, 0, 0.3);
         color: var(--muted);
-        margin-top: 4px;
         transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         position: relative;
         z-index: 1;
-        width: fit-content;
+        width: 100%;
         max-width: 100%;
-        align-self: flex-start;
       }
       .fire-icon {
         display: inline-block;
@@ -805,7 +816,8 @@
       }
       .avatar-lg {
         width: 72px;
-        height: 72px;
+        height: 108px;
+        aspect-ratio: 2 / 3;
         border-radius: 18px;
         border: 2px solid rgba(255, 255, 255, 0.12);
         object-fit: cover;
@@ -1058,10 +1070,16 @@
             </div>
             <div class="name-box">
               <input id="nameA" class="player-input" value="Player A" />
-              <div id="streakA" class="streak-badge">0 Streak</div>
             </div>
           </div>
-          <div id="scoreA" class="score-display">0</div>
+          <div class="score-stack">
+            <div id="scoreA" class="score-display">0</div>
+            <div
+              id="streakA"
+              class="streak-badge"
+              style="display: none;"
+            ></div>
+          </div>
         </div>
         <div class="card-footer">
           <button id="minusA" class="minus-btn">
@@ -1119,10 +1137,16 @@
             </div>
             <div class="name-box">
               <input id="nameB" class="player-input" value="Player B" />
-              <div id="streakB" class="streak-badge">0 Streak</div>
             </div>
           </div>
-          <div id="scoreB" class="score-display">0</div>
+          <div class="score-stack">
+            <div id="scoreB" class="score-display">0</div>
+            <div
+              id="streakB"
+              class="streak-badge"
+              style="display: none;"
+            ></div>
+          </div>
         </div>
         <div class="card-footer">
           <button id="minusB" class="minus-btn">
@@ -1471,7 +1495,13 @@
       function updateStreakBadge(el, streak) {
         if (!el) return;
         el.classList.remove(...STREAK_CLASSES);
-        el.innerHTML = `<span class="fire-icon">🔥</span> ${streak} Streak`;
+        if (streak <= 0) {
+          el.style.display = "none";
+          el.textContent = "";
+          return;
+        }
+        el.style.display = "inline-flex";
+        el.innerHTML = `<span class="fire-icon">🔥</span> ${streak}`;
         if (streak >= 10) {
           el.classList.add("inferno");
         } else if (streak >= 5) {

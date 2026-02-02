@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.3.0] - 2026-02-02
+- UI polish: taller avatars, score/streak layout, button/header tweaks
+
 ## [3.0.0] - 2026-02-02
 
 - Major UI refresh: new player layout, leaderboard presentation, and streamlined modals.
