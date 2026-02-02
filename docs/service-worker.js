@@ -11,6 +11,7 @@ const APP_SHELL = [
   "./service-worker.js",
   "./app-version.js",
   "./icons/punchbuggy.png",
+  "./punchbuggy_splash.jpg",
 ].map((path) => new URL(path, self.location).toString());
 
 self.addEventListener("install", (event) => {
@@ -61,7 +62,16 @@ self.addEventListener("fetch", (event) => {
 
   if (IS_DEV_HOST) {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request)),
+      fetch(event.request).catch(() => {
+        return caches.match(event.request).then((cached) => {
+          if (cached) return cached;
+          // Return a network error response instead of undefined
+          return new Response("Network error and no cache available", {
+            status: 503,
+            statusText: "Service Unavailable",
+          });
+        });
+      }),
     );
     return;
   }

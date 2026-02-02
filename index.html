@@ -122,6 +122,39 @@
         pointer-events: none;
       }
 
+      /* Splash screen overlay - shown while content loads */
+      #splashOverlay {
+        position: fixed;
+        inset: 0;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-color: #0b0f1a;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 600ms ease-out;
+        pointer-events: auto;
+        display: block;
+      }
+
+      /* Overlay gradient */
+      #splashOverlay::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(11, 15, 26, 0.95), rgba(11, 15, 26, 0.5));
+        z-index: 1;
+      }
+
+      #splashOverlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
       @supports not (height: 100dvh) {
         body {
           min-height: var(--app-height);
@@ -1499,7 +1532,10 @@
       <div id="roundList" class="round-list"></div>
     </div>
 
-    <script src="app-version.js"></script>
+    <!-- Splash screen overlay - shown while content loads -->
+    <div id="splashOverlay" style="background-image: url('./punchbuggy_splash.jpg');"></div>
+
+    <script src="./public/app-version.js"></script>
     <script>
       // --- JS from main.js (Embedded) ---
       const setAppHeight = () => {
@@ -1514,8 +1550,8 @@
 
       setAppHeight();
       const splashImages = {
-        punchbuggy_splash: "/punchbuggy_splash.png",
-        punchbuggy_splash_2: "/punchbuggy_splash_2.png",
+        punchbuggy_splash: "./punchbuggy_splash.jpg",
+        punchbuggy_splash_2: "./punchbuggy_splash_2.png",
       };
       const applySplashImage = () => {
         const params = new URLSearchParams(window.location.search);
@@ -1531,6 +1567,35 @@
         document.body.dataset.splash = key;
       };
       applySplashImage();
+
+      // Splash screen management
+      const hideSplash = () => {
+        const splash = document.getElementById("splashOverlay");
+        if (splash && !splash.classList.contains("hidden")) {
+          splash.classList.add("hidden");
+        }
+      };
+
+      // Hide splash after 2.8 seconds minimum (allows time for content to load)
+      const splashTimeout = setTimeout(hideSplash, 2800);
+
+      // Also hide splash when DOM is fully loaded (whichever comes first)
+      document.addEventListener("DOMContentLoaded", () => {
+        clearTimeout(splashTimeout);
+        hideSplash();
+      });
+
+      // Hide splash on window load (all resources loaded)
+      window.addEventListener("load", () => {
+        clearTimeout(splashTimeout);
+        hideSplash();
+      });
+      
+      // Fallback: hide splash immediately if script reaches here (content already loaded)
+      if (document.readyState !== "loading") {
+        hideSplash();
+      }
+
       window.addEventListener("resize", setAppHeight);
       if (window.visualViewport) {
         window.visualViewport.addEventListener("resize", setAppHeight);
