@@ -37,6 +37,7 @@
         --plasma: #ffffff;
         --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
         --radius: 20px; /* Slightly rounder for modern feel */
+        --splash-image: url("/punchbuggy_splash.png");
         --p1-base: #1a4d40;
         --p1-accent: #5be2b0;
         --p1-glow: rgba(91, 226, 176, 0.22);
@@ -104,6 +105,21 @@
         padding-top: calc(12px + var(--sat));
         padding-bottom: calc(12px + var(--sab));
         gap: 16px; /* Increased gap */
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          linear-gradient(180deg, rgba(11, 15, 26, 0.9), rgba(11, 15, 26, 0.4)),
+          var(--splash-image);
+        background-size: cover;
+        background-position: center;
+        opacity: 0.65;
+        z-index: -1;
+        transition: opacity 400ms ease;
+        pointer-events: none;
       }
 
       @supports not (height: 100dvh) {
@@ -1497,6 +1513,24 @@
       };
 
       setAppHeight();
+      const splashImages = {
+        punchbuggy_splash: "/punchbuggy_splash.png",
+        punchbuggy_splash_2: "/punchbuggy_splash_2.png",
+      };
+      const applySplashImage = () => {
+        const params = new URLSearchParams(window.location.search);
+        const requested = params.get("splash");
+        const key =
+          requested && splashImages[requested]
+            ? requested
+            : "punchbuggy_splash";
+        document.documentElement.style.setProperty(
+          "--splash-image",
+          `url(${splashImages[key]})`,
+        );
+        document.body.dataset.splash = key;
+      };
+      applySplashImage();
       window.addEventListener("resize", setAppHeight);
       if (window.visualViewport) {
         window.visualViewport.addEventListener("resize", setAppHeight);
