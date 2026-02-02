@@ -1530,9 +1530,14 @@
           const crownEl = getEl(selector);
           if (!crownEl) return;
           const punched = Number(state.players[player].punched) || 0;
+          if (isLeader) {
+            crownEl.classList.remove("frustrated");
+            setDisplay(selector, "flex");
+            return;
+          }
           const isFrustrated = punched >= FRUSTRATED_THRESHOLD;
           crownEl.classList.toggle("frustrated", isFrustrated);
-          if (isFrustrated || isLeader) {
+          if (isFrustrated) {
             setDisplay(selector, "flex");
           } else {
             setDisplay(selector, "none");
