@@ -1049,15 +1049,17 @@
       </div>
     </header>
 
-    <nav id="menuPanel" class="menu-panel">
+    <nav id="menuPanel" class="menu-panel" aria-label="Application menu">
       <button
         id="resetBtnMenu"
         class="menu-btn danger"
         aria-label="Reset game"
         title="Reset game"
       >
-        ♻️
+        ♻️ Reset Game
       </button>
+      <button id="menuExport" class="menu-btn">Export JSON</button>
+      <button id="menuImport" class="menu-btn">Import JSON</button>
       <div class="menu-about">
         <div class="menu-about-title">About</div>
         <div class="menu-about-version">
@@ -1863,6 +1865,14 @@
       onClick("#resetBtnMenu", () => {
         toggleMenu(false);
         reset();
+      });
+      onClick("#menuExport", () => {
+        const exportBtn = getEl("#exportData");
+        if (exportBtn) exportBtn.click();
+      });
+      onClick("#menuImport", () => {
+        const importBtn = getEl("#importBtn");
+        if (importBtn) importBtn.click();
       });
       onClick("#undoBtn", undo);
       onClick("#nextRound", nextRound);
