@@ -274,12 +274,34 @@
         display: none;
         align-items: center;
         justify-content: center;
-        font-size: 20px;
-        background: linear-gradient(180deg, #ffd166, #ffb347);
         border-radius: 50%;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
         border: 2px solid rgba(255, 255, 255, 0.2);
+        background: linear-gradient(180deg, #ffd166, #ffb347);
+        overflow: hidden;
         z-index: 10;
+      }
+      .player-crown .crown-emoji {
+        font-size: 18px;
+        line-height: 1;
+      }
+      .player-crown .frustrated-icon {
+        display: none;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: inherit;
+        background: rgba(0, 0, 0, 0.6);
+      }
+      .player-crown.frustrated {
+        background: rgba(0, 0, 0, 0.35);
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+      .player-crown.frustrated .crown-emoji {
+        display: none;
+      }
+      .player-crown.frustrated .frustrated-icon {
+        display: block;
       }
 
       .upload-label {
@@ -1043,7 +1065,14 @@
                 class="avatar"
                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%231a4d40'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50' y='65' font-size='40' text-anchor='middle' fill='%235be2b0'%3EA%3C/text%3E%3C/svg%3E"
               />
-              <div id="crownA" class="player-crown">👑</div>
+              <div id="crownA" class="player-crown" aria-hidden="true">
+                <span class="crown-emoji" aria-hidden="true">👑</span>
+                <img
+                  class="frustrated-icon"
+                  src="/frustrated.png"
+                  alt="Frustrated face"
+                />
+              </div>
               <label class="upload-label" for="uploadA">
                 <svg
                   width="16"
@@ -1110,7 +1139,14 @@
                 class="avatar"
                 src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%231e2a4a'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50' y='65' font-size='40' text-anchor='middle' fill='%238aa8ff'%3EB%3C/text%3E%3C/svg%3E"
               />
-              <div id="crownB" class="player-crown">👑</div>
+              <div id="crownB" class="player-crown" aria-hidden="true">
+                <span class="crown-emoji" aria-hidden="true">👑</span>
+                <img
+                  class="frustrated-icon"
+                  src="/frustrated.png"
+                  alt="Frustrated face"
+                />
+              </div>
               <label class="upload-label" for="uploadB">
                 <svg
                   width="16"
@@ -1435,8 +1471,8 @@
       const state = {
         round: 1,
         players: {
-          A: { name: "Player A", score: 0, streak: 0, avatar: "" },
-          B: { name: "Player B", score: 0, streak: 0, avatar: "" },
+          A: { name: "Player A", score: 0, streak: 0, avatar: "", punched: 0 },
+          B: { name: "Player B", score: 0, streak: 0, avatar: "", punched: 0 },
         },
         roundWinners: [],
         history: [],
@@ -1476,21 +1512,27 @@
             : state.players.A.score > state.players.B.score
               ? "A"
               : "B";
-        if (leader === "A") {
-          setDisplay("#crownA", "flex");
-          setDisplay("#crownB", "none");
-        } else if (leader === "B") {
-          setDisplay("#crownB", "flex");
-          setDisplay("#crownA", "none");
-        } else {
-          setDisplay("#crownA", "none");
-          setDisplay("#crownB", "none");
-        }
+        const setCrownState = (player, isLeader) => {
+          const selector = `#crown${player}`;
+          const crownEl = getEl(selector);
+          if (!crownEl) return;
+          const punched = Number(state.players[player].punched) || 0;
+          const isFrustrated = punched >= FRUSTRATED_THRESHOLD;
+          crownEl.classList.toggle("frustrated", isFrustrated);
+          if (isFrustrated || isLeader) {
+            setDisplay(selector, "flex");
+          } else {
+            setDisplay(selector, "none");
+          }
+        };
+        setCrownState("A", leader === "A");
+        setCrownState("B", leader === "B");
         renderModalLog();
         save();
       }
 
       const STREAK_CLASSES = ["smolder", "burning", "inferno"];
+      const FRUSTRATED_THRESHOLD = 3;
 
       function updateStreakBadge(el, streak) {
         if (!el) return;
@@ -1697,6 +1739,8 @@
         state.players[p].score = Math.max(0, state.players[p].score + d);
 
         if (d > 0) {
+          state.players[p].punched = 0;
+          state.players[other].punched = (state.players[other].punched || 0) + 1;
           state.players[p].streak++;
           state.players[other].streak = 0;
 
@@ -1736,6 +1780,7 @@
           Object.values(state.players).forEach((p) => {
             p.score = 0;
             p.streak = 0;
+            p.punched = 0;
           });
           state.history = [];
           state.roundWinners = [];
@@ -1774,6 +1819,7 @@
         Object.values(state.players).forEach((p) => {
           p.score = 0;
           p.streak = 0;
+          p.punched = 0;
         });
         log(`🏁 Round ${state.round} started!`);
         render();
@@ -1843,8 +1889,20 @@
 
       async function clearAllAppData() {
         state.round = 1;
-        state.players.A = { name: "Player A", score: 0, streak: 0, avatar: "" };
-        state.players.B = { name: "Player B", score: 0, streak: 0, avatar: "" };
+        state.players.A = {
+          name: "Player A",
+          score: 0,
+          streak: 0,
+          avatar: "",
+          punched: 0,
+        };
+        state.players.B = {
+          name: "Player B",
+          score: 0,
+          streak: 0,
+          avatar: "",
+          punched: 0,
+        };
         state.history = [];
         state.roundWinners = [];
         render();
@@ -1882,8 +1940,8 @@
           parsed.data && typeof parsed.data === "object" ? parsed.data : parsed;
         const out = {};
         out.players = {
-          A: { name: "Player A", score: 0, streak: 0, avatar: "" },
-          B: { name: "Player B", score: 0, streak: 0, avatar: "" },
+          A: { name: "Player A", score: 0, streak: 0, avatar: "", punched: 0 },
+          B: { name: "Player B", score: 0, streak: 0, avatar: "", punched: 0 },
         };
 
         if (source.players && typeof source.players === "object") {
@@ -1895,15 +1953,18 @@
                 : out.players[k].name;
             const avatar = typeof p.avatar === "string" ? p.avatar : "";
             let score = 0,
-              streak = 0;
+              streak = 0,
+              punched = 0;
             if (p.current && typeof p.current === "object") {
               score = Number(p.current.score) || 0;
               streak = Number(p.current.streak) || 0;
+              punched = Number(p.current.punched) || 0;
             } else {
               score = Number(p.score) || 0;
               streak = Number(p.streak) || 0;
+              punched = Number(p.punched) || 0;
             }
-            out.players[k] = { name, score, streak, avatar };
+            out.players[k] = { name, score, streak, avatar, punched };
           });
         }
 
