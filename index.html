@@ -1,274 +1,2428 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <meta name="theme-color" content="#0b0f1a" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="/manifest.webmanifest" />
-    <link rel="icon" type="image/png" sizes="1024x1024" href="/icons/punchbuggy.png" />
-    <title>Punch Buggy — Mobile</title>
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="1024x1024"
+      href="icons/punchbuggy.png"
+    />
+    <title>Punch Buggy</title>
+    <style>
+      /* --- CSS from app.css (Refactored for Layout) --- */
+      :root {
+        --bg: #0b0f1a;
+        --panel: #121829ee;
+        --panel-2: #0f1524aa;
+        --text: #e6ecff;
+        --muted: #97a3c0;
+        --accent: #5be2b0;
+        --accent-2: #8aa8ff;
+        --danger: #ff6b6b;
+        --gold: #ffd166;
+        --ember: #ff6b6b;
+        --fire: #ff9f43;
+        --plasma: #ffffff;
+        --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        --radius: 20px; /* Slightly rounder for modern feel */
+        --splash-image: url("/punchbuggy_splash.png");
+        --p1-base: #1a4d40;
+        --p1-accent: #5be2b0;
+        --p1-glow: rgba(91, 226, 176, 0.22);
+        --p1-gradient: linear-gradient(
+          180deg,
+          rgba(22, 39, 58, 0.85) 0%,
+          rgba(26, 77, 64, 0.45) 100%
+        );
+        --p2-base: #1e2a4a;
+        --p2-accent: #8aa8ff;
+        --p2-glow: rgba(138, 168, 255, 0.22);
+        --p2-gradient: linear-gradient(
+          180deg,
+          rgba(22, 39, 58, 0.85) 0%,
+          rgba(30, 42, 74, 0.45) 100%
+        );
+
+        /* Safe area variables */
+        --sat: env(safe-area-inset-top, 0px);
+        --sab: env(safe-area-inset-bottom, 20px);
+
+        /* JS fallback for older browsers without dynamic viewport units */
+        --app-height: 100vh;
+      }
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none; /* App-like feel */
+      }
+      input {
+        user-select: auto;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden; /* Prevent body scroll, handle inside containers */
+      }
+      body {
+        min-height: 100vh;
+        min-height: 100svh;
+        min-height: 100dvh;
+        height: 100vh;
+        height: 100svh;
+        height: 100dvh;
+        margin: 0;
+        font-family:
+          "Sora",
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          Helvetica,
+          Arial,
+          sans-serif;
+        color: var(--text);
+        background: radial-gradient(
+          120% 80% at 18% 0%,
+          #15254a 0%,
+          #0b0f1a 55%,
+          #070e1d 100%
+        );
+        display: flex;
+        flex-direction: column;
+        padding: 12px;
+        padding-top: calc(12px + var(--sat));
+        padding-bottom: calc(12px + var(--sab));
+        gap: 16px; /* Increased gap */
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background:
+          linear-gradient(180deg, rgba(11, 15, 26, 0.9), rgba(11, 15, 26, 0.4)),
+          var(--splash-image);
+        background-size: cover;
+        background-position: center;
+        opacity: 0.65;
+        z-index: -1;
+        transition: opacity 400ms ease;
+        pointer-events: none;
+      }
+
+      /* Splash screen overlay - shown while content loads */
+      #splashOverlay {
+        position: fixed;
+        inset: 0;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-color: #0b0f1a;
+        z-index: 9999;
+        opacity: 1;
+        transition: opacity 600ms ease-out;
+        pointer-events: auto;
+        display: block;
+        filter: brightness(0.1);
+        animation: splashBrighten 3s ease-out forwards;
+      }
+
+      @keyframes splashBrighten {
+        0% {
+          filter: brightness(0.1);
+        }
+        100% {
+          filter: brightness(1);
+        }
+      }
+
+      #splashOverlay.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      @supports not (height: 100dvh) {
+        body {
+          min-height: var(--app-height);
+          height: var(--app-height);
+        }
+      }
+
+      /* Header */
+      header {
+        flex: 0 0 auto;
+        text-align: center;
+        position: relative;
+        z-index: 50;
+        background: transparent;
+        box-shadow: none;
+        border: none;
+        backdrop-filter: blur(12px);
+        padding: 12px;
+        border-radius: 18px;
+      }
+      .app-title {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-height: 48px;
+      }
+      .app-title-img {
+        max-width: min(240px, 85vw);
+        width: auto;
+        max-height: 60px;
+        height: auto;
+        display: block;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .topbar {
+        display: grid;
+        grid-template-columns: 48px 1fr 48px;
+        align-items: center;
+        gap: 12px;
+      }
+      .icon-btn {
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 12px;
+        color: var(--text);
+        font-size: 20px;
+        cursor: pointer;
+        padding: 0;
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease;
+      }
+      .icon-btn:active {
+        transform: scale(0.95);
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      /* Main Player Container - Refactored for Flex Growth */
+      .players {
+        display: flex;
+        flex-direction: column;
+        gap: 16px; /* Spacing between cards */
+        flex: 1; /* Grow to fill screen */
+        overflow-y: auto;
+        min-height: 0; /* Important for nested flex scroll */
+        padding-bottom: 100px; /* Increased space for Toolbar */
+      }
+
+      /* Player Card - Refactored for Vertical Stretch */
+      .player-card {
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 16px;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+
+        /* Flex properties to fill space */
+        display: flex;
+        flex-direction: column;
+        flex: 0 0 auto; /* Don't grow, only use needed space */
+        justify-content: space-between;
+        min-height: 0; /* Remove min-height constraint */
+      }
+
+      .player-card.p1 {
+        border-top: 1px solid rgba(91, 226, 176, 0.22);
+        background: var(--p1-gradient);
+      }
+      .player-card.p2 {
+        border-top: 1px solid rgba(138, 168, 255, 0.22);
+        background: var(--p2-gradient);
+      }
+
+      /* Card Internals */
+      .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        flex: 0 0 auto;
+        padding: 12px 0; /* 20% enlarged vertical spacing */
+      }
+      .player-info {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+        width: 100%;
+        max-width: 50%;
+      }
+      .name-box {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+      }
+
+      /* Body now grows to push Score to center */
+      .card-body {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        flex: 1; /* Reduced from 2 to 1 (50% removal) */
+        padding: 16px 0; /* 10% gap spacing */
+        width: 100%;
+      }
+      .score-display {
+        text-align: right;
+        width: 50%;
+        margin-left: auto;
+        align-self: center;
+      }
+      .minus-btn {
+        justify-self: end;
+        align-self: flex-end;
+      }
+
+      .card-footer {
+        flex: 0 0 auto;
+        margin-top: 8px;
+        padding: 12px 0; /* 20% enlarged vertical spacing */
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+        align-items: center;
+        justify-content: flex-end;
+      }
+
+      /* Avatars */
+      .avatar-wrapper {
+        position: relative;
+        display: inline-block;
+        flex-shrink: 0;
+      }
+      .avatar {
+        width: 80px; /* Reduced from 96px */
+        height: 120px; /* Reduced from 144px - maintains 2:3 ratio */
+        aspect-ratio: 2 / 3;
+        border-radius: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        object-fit: cover;
+        background: rgba(0, 0, 0, 0.2);
+      }
+      .avatar-wrapper.loading::after,
+      .avatar-container.loading::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 18px;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.1) 0%,
+          rgba(255, 255, 255, 0.02) 50%,
+          rgba(255, 255, 255, 0.1) 100%
+        );
+        animation: skeletonShimmer 1.6s linear infinite;
+        pointer-events: none;
+      }
+      .avatar.loading,
+      .avatar-lg.loading {
+        filter: blur(3px);
+        opacity: 0.6;
+      }
+      .app-title-img.lazy-title {
+        filter: blur(4px);
+        opacity: 0.4;
+        transition:
+          opacity 0.4s ease,
+          filter 0.4s ease;
+      }
+      .app-title-img.lazy-title.loaded {
+        filter: none;
+        opacity: 1;
+      }
+      @keyframes skeletonShimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+      .player-card.p1 .avatar {
+        border-color: var(--p1-accent);
+      }
+      .player-card.p2 .avatar {
+        border-color: var(--p2-accent);
+      }
+
+      .player-crown {
+        position: absolute;
+        top: -10px;
+        left: -10px; /* Moved to left for better visual */
+        width: 32px;
+        height: 32px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        background: linear-gradient(180deg, #ffd166, #ffb347);
+        overflow: hidden;
+        z-index: 10;
+      }
+      .player-crown .crown-emoji {
+        font-size: 18px;
+        line-height: 1;
+      }
+      .player-crown .frustrated-icon {
+        display: none;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: inherit;
+        background: rgba(0, 0, 0, 0.6);
+      }
+      .player-crown.frustrated {
+        background: rgba(0, 0, 0, 0.35);
+        border-color: rgba(255, 255, 255, 0.25);
+        animation: frustratedPulse 1s ease-in-out infinite alternate;
+      }
+      .player-crown.frustrated .crown-emoji {
+        display: none;
+      }
+      .player-crown.frustrated .frustrated-icon {
+        display: block;
+      }
+      @keyframes frustratedPulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.15);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .upload-label {
+        position: absolute;
+        bottom: -4px;
+        right: -4px;
+        background: #2a3966;
+        color: #fff;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+      .upload-input {
+        display: none;
+      }
+
+      /* Typography & Inputs */
+      .player-input {
+        font-size: 20px; /* Larger font */
+        font-weight: 700;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text);
+        width: 100%;
+        padding: 4px 0;
+      }
+      .player-input:focus {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+      }
+
+      /* Score */
+      .score-stack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+        width: fit-content;
+      }
+      .score-display {
+        font-size: 96px; /* Huge score */
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -4px;
+        flex: 0 0 auto;
+        width: fit-content;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+      }
+      .player-card.p1 .score-display {
+        color: var(--p1-accent);
+        text-shadow: 0 0 30px var(--p1-glow);
+      }
+      .player-card.p2 .score-display {
+        color: var(--p2-accent);
+        text-shadow: 0 0 30px var(--p2-glow);
+      }
+      .score.bump {
+        animation: scoreBump 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      }
+
+      /* Buttons */
+      .minus-btn {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--muted);
+        font-size: 24px;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .minus-btn:active {
+        background: rgba(255, 255, 255, 0.15);
+        transform: scale(0.9);
+      }
+
+      .punch-btn {
+        flex: 1 1 auto;
+        min-width: 180px;
+        padding: 24px; /* Taller button */
+        border-radius: 20px;
+        border: none;
+        font-weight: 800;
+        font-size: 20px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        transition:
+          transform 0.1s,
+          filter 0.1s;
+        position: relative;
+        overflow: hidden;
+      }
+      .punch-btn:active {
+        transform: scale(0.97);
+        filter: brightness(0.9);
+      }
+      .player-card.p1 .punch-btn {
+        background: var(--p1-accent);
+        color: #0b1a15;
+        box-shadow: 0 12px 30px var(--p1-glow);
+      }
+      .player-card.p2 .punch-btn {
+        background: var(--p2-accent);
+        color: #0b1226;
+        box-shadow: 0 12px 30px var(--p2-glow);
+      }
+
+      /* Streak Badges */
+      .streak-badge {
+        font-size: 16px;
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        color: var(--muted);
+        transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        position: relative;
+        z-index: 1;
+        width: fit-content;
+        align-self: center;
+      }
+      .fire-icon {
+        display: inline-block;
+        font-style: normal;
+        line-height: 1;
+      }
+      .streak-badge.smolder {
+        color: var(--ember);
+        border: 1px solid rgba(255, 107, 107, 0.2);
+        box-shadow: 0 0 10px rgba(255, 107, 107, 0.1) inset;
+        animation: breathe 3s infinite ease-in-out;
+      }
+      .streak-badge.smolder .fire-icon {
+        filter: drop-shadow(0 0 4px var(--ember));
+        opacity: 0.9;
+      }
+      .streak-badge.burning {
+        color: #ffd32a;
+        background: rgba(255, 159, 67, 0.1);
+        border: 1px solid rgba(255, 159, 67, 0.5);
+        text-shadow: 0 0 8px rgba(255, 159, 67, 0.6);
+        animation: flicker-bg 0.15s infinite alternate;
+      }
+      .streak-badge.burning .fire-icon {
+        transform: scale(1.2);
+        filter: drop-shadow(0 0 6px #ff9f43);
+        animation: flicker-icon 0.1s infinite alternate-reverse;
+      }
+      .streak-badge.inferno {
+        color: var(--plasma);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 77, 77, 0.3),
+          rgba(255, 159, 67, 0.3)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        text-shadow:
+          0 0 5px #fff,
+          0 0 15px var(--fire),
+          0 0 25px var(--ember);
+        box-shadow: 0 0 20px rgba(255, 100, 50, 0.4);
+        animation: inferno-shimmer 0.1s infinite;
+      }
+      .streak-badge.inferno .fire-icon {
+        font-size: 1.2em;
+        filter: drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px var(--fire));
+        animation: inferno-grow 0.4s infinite alternate ease-in-out;
+      }
+
+      @keyframes breathe {
+        0%,
+        100% {
+          border-color: rgba(255, 107, 107, 0.2);
+          text-shadow: 0 0 0 transparent;
+        }
+        50% {
+          border-color: rgba(255, 107, 107, 0.6);
+          text-shadow: 0 0 8px rgba(255, 107, 107, 0.4);
+        }
+      }
+      @keyframes flicker-bg {
+        0% {
+          box-shadow: 0 0 5px rgba(255, 159, 67, 0.2);
+          opacity: 0.95;
+        }
+        100% {
+          box-shadow: 0 0 12px rgba(255, 159, 67, 0.5);
+          opacity: 1;
+        }
+      }
+      @keyframes flicker-icon {
+        0% {
+          transform: scale(1.2) rotate(-1deg);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1.25) rotate(1deg);
+          opacity: 1;
+        }
+      }
+      @keyframes inferno-shimmer {
+        0% {
+          transform: translate(0, 0);
+        }
+        25% {
+          transform: translate(-0.2px, 0.2px);
+          border-color: rgba(255, 255, 255, 0.8);
+        }
+        50% {
+          transform: translate(0.2px, -0.2px);
+        }
+        75% {
+          transform: translate(-0.2px, -0.2px);
+          border-color: rgba(255, 255, 255, 0.4);
+        }
+        100% {
+          transform: translate(0.2px, 0.2px);
+        }
+      }
+      @keyframes inferno-grow {
+        0% {
+          transform: scale(1.3);
+        }
+        100% {
+          transform: scale(1.5);
+          filter: drop-shadow(0 0 8px #fff) drop-shadow(0 0 15px var(--fire));
+        }
+      }
+
+      /* Animations */
+      @keyframes scoreBump {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.15);
+        }
+      }
+      @keyframes winPulse {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.02);
+        }
+      }
+      .card.winner {
+        animation: winPulse 0.4s ease;
+        z-index: 5;
+      }
+
+      /* Bottom Toolbar */
+      .toolbar {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr 1fr; /* Emphasize middle action */
+        gap: 10px;
+        position: fixed;
+        bottom: 18px;
+        bottom: calc(10px + var(--sab));
+        left: 10px;
+        right: 10px;
+        z-index: 40;
+        padding: 10px;
+        border-radius: 22px;
+        background: linear-gradient(
+          180deg,
+          rgba(12, 18, 34, 0.9),
+          rgba(8, 12, 22, 0.95)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow:
+          0 14px 28px rgba(0, 0, 0, 0.35),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(14px);
+      }
+
+      button.tool-btn {
+        padding: 14px 12px;
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: 16px;
+        border: none;
+        cursor: pointer;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease,
+          filter 0.15s ease;
+      }
+      button.tool-btn:active {
+        transform: translateY(1px) scale(0.98);
+        filter: brightness(0.98);
+      }
+      .accent {
+        background: linear-gradient(180deg, #51d7b1, #2fbe93);
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(81, 215, 177, 0.25);
+      }
+      .trophy-btn {
+        background: linear-gradient(180deg, #ffd166, #ffb347);
+        color: #2b1a00;
+        box-shadow: 0 6px 18px rgba(255, 193, 102, 0.4);
+        font-size: 18px;
+        letter-spacing: 0.4px;
+      }
+      .danger {
+        background: linear-gradient(180deg, #ff7c7c, #ff4d4d);
+        color: #fff;
+      }
+      .ghost {
+        background: rgba(255, 107, 107, 0.15);
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        color: #ffd1d1;
+        backdrop-filter: blur(6px);
+      }
+      .ghost:active {
+        background: rgba(255, 107, 107, 0.25);
+      }
+
+      /* Menus & Modals */
+      .menu-panel {
+        position: absolute;
+        top: 70px;
+        left: 12px;
+        z-index: 60;
+        width: 220px;
+        padding: 8px;
+        border-radius: 16px;
+        background: rgba(12, 20, 40, 0.98);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+        display: none;
+        flex-direction: column;
+        gap: 4px;
+        backdrop-filter: blur(12px);
+      }
+      .menu-panel.open {
+        display: flex;
+        animation: slideDown 0.2s ease-out;
+      }
+      .menu-btn {
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 15px;
+        background: transparent;
+        color: var(--text);
+        border: none;
+        text-align: left;
+        cursor: pointer;
+      }
+      .menu-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .menu-btn.danger {
+        color: #ff9a9a;
+      }
+      .menu-btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        margin-right: 8px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .menu-btn-icon img {
+        width: 18px;
+        height: 18px;
+        filter: brightness(0) invert(1);
+      }
+      .menu-about {
+        margin-top: 6px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .menu-about-title {
+        font-size: 12px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .menu-about-version {
+        font-size: 14px;
+        color: var(--text);
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 90;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+        padding: 20px;
+      }
+      .modal-card {
+        background: #151b2e;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        width: 100%;
+        max-width: 500px;
+        padding: 24px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        max-height: 80vh;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+      .modal-title {
+        font-size: 20px;
+        font-weight: 800;
+      }
+      .modal-body {
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      /* App Title */
+      .app-title {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 1;
+      }
+      .title-main {
+        font-weight: 900;
+        font-size: 20px;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        letter-spacing: 1px;
+      }
+      #appVersion {
+        font-size: 10px;
+        opacity: 0.6;
+        font-family: monospace;
+        margin-top: 4px;
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Fullscreen Leaderboard Overrides */
+      .leaderboard-view {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: #0b0f1a;
+        padding: 20px;
+        overflow-y: auto;
+      }
+      .leaderboard-view h2 {
+        margin-top: 0;
+      }
+
+      .lb-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        padding: 8px 0 16px;
+        background: linear-gradient(
+          180deg,
+          rgba(11, 15, 26, 0.98),
+          rgba(11, 15, 26, 0.6)
+        );
+        backdrop-filter: blur(8px);
+      }
+      .matchup-card {
+        background: linear-gradient(
+          180deg,
+          rgba(18, 26, 43, 0.95),
+          rgba(12, 20, 36, 0.9)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 22px;
+        padding: 18px;
+        box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+      }
+      .matchup-header {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+      .players-row {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        gap: 12px;
+      }
+      .player {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 10px;
+        border-radius: 16px;
+        background: rgba(0, 0, 0, 0.18);
+      }
+      .player.p1 {
+        border: 1px solid rgba(91, 226, 176, 0.25);
+      }
+      .player.p2 {
+        border: 1px solid rgba(138, 168, 255, 0.25);
+      }
+      .avatar-lg {
+        width: 72px;
+        height: 108px;
+        aspect-ratio: 2 / 3;
+        border-radius: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        object-fit: cover;
+      }
+      .crown-icon {
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        font-size: 18px;
+        background: linear-gradient(180deg, #ffd166, #ffb347);
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      }
+      .avatar-container {
+        position: relative;
+      }
+      .player-name {
+        font-weight: 700;
+      }
+      .big-score {
+        font-size: 36px;
+        font-weight: 800;
+        letter-spacing: -1px;
+      }
+      .player.p1 .big-score {
+        color: var(--p1-accent);
+      }
+      .player.p2 .big-score {
+        color: var(--p2-accent);
+      }
+      .vs-divider {
+        font-weight: 800;
+        color: var(--muted);
+        letter-spacing: 0.2em;
+        font-size: 12px;
+      }
+      .meter-container {
+        margin-top: 16px;
+      }
+      .meter-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .meter-bar {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        overflow: hidden;
+        display: flex;
+      }
+      .meter-fill-p1 {
+        background: linear-gradient(90deg, #1aa97a, #5be2b0);
+      }
+      .meter-fill-p2 {
+        background: linear-gradient(90deg, #4b6bff, #8aa8ff);
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .stat-box {
+        background: rgba(15, 20, 33, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 12px;
+        text-align: center;
+      }
+      .stat-label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .stat-value {
+        font-size: 20px;
+        font-weight: 800;
+      }
+
+      .round-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .round-item {
+        display: grid;
+        grid-template-columns: 56px 1fr 64px;
+        gap: 12px;
+        align-items: center;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .round-item.win-a {
+        border-color: rgba(91, 226, 176, 0.3);
+      }
+      .round-item.win-b {
+        border-color: rgba(138, 168, 255, 0.3);
+      }
+      .round-item.tie {
+        border-color: rgba(255, 255, 255, 0.1);
+      }
+      .round-num {
+        font-weight: 700;
+        color: var(--muted);
+      }
+      .round-scores {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        font-weight: 700;
+      }
+      .score-val.p1.winner {
+        color: var(--p1-accent);
+      }
+      .score-val.p2.winner {
+        color: var(--p2-accent);
+      }
+      .score-val.dim {
+        opacity: 0.6;
+      }
+      .round-divider {
+        color: var(--muted);
+      }
+      .round-badge {
+        display: flex;
+        justify-content: flex-end;
+      }
+      .round-badge span {
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+      .badge-a {
+        background: rgba(91, 226, 176, 0.2);
+        color: var(--p1-accent);
+      }
+      .badge-b {
+        background: rgba(138, 168, 255, 0.2);
+        color: var(--p2-accent);
+      }
+      .badge-tie {
+        background: rgba(255, 255, 255, 0.12);
+        color: var(--muted);
+      }
+
+      .modal-subtitle {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+      .modal-log {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+    </style>
   </head>
   <body>
     <header>
       <div class="topbar">
-        <button class="icon-btn" id="menuBtn" aria-label="Menu">☰</button>
+        <button id="menuBtn" class="icon-btn">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
         <div class="app-title">
-          <div class="title-main">Punch Buggy</div>
+          <img
+            class="app-title-img lazy-title"
+            src="/punchbuggy_title_low.png"
+            data-high="/punchbuggy_title.png"
+            alt="Punch Buggy logo"
+            role="img"
+          />
+          <span class="sr-only">Punch Buggy</span>
         </div>
-        <button class="icon-btn" id="leaderboardBtn" aria-label="Scores">🏆</button>
-      </div>
-      <div class="roundbar">Round <span id="round">1</span> • <span id="lead">Tied</span></div>
-      <div class="menu-panel" id="menuPanel" aria-hidden="true">
-        <div class="menu-section">
-          <div class="menu-title">Menu</div>
-          <button class="menu-btn" id="dataBtn">&#x1F4BE; Data & Log</button>
-          <button class="menu-btn" id="rulesBtn">❓ Rules</button>
-        </div>
-        <div class="menu-meta">Version v<span id="appVersion">—</span></div>
+        <div></div>
       </div>
     </header>
 
-    <div class="players players-section">
+    <nav id="menuPanel" class="menu-panel" aria-label="Application menu">
+      <button
+        id="resetBtnMenu"
+        class="menu-btn danger"
+        aria-label="Reset game"
+        title="Reset game"
+      >
+        <span class="menu-btn-icon" aria-hidden="true">
+          <img src="/delete.svg" alt="" />
+        </span>
+        Reset Game
+      </button>
+      <button id="menuExport" class="menu-btn">Export JSON</button>
+      <button id="menuImport" class="menu-btn">Import JSON</button>
+      <div class="menu-about">
+        <div class="menu-about-title">About</div>
+        <div class="menu-about-version">
+          Version <span id="appVersion"></span>
+        </div>
+      </div>
+    </nav>
+
+    <main class="players">
+      <!-- Player A -->
       <div class="card player-card p1" data-player="A">
         <div class="card-header">
           <div class="player-info">
             <div class="avatar-wrapper">
               <img
-                class="avatar"
-                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%25' height='100%25' fill='%2316273a'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>A</text></svg>"
-                alt="Player A"
                 id="avatarA"
-                onerror="
-                  this.src =
-                    'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%25\' height=\'100%25\' fill=\'%2316273a\'/><text x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>A</text></svg>'
-                "
+                class="avatar"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%231a4d40'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50' y='65' font-size='40' text-anchor='middle' fill='%235be2b0'%3EA%3C/text%3E%3C/svg%3E"
               />
-              <span class="player-crown" id="crownA">👑</span>
-              <label class="upload-label" for="uploadA" aria-label="Change Player A avatar">
-                <svg class="upload-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <div id="crownA" class="player-crown" aria-hidden="true">
+                <span class="crown-emoji" aria-hidden="true">👑</span>
+                <img
+                  class="frustrated-icon"
+                  src="/frustrated.png"
+                  alt="Frustrated face"
+                />
+              </div>
+              <label class="upload-label" for="uploadA">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path
-                    fill="currentColor"
-                    d="M4 6h3l1-1h8l1 1h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm8 3.5a4.5 4.5 0 1 0 4.5 4.5A4.5 4.5 0 0 0 12 9.5zm0 1.5a3 3 0 1 1-3 3 3 3 0 0 1 3-3z"
+                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
                   />
+                  <circle cx="12" cy="13" r="4" />
                 </svg>
               </label>
-              <input type="file" class="upload-input" id="uploadA" accept="image/*" />
+              <input
+                type="file"
+                id="uploadA"
+                class="upload-input"
+                accept="image/*"
+              />
             </div>
             <div class="name-box">
-              <input class="player-input" id="nameA" value="Player A" />
+              <input id="nameA" class="player-input" value="Player A" />
             </div>
           </div>
-          <div class="streak-badge streak-right" id="streakA">🔥 0 Streak</div>
-        </div>
-        <div class="card-body">
-          <div class="score-display score" id="scoreA">0</div>
-          <button class="minus-btn" id="minusA" aria-label="Subtract point">−</button>
+          <div class="score-stack">
+            <div id="scoreA" class="score-display">0</div>
+            <div id="streakA" class="streak-badge" style="display: none"></div>
+          </div>
         </div>
         <div class="card-footer">
-          <button class="punch-btn" id="btnA">+1 Punch</button>
+          <button id="minusA" class="minus-btn">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <button id="btnA" class="punch-btn">PUNCH!</button>
         </div>
       </div>
 
+      <!-- Player B -->
       <div class="card player-card p2" data-player="B">
         <div class="card-header">
           <div class="player-info">
             <div class="avatar-wrapper">
               <img
-                class="avatar"
-                src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><rect width='100%25' height='100%25' fill='%2316273a'/><text x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Verdana,Arial' font-size='72' fill='%23ffffff'>B</text></svg>"
-                alt="Player B"
                 id="avatarB"
-                onerror="
-                  this.src =
-                    'data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'200\' height=\'200\'><rect width=\'100%25\' height=\'100%25\' fill=\'%2316273a\'/><text x=\'50%25\' y=\'50%25\' dominant-baseline=\'middle\' text-anchor=\'middle\' font-family=\'Verdana,Arial\' font-size=\'72\' fill=\'%23ffffff\'>B</text></svg>'
-                "
+                class="avatar"
+                src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%231e2a4a'%3E%3Crect width='100' height='100'/%3E%3Ctext x='50' y='65' font-size='40' text-anchor='middle' fill='%238aa8ff'%3EB%3C/text%3E%3C/svg%3E"
               />
-              <span class="player-crown" id="crownB">👑</span>
-              <label class="upload-label" for="uploadB" aria-label="Change Player B avatar">
-                <svg class="upload-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <div id="crownB" class="player-crown" aria-hidden="true">
+                <span class="crown-emoji" aria-hidden="true">👑</span>
+                <img
+                  class="frustrated-icon"
+                  src="/frustrated.png"
+                  alt="Frustrated face"
+                />
+              </div>
+              <label class="upload-label" for="uploadB">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
                   <path
-                    fill="currentColor"
-                    d="M4 6h3l1-1h8l1 1h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zm8 3.5a4.5 4.5 0 1 0 4.5 4.5A4.5 4.5 0 0 0 12 9.5zm0 1.5a3 3 0 1 1-3 3 3 3 0 0 1 3-3z"
+                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
                   />
+                  <circle cx="12" cy="13" r="4" />
                 </svg>
               </label>
-              <input type="file" class="upload-input" id="uploadB" accept="image/*" />
+              <input
+                type="file"
+                id="uploadB"
+                class="upload-input"
+                accept="image/*"
+              />
             </div>
             <div class="name-box">
-              <input class="player-input" id="nameB" value="Player B" />
+              <input id="nameB" class="player-input" value="Player B" />
             </div>
           </div>
-          <div class="streak-badge streak-right" id="streakB">🔥 0 Streak</div>
-        </div>
-        <div class="card-body">
-          <div class="score-display score" id="scoreB">0</div>
-          <button class="minus-btn" id="minusB" aria-label="Subtract point">−</button>
+          <div class="score-stack">
+            <div id="scoreB" class="score-display">0</div>
+            <div id="streakB" class="streak-badge" style="display: none"></div>
+          </div>
         </div>
         <div class="card-footer">
-          <button class="punch-btn" id="btnB">+1 Punch</button>
+          <button id="minusB" class="minus-btn">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <button id="btnB" class="punch-btn">PUNCH!</button>
         </div>
       </div>
-    </div>
+    </main>
 
     <div class="toolbar">
-      <button class="ghost" id="undoBtn">↶ Undo</button>
-      <button class="danger" id="resetBtn">⟳ Reset</button>
-      <button class="ghost" id="nextRound">Next Round ▶</button>
+      <button id="undoBtn" class="tool-btn ghost">Undo</button>
+      <button id="leaderboardBtn" class="tool-btn trophy-btn">
+        🏆 Leaderboard
+      </button>
+      <button id="nextRound" class="tool-btn accent">Next Round</button>
     </div>
 
-    <!-- Event log moved to Data modal -->
-
-    <!-- Leaderboard (hidden by default) -->
-    <div class="leaderboard-wrap" id="leaderboardWrap">
-      <div class="leaderboard card">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-          "
-        >
-          <div style="font-weight: 800">Scores</div>
-          <div>
-            <button class="ghost" id="clearBoard">Clear</button>
-            <button class="ghost" id="closeBoard">Close</button>
-          </div>
-        </div>
-        <div id="miniList" style="display: flex; flex-direction: column; gap: 8px">
-          <!-- compact per-round rows inserted here -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Fullscreen Leaderboard View -->
-    <div class="leaderboard-view" id="leaderboardView" role="dialog" aria-modal="true">
-      <div class="lb-header">
-        <div class="lb-title">🏆 Leaderboard</div>
-        <button class="lb-close" id="closeFull" aria-label="Close">✕</button>
-      </div>
-
-      <div class="lb-content">
-        <section class="matchup-card">
-          <div class="matchup-header">Total Wins</div>
-          <div class="players-row">
-            <div class="player p1" id="lbPlayerA">
-              <div class="avatar-container">
-                <span class="crown-icon" id="lbCrownA">👑</span>
-                <img class="avatar-lg" id="lbAvatarA" src="" alt="Player A" />
-              </div>
-              <div class="big-score" id="lbWinsA">0</div>
-              <div class="player-name" id="lbNameA">Player A</div>
-            </div>
-
-            <div class="vs-divider">VS</div>
-
-            <div class="player p2" id="lbPlayerB">
-              <div class="avatar-container">
-                <span class="crown-icon" id="lbCrownB">👑</span>
-                <img class="avatar-lg" id="lbAvatarB" src="" alt="Player B" />
-              </div>
-              <div class="big-score" id="lbWinsB">0</div>
-              <div class="player-name" id="lbNameB">Player B</div>
-            </div>
-          </div>
-
-          <div class="meter-container">
-            <div class="meter-labels">
-              <span id="lbPercentA" style="color: var(--accent)">50%</span>
-              <span id="lbPercentB" style="color: var(--accent-2)">50%</span>
-            </div>
-            <div class="meter-bar">
-              <div class="meter-fill-p1" id="lbMeterA"></div>
-              <div class="meter-fill-p2" id="lbMeterB"></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="stats-grid">
-          <div class="stat-box">
-            <div class="stat-label">Total Rounds</div>
-            <div class="stat-value" id="lbTotalRounds">0</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Ties</div>
-            <div class="stat-value" id="lbTotalTies">0</div>
-          </div>
-          <div class="stat-box">
-            <div class="stat-label">Total Punches</div>
-            <div class="stat-value" id="lbTotalPunches">0</div>
-          </div>
-        </section>
-
-        <section class="history-section">
-          <h3>History <span id="lbHistoryCount">0</span></h3>
-          <div class="round-list" id="roundList"></div>
-        </section>
-      </div>
-    </div>
-
-    <!-- Rules Modal -->
-    <div class="modal" id="rulesModal" role="dialog" aria-modal="true" style="display: none">
-      <div class="modal-card card">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-          "
-        >
-          <div style="font-weight: 900">Game Rules</div>
-          <button class="back-btn" id="closeRules">Close</button>
-        </div>
-        <div id="rulesContent" style="font-size: 14px; color: var(--muted); line-height: 1.4">
-          <!-- rules injected by JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- Data & Event Log Modal -->
-    <div class="modal" id="dataModal" role="dialog" aria-modal="true" style="display: none">
-      <div class="modal-card card">
+    <!-- Modals -->
+    <div id="rulesModal" class="modal">
+      <div class="modal-card">
         <div class="modal-header">
-          <div class="modal-title">Data & Log</div>
-          <div class="modal-actions">
-            <button class="back-btn" id="exportData">Export</button>
-            <button class="back-btn" id="importBtn">Import</button>
-            <input type="file" id="importFile" accept="application/json" style="display: none" />
-            <button class="back-btn danger" id="clearData">Delete all</button>
-            <button class="back-btn" id="closeData">Close</button>
-          </div>
+          <div class="modal-title">Game Rules</div>
+          <button id="closeRules" class="icon-btn">✕</button>
+        </div>
+        <div
+          id="rulesContent"
+          class="modal-body"
+          style="font-size: 14px; line-height: 1.6; color: var(--muted)"
+        ></div>
+      </div>
+    </div>
+
+    <div id="dataModal" class="modal">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title">Data & Logs</div>
+          <button id="closeData" class="icon-btn">✕</button>
         </div>
         <div class="modal-subtitle">
-          Export downloads the full game state (JSON). Import replaces the current state if
-          compatible. Delete all clears rounds, scores, history, names, and avatars.
+          Current session history and data management.
         </div>
-        <div class="modal-body">
+        <div
+          class="modal-body"
+          style="
+            background: rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+          "
+        >
           <ul id="modalLog" class="modal-log"></ul>
         </div>
-      </div>
-    </div>
-
-    <div class="update-banner" id="updateBanner" role="status" aria-live="polite">
-      <div>
-        <strong>Update ready</strong>
-        <div id="updateBannerText" style="font-size: 13px; color: var(--muted)">
-          A new version is available. Refresh to apply the latest fixes.
+        <div style="display: flex; gap: 10px; flex-wrap: wrap">
+          <button
+            id="exportData"
+            class="tool-btn ghost"
+            style="flex: 1; font-size: 14px; padding: 12px"
+          >
+            Export JSON
+          </button>
+          <button
+            id="importBtn"
+            class="tool-btn ghost"
+            style="flex: 1; font-size: 14px; padding: 12px"
+          >
+            Import JSON
+          </button>
+          <input
+            type="file"
+            id="importFile"
+            style="display: none"
+            accept=".json"
+          />
+          <button
+            id="clearData"
+            class="tool-btn danger"
+            style="flex: 1; font-size: 14px; padding: 12px"
+          >
+            Wipe All
+          </button>
         </div>
       </div>
-      <div class="update-actions">
-        <button class="ghost" id="dismissUpdate">Later</button>
-        <button id="refreshUpdate">Refresh</button>
-      </div>
     </div>
 
-    <script src="/app-version.js"></script>
-    <script type="module" src="/src/main.js"></script>
+    <div id="leaderboardView" class="leaderboard-view">
+      <div
+        class="lb-header"
+        style="
+          margin-bottom: 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        "
+      >
+        <h2 style="margin: 0">Leaderboard</h2>
+        <button id="closeFull" class="icon-btn">✕</button>
+      </div>
+
+      <div class="matchup-card">
+        <div class="matchup-header">Head to Head</div>
+        <div class="players-row">
+          <div class="player p1" id="lbPlayerA">
+            <div class="avatar-container">
+              <img
+                id="lbAvatarA"
+                class="avatar-lg"
+                src=""
+                style="
+                  width: 64px;
+                  height: 64px;
+                  border-radius: 16px;
+                  background: #333;
+                "
+              />
+              <div id="lbCrownA" class="crown-icon" style="display: none">
+                👑
+              </div>
+            </div>
+            <div id="lbNameA" class="player-name" style="margin-top: 8px">
+              Player A
+            </div>
+            <div id="lbWinsA" class="big-score">0</div>
+          </div>
+          <div class="vs-divider">VS</div>
+          <div class="player p2" id="lbPlayerB">
+            <div class="avatar-container">
+              <img
+                id="lbAvatarB"
+                class="avatar-lg"
+                src=""
+                style="
+                  width: 64px;
+                  height: 64px;
+                  border-radius: 16px;
+                  background: #333;
+                "
+              />
+              <div id="lbCrownB" class="crown-icon" style="display: none">
+                👑
+              </div>
+            </div>
+            <div id="lbNameB" class="player-name" style="margin-top: 8px">
+              Player B
+            </div>
+            <div id="lbWinsB" class="big-score">0</div>
+          </div>
+        </div>
+        <div class="meter-container">
+          <div class="meter-labels">
+            <span id="lbPercentA">50%</span>
+            <span id="lbPercentB">50%</span>
+          </div>
+          <div class="meter-bar">
+            <div id="lbMeterA" class="meter-fill-p1" style="width: 50%"></div>
+            <div id="lbMeterB" class="meter-fill-p2" style="width: 50%"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid" style="margin-top: 16px">
+        <div class="stat-box">
+          <div class="stat-label">Rounds</div>
+          <div class="stat-value" id="lbTotalRounds">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Punches</div>
+          <div class="stat-value" id="lbTotalPunches">0</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Ties</div>
+          <div class="stat-value" id="lbTotalTies">0</div>
+        </div>
+      </div>
+
+      <h3
+        style="
+          margin-top: 24px;
+          margin-bottom: 12px;
+          font-size: 16px;
+          color: var(--muted);
+        "
+      >
+        Round History
+      </h3>
+      <div id="roundList" class="round-list"></div>
+    </div>
+
+    <!-- Splash screen overlay - shown while content loads -->
+    <div
+      id="splashOverlay"
+      style="background-image: url(&quot;./punchbuggy_splash.jpg&quot;)"
+    ></div>
+
+    <script>
+      // Set app version for menu and service worker
+      window.PUNCHBUGGY_APP_VERSION = "3.3.1";
+    </script>
+
+    <script>
+      // --- JS from main.js (Embedded) ---
+      const setAppHeight = () => {
+        const height = window.visualViewport
+          ? window.visualViewport.height
+          : window.innerHeight;
+        document.documentElement.style.setProperty(
+          "--app-height",
+          `${Math.round(height)}px`,
+        );
+      };
+
+      setAppHeight();
+      const splashImages = {
+        punchbuggy_splash: "./punchbuggy_splash.jpg",
+        punchbuggy_splash_2: "./punchbuggy_splash_2.png",
+      };
+      const applySplashImage = () => {
+        const params = new URLSearchParams(window.location.search);
+        const requested = params.get("splash");
+        const key =
+          requested && splashImages[requested]
+            ? requested
+            : "punchbuggy_splash";
+        document.documentElement.style.setProperty(
+          "--splash-image",
+          `url(${splashImages[key]})`,
+        );
+        document.body.dataset.splash = key;
+      };
+      applySplashImage();
+
+      // Splash screen management
+      const hideSplash = () => {
+        const splash = document.getElementById("splashOverlay");
+        if (splash && !splash.classList.contains("hidden")) {
+          splash.classList.add("hidden");
+        }
+      };
+
+      // Hide splash after 2.8 seconds minimum (allows time for content to load)
+      const splashTimeout = setTimeout(hideSplash, 2800);
+
+      // Also hide splash when DOM is fully loaded (whichever comes first)
+      document.addEventListener("DOMContentLoaded", () => {
+        clearTimeout(splashTimeout);
+        hideSplash();
+      });
+
+      // Hide splash on window load (all resources loaded)
+      window.addEventListener("load", () => {
+        clearTimeout(splashTimeout);
+        hideSplash();
+      });
+
+      // Fallback: hide splash immediately if script reaches here (content already loaded)
+      if (document.readyState !== "loading") {
+        hideSplash();
+      }
+
+      window.addEventListener("resize", setAppHeight);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", setAppHeight);
+      }
+
+      const $ = (sel) => document.querySelector(sel);
+      const warnMissing = (sel) =>
+        console.warn(`[PunchBuggy] Missing element for selector: ${sel}`);
+      const getEl = (sel) => {
+        const el = $(sel);
+        if (!el) warnMissing(sel);
+        return el;
+      };
+      const setText = (sel, text) => {
+        const el = getEl(sel);
+        if (el) el.textContent = text;
+      };
+      const setValue = (sel, value) => {
+        const el = getEl(sel);
+        if (el) el.value = value;
+      };
+      const setSrc = (sel, value) => {
+        const el = getEl(sel);
+        if (el) el.src = value;
+      };
+      const setDisplay = (sel, value) => {
+        const el = getEl(sel);
+        if (el) el.style.display = value;
+      };
+      const DEBUG_TIMINGS = window.location.search.includes("debugTimings");
+      const lazyLoadHighResImage = (img) => {
+        if (!img) return;
+        const highSrc = img.dataset.high;
+        if (!highSrc || img.dataset.loaded === "true") return;
+        if (DEBUG_TIMINGS) {
+          const label = `highRes:${highSrc}`;
+          console.time(label);
+          img.dataset.timingLabel = label;
+        }
+        img.classList.add("loading");
+        const loader = new Image();
+        const finish = () => {
+          loader.onload = null;
+          loader.onerror = null;
+          img.classList.remove("loading");
+          img.classList.add("loaded");
+          img.dataset.loaded = "true";
+          if (DEBUG_TIMINGS && img.dataset.timingLabel) {
+            console.timeEnd(img.dataset.timingLabel);
+            delete img.dataset.timingLabel;
+          }
+        };
+        loader.onload = () => {
+          img.src = highSrc;
+          finish();
+        };
+        loader.onerror = finish;
+        loader.src = highSrc;
+      };
+
+      // Load title image immediately for faster display
+      window.addEventListener("DOMContentLoaded", () => {
+        const titleImg = document.querySelector(".app-title-img");
+        if (titleImg) {
+          lazyLoadHighResImage(titleImg);
+        }
+      });
+
+      const setAvatarSrc = (selector, src) => {
+        const img = getEl(selector);
+        if (!img) return;
+        const wrapper =
+          img.closest(".avatar-wrapper") || img.closest(".avatar-container");
+        if (img._lazyCleanup) img._lazyCleanup();
+        const loadedHandler = () => cleanup();
+        const cleanup = () => {
+          if (wrapper) wrapper.classList.remove("loading");
+          img.classList.remove("loading");
+          img.removeEventListener("load", loadedHandler);
+          img.removeEventListener("error", loadedHandler);
+          img._lazyCleanup = null;
+        };
+        img._lazyCleanup = cleanup;
+        if (wrapper) wrapper.classList.add("loading");
+        img.classList.add("loading");
+        img.addEventListener("load", loadedHandler);
+        img.addEventListener("error", loadedHandler);
+        img.src = src || "";
+      };
+      const avatarAPlaceholder = getEl("#avatarA");
+      const avatarBPlaceholder = getEl("#avatarB");
+      const defaultAvatarA = avatarAPlaceholder ? avatarAPlaceholder.src : "";
+      const defaultAvatarB = avatarBPlaceholder ? avatarBPlaceholder.src : "";
+      const onClick = (sel, handler) => {
+        const el = getEl(sel);
+        if (el) el.onclick = handler;
+      };
+      const onChange = (sel, handler) => {
+        const el = getEl(sel);
+        if (el) el.onchange = handler;
+      };
+      const safeStorageGet = (key) => {
+        try {
+          return localStorage.getItem(key);
+        } catch (err) {
+          console.warn(
+            `[PunchBuggy] Failed to read localStorage key "${key}"`,
+            err,
+          );
+          return null;
+        }
+      };
+      const safeStorageSet = (key, value) => {
+        try {
+          localStorage.setItem(key, value);
+          return true;
+        } catch (err) {
+          console.warn(
+            `[PunchBuggy] Failed to write localStorage key "${key}"`,
+            err,
+          );
+          return false;
+        }
+      };
+      const safeStorageRemove = (key) => {
+        try {
+          localStorage.removeItem(key);
+          return true;
+        } catch (err) {
+          console.warn(
+            `[PunchBuggy] Failed to remove localStorage key "${key}"`,
+            err,
+          );
+          return false;
+        }
+      };
+      const state = {
+        round: 1,
+        players: {
+          A: { name: "Player A", score: 0, streak: 0, avatar: "", punched: 0 },
+          B: { name: "Player B", score: 0, streak: 0, avatar: "", punched: 0 },
+        },
+        roundWinners: [],
+        history: [],
+        undoStack: [],
+      };
+
+      const versionEl = getEl("#appVersion");
+      if (versionEl) {
+        const storedVersion = safeStorageGet("punchBuggy_running_version");
+        const appVersion = window.PUNCHBUGGY_APP_VERSION || "unknown";
+        const currentVersion = storedVersion || appVersion || "—";
+        versionEl.textContent = `v${currentVersion}`;
+        if (!storedVersion || (appVersion && storedVersion !== appVersion)) {
+          safeStorageSet("punchBuggy_running_version", appVersion);
+          versionEl.textContent = `v${appVersion}`;
+        }
+      }
+
+      function render() {
+        if (DEBUG_TIMINGS) console.time("render");
+        setText("#scoreA", state.players.A.score);
+        setText("#scoreB", state.players.B.score);
+        updateStreakBadge(getEl("#streakA"), state.players.A.streak);
+        updateStreakBadge(getEl("#streakB"), state.players.B.streak);
+        setValue("#nameA", state.players.A.name);
+        setValue("#nameB", state.players.B.name);
+        const avatarA = state.players.A.avatar || defaultAvatarA;
+        const avatarB = state.players.B.avatar || defaultAvatarB;
+        setAvatarSrc("#avatarA", avatarA);
+        setAvatarSrc("#avatarB", avatarB);
+
+        // Note: #round and #lead logic was in original JS but no HTML elements for them were found in main UI scope
+        // If needed, they could be added to header.
+
+        renderLeaderboard();
+        lazyLoadHighResImage(getEl(".app-title-img"));
+
+        const leader =
+          state.players.A.score === state.players.B.score
+            ? null
+            : state.players.A.score > state.players.B.score
+              ? "A"
+              : "B";
+        const setCrownState = (player, isLeader) => {
+          const selector = `#crown${player}`;
+          const crownEl = getEl(selector);
+          if (!crownEl) return;
+          const punched = Number(state.players[player].punched) || 0;
+          if (isLeader) {
+            crownEl.classList.remove("frustrated");
+            setDisplay(selector, "flex");
+            return;
+          }
+          const isFrustrated = punched >= FRUSTRATED_THRESHOLD;
+          crownEl.classList.toggle("frustrated", isFrustrated);
+          if (isFrustrated) {
+            setDisplay(selector, "flex");
+          } else {
+            setDisplay(selector, "none");
+          }
+        };
+        setCrownState("A", leader === "A");
+        setCrownState("B", leader === "B");
+        renderModalLog();
+        save();
+      }
+
+      const STREAK_CLASSES = ["smolder", "burning", "inferno"];
+      const FRUSTRATED_THRESHOLD = 3;
+
+      function updateStreakBadge(el, streak) {
+        if (!el) return;
+        el.classList.remove(...STREAK_CLASSES);
+        if (streak <= 0) {
+          el.style.display = "none";
+          el.textContent = "";
+          return;
+        }
+        el.style.display = "inline-flex";
+        el.innerHTML = `<span class="fire-icon">🔥</span> ${streak}`;
+        if (streak >= 10) {
+          el.classList.add("inferno");
+        } else if (streak >= 5) {
+          el.classList.add("burning");
+        } else if (streak >= 3) {
+          el.classList.add("smolder");
+        }
+      }
+
+      function renderModalLog() {
+        const list = $("#modalLog");
+        if (!list) return;
+        list.innerHTML = "";
+        state.history
+          .slice()
+          .reverse()
+          .forEach((entry) => {
+            const item = document.createElement("li");
+            item.style.padding = "8px";
+            item.style.borderRadius = "8px";
+            item.style.background = "rgba(255,255,255,0.03)";
+            item.textContent = entry;
+            list.appendChild(item);
+          });
+      }
+
+      function renderLeaderboard() {
+        const rounds = state.roundWinners
+          .map((r) => {
+            if (!r) return null;
+            if (typeof r === "string") {
+              if (r === "A") return { winner: "A", scoreA: 0, scoreB: 0 };
+              if (r === "B") return { winner: "B", scoreA: 0, scoreB: 0 };
+              return { winner: "T", scoreA: 0, scoreB: 0 };
+            }
+            return r;
+          })
+          .filter(Boolean);
+
+        let totalA = 0;
+        let totalB = 0;
+        let winsA = 0;
+        let winsB = 0;
+        let ties = 0;
+        rounds.forEach((r) => {
+          totalA += r.scoreA;
+          totalB += r.scoreB;
+          if (r.winner === "A") winsA++;
+          else if (r.winner === "B") winsB++;
+          else ties++;
+        });
+
+        const totalPunches = totalA + totalB;
+        const winTotal = winsA + winsB;
+        const percentA = winTotal ? Math.round((winsA / winTotal) * 100) : 50;
+        const percentB = 100 - percentA;
+
+        const avatarAEl = $("#avatarA");
+        const avatarBEl = $("#avatarB");
+        const avatarA =
+          state.players.A.avatar || (avatarAEl ? avatarAEl.src : "");
+        const avatarB =
+          state.players.B.avatar || (avatarBEl ? avatarBEl.src : "");
+
+        setAvatarSrc("#lbAvatarA", avatarA);
+        setAvatarSrc("#lbAvatarB", avatarB);
+        if ($("#lbNameA")) $("#lbNameA").textContent = state.players.A.name;
+        if ($("#lbNameB")) $("#lbNameB").textContent = state.players.B.name;
+        if ($("#lbWinsA")) $("#lbWinsA").textContent = winsA;
+        if ($("#lbWinsB")) $("#lbWinsB").textContent = winsB;
+        if ($("#lbPercentA")) $("#lbPercentA").textContent = `${percentA}%`;
+        if ($("#lbPercentB")) $("#lbPercentB").textContent = `${percentB}%`;
+        if ($("#lbMeterA")) $("#lbMeterA").style.width = `${percentA}%`;
+        if ($("#lbMeterB")) $("#lbMeterB").style.width = `${percentB}%`;
+        if ($("#lbTotalRounds"))
+          $("#lbTotalRounds").textContent = rounds.length;
+        if ($("#lbTotalTies")) $("#lbTotalTies").textContent = ties;
+        if ($("#lbTotalPunches"))
+          $("#lbTotalPunches").textContent = totalPunches;
+
+        const playerAEl = $("#lbPlayerA");
+        const playerBEl = $("#lbPlayerB");
+        if (playerAEl) playerAEl.classList.toggle("winner", winsA > winsB);
+        if (playerBEl) playerBEl.classList.toggle("winner", winsB > winsA);
+        if ($("#lbCrownA"))
+          $("#lbCrownA").style.display = winsA > winsB ? "block" : "none";
+        if ($("#lbCrownB"))
+          $("#lbCrownB").style.display = winsB > winsA ? "block" : "none";
+
+        const roundList = $("#roundList");
+        if (roundList) {
+          roundList.innerHTML = "";
+          rounds
+            .slice()
+            .reverse()
+            .forEach((r, idx) => {
+              const roundNumber = rounds.length - idx;
+              const item = document.createElement("div");
+              const winClass =
+                r.winner === "A" ? "win-a" : r.winner === "B" ? "win-b" : "tie";
+              item.className = `round-item ${winClass}`;
+
+              const roundNum = document.createElement("div");
+              roundNum.className = "round-num";
+              roundNum.textContent = `#${roundNumber}`;
+
+              const scores = document.createElement("div");
+              scores.className = "round-scores";
+
+              const scoreA = document.createElement("span");
+              scoreA.className = `score-val p1 ${r.scoreA > r.scoreB ? "winner" : "dim"}`;
+              scoreA.textContent = r.scoreA;
+
+              const divider = document.createElement("span");
+              divider.className = "round-divider";
+              divider.textContent = "—";
+
+              const scoreB = document.createElement("span");
+              scoreB.className = `score-val p2 ${r.scoreB > r.scoreA ? "winner" : "dim"}`;
+              scoreB.textContent = r.scoreB;
+
+              scores.appendChild(scoreA);
+              scores.appendChild(divider);
+              scores.appendChild(scoreB);
+
+              const badge = document.createElement("div");
+              badge.className = "round-badge";
+              const badgeLabel = document.createElement("span");
+              badgeLabel.className =
+                r.winner === "A"
+                  ? "badge-a"
+                  : r.winner === "B"
+                    ? "badge-b"
+                    : "badge-tie";
+              badgeLabel.textContent = r.winner === "T" ? "TIE" : "WIN";
+              badge.appendChild(badgeLabel);
+
+              item.appendChild(roundNum);
+              item.appendChild(scores);
+              item.appendChild(badge);
+              roundList.appendChild(item);
+            });
+        }
+      }
+
+      function save() {
+        const { undoStack, ...persisted } = state;
+        const payload = JSON.stringify(persisted);
+        if (!safeStorageSet("punchBuggy", payload)) {
+          console.warn(
+            "[PunchBuggy] Save failed (localStorage may be full or unavailable).",
+          );
+        }
+      }
+      function load() {
+        const s = safeStorageGet("punchBuggy");
+        if (s) {
+          try {
+            const parsed = JSON.parse(s);
+            if (parsed && typeof parsed === "object") {
+              if (parsed.roundWinners && Array.isArray(parsed.roundWinners)) {
+                parsed.roundWinners = parsed.roundWinners.map((r) => {
+                  if (typeof r === "string") {
+                    if (r === "A") return { winner: "A", scoreA: 0, scoreB: 0 };
+                    if (r === "B") return { winner: "B", scoreA: 0, scoreB: 0 };
+                    return { winner: "T", scoreA: 0, scoreB: 0 };
+                  }
+                  return r;
+                });
+              }
+              Object.assign(state, parsed);
+            }
+          } catch (err) {
+            console.warn(
+              "[PunchBuggy] Failed to parse saved game state, clearing storage.",
+              err,
+            );
+            safeStorageRemove("punchBuggy");
+          }
+        }
+        state.undoStack = [];
+        render();
+      }
+
+      function log(msg) {
+        state.history.push(msg);
+        render();
+      }
+
+      function score(p, d = 1) {
+        pushUndoState();
+        const other = p === "A" ? "B" : "A";
+        state.players[p].score = Math.max(0, state.players[p].score + d);
+
+        if (d > 0) {
+          state.players[p].punched = 0;
+          state.players[other].punched =
+            (state.players[other].punched || 0) + 1;
+          state.players[p].streak++;
+          state.players[other].streak = 0;
+
+          const winnerCard = $(`.card[data-player="${p}"]`);
+          if (winnerCard) {
+            winnerCard.classList.add("winner");
+            setTimeout(() => winnerCard.classList.remove("winner"), 600);
+          }
+          const loserCard = $(`.card[data-player="${other}"]`);
+          if (loserCard) {
+            loserCard.classList.add("loser");
+            setTimeout(() => loserCard.classList.remove("loser"), 500);
+          }
+          const scoreEl = $(`#score${p}`);
+          if (scoreEl) {
+            scoreEl.classList.add("bump");
+            setTimeout(() => scoreEl.classList.remove("bump"), 500);
+          }
+          log(`${state.players[p].name} spotted a bug! +1`);
+        } else {
+          state.players[p].streak = 0;
+          log(`${state.players[p].name} correction: -1`);
+        }
+
+        render();
+      }
+
+      function pushUndoState() {
+        const { undoStack, ...snapshot } = state;
+        undoStack.push(JSON.parse(JSON.stringify(snapshot)));
+        if (undoStack.length > 50) undoStack.shift();
+      }
+
+      function reset() {
+        if (confirm("Reset entire game? This will also clear round history.")) {
+          state.round = 1;
+          Object.values(state.players).forEach((p) => {
+            p.score = 0;
+            p.streak = 0;
+            p.punched = 0;
+          });
+          state.history = [];
+          state.roundWinners = [];
+          render();
+        }
+      }
+
+      function undo() {
+        if (!state.undoStack.length) return;
+        const prev = state.undoStack.pop();
+        const { undoStack, ...rest } = state;
+        Object.assign(state, prev);
+        state.undoStack = undoStack;
+        render();
+      }
+      function recordRoundWinner() {
+        const a = state.players.A.score;
+        const b = state.players.B.score;
+        const playerAName =
+          state.players && state.players.A ? state.players.A.name : "Player A";
+        const playerBName =
+          state.players && state.players.B ? state.players.B.name : "Player B";
+        let win = "T";
+        if (a > b) win = "A";
+        else if (b > a) win = "B";
+        state.roundWinners.push({ winner: win, scoreA: a, scoreB: b });
+        if (win === "T") log(`🤝 Round ${state.round} tied ${a}-${b}`);
+        else if (win === "A")
+          log(`🏆 ${playerAName} won Round ${state.round} ${a}-${b}`);
+        else log(`🏆 ${playerBName} won Round ${state.round} ${b}-${a}`);
+      }
+
+      function nextRound() {
+        recordRoundWinner();
+        state.round++;
+        Object.values(state.players).forEach((p) => {
+          p.score = 0;
+          p.streak = 0;
+          p.punched = 0;
+        });
+        log(`🏁 Round ${state.round} started!`);
+        render();
+      }
+
+      function handleImageUpload(player, file) {
+        if (!file || !file.type.startsWith("image/")) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          state.players[player].avatar = e.target.result;
+          render();
+        };
+        reader.onerror = () => {
+          console.warn("[PunchBuggy] Avatar upload failed", reader.error);
+          alert("Failed to read the image file. Please try a smaller image.");
+        };
+        reader.readAsDataURL(file);
+      }
+
+      onClick("#btnA", () => score("A", 1));
+      onClick("#btnB", () => score("B", 1));
+      onClick("#minusA", () => score("A", -1));
+      onClick("#minusB", () => score("B", -1));
+      onClick("#resetBtnMenu", () => {
+        toggleMenu(false);
+        reset();
+      });
+      onClick("#menuExport", () => {
+        const exportBtn = getEl("#exportData");
+        if (exportBtn) exportBtn.click();
+      });
+      onClick("#menuImport", () => {
+        const importBtn = getEl("#importBtn");
+        if (importBtn) importBtn.click();
+      });
+      onClick("#undoBtn", undo);
+      onClick("#nextRound", nextRound);
+
+      function openFullLeaderboard() {
+        document.body.style.overflow = "hidden";
+        setDisplay("#leaderboardView", "block");
+        renderLeaderboard();
+        lazyLoadHighResImage(getEl(".app-title-img"));
+        if (DEBUG_TIMINGS) console.timeEnd("render");
+      }
+      function closeFullLeaderboard() {
+        document.body.style.overflow = "";
+        setDisplay("#leaderboardView", "none");
+      }
+      onClick("#leaderboardBtn", () => openFullLeaderboard());
+      onClick("#closeFull", () => closeFullLeaderboard());
+
+      const menuPanel = getEl("#menuPanel");
+      const menuBtn = getEl("#menuBtn");
+      function toggleMenu(force) {
+        if (!menuPanel) return;
+        const shouldOpen =
+          typeof force === "boolean"
+            ? force
+            : !menuPanel.classList.contains("open");
+        menuPanel.classList.toggle("open", shouldOpen);
+        menuPanel.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+        menuPanel.inert = !shouldOpen;
+        if (
+          !shouldOpen &&
+          menuBtn &&
+          menuPanel.contains(document.activeElement)
+        ) {
+          menuBtn.focus();
+        }
+      }
+      if (menuBtn) menuBtn.onclick = () => toggleMenu();
+
+      // Close menu when clicking outside of it
+      document.addEventListener("click", (e) => {
+        if (
+          menuPanel &&
+          menuPanel.classList.contains("open") &&
+          !menuPanel.contains(e.target) &&
+          menuBtn &&
+          !menuBtn.contains(e.target)
+        ) {
+          toggleMenu(false);
+        }
+      });
+
+      onClick("#closeData", () => {
+        setDisplay("#dataModal", "none");
+      });
+
+      async function clearAllAppData() {
+        state.round = 1;
+        state.players.A = {
+          name: "Player A",
+          score: 0,
+          streak: 0,
+          avatar: "",
+          punched: 0,
+        };
+        state.players.B = {
+          name: "Player B",
+          score: 0,
+          streak: 0,
+          avatar: "",
+          punched: 0,
+        };
+        state.history = [];
+        state.roundWinners = [];
+        render();
+        safeStorageRemove("punchBuggy");
+        safeStorageRemove("punchBuggy_running_version");
+        setDisplay("#dataModal", "none");
+      }
+
+      onClick("#clearData", () => {
+        if (
+          confirm(
+            "Delete all game data (rounds, scores, history, names, avatars)?",
+          )
+        ) {
+          clearAllAppData();
+        }
+      });
+
+      onClick("#exportData", () => {
+        const payload = JSON.stringify(state, null, 2);
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `punchbuggy-export-${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      });
+
+      function normalizeImportedState(parsed) {
+        if (!parsed || typeof parsed !== "object") return { error: "invalid" };
+        const source =
+          parsed.data && typeof parsed.data === "object" ? parsed.data : parsed;
+        const out = {};
+        out.players = {
+          A: { name: "Player A", score: 0, streak: 0, avatar: "", punched: 0 },
+          B: { name: "Player B", score: 0, streak: 0, avatar: "", punched: 0 },
+        };
+
+        if (source.players && typeof source.players === "object") {
+          ["A", "B"].forEach((k) => {
+            const p = source.players[k] || {};
+            const name =
+              typeof p.name === "string" && p.name.trim()
+                ? p.name.trim()
+                : out.players[k].name;
+            const avatar = typeof p.avatar === "string" ? p.avatar : "";
+            let score = 0,
+              streak = 0,
+              punched = 0;
+            if (p.current && typeof p.current === "object") {
+              score = Number(p.current.score) || 0;
+              streak = Number(p.current.streak) || 0;
+              punched = Number(p.current.punched) || 0;
+            } else {
+              score = Number(p.score) || 0;
+              streak = Number(p.streak) || 0;
+              punched = Number(p.punched) || 0;
+            }
+            out.players[k] = { name, score, streak, avatar, punched };
+          });
+        }
+
+        if (Number.isFinite(Number(source.round)))
+          out.round = Math.max(1, Math.round(Number(source.round)));
+        else if (
+          source.rounds &&
+          source.rounds.current &&
+          Number.isFinite(Number(source.rounds.current.number))
+        )
+          out.round = Math.max(
+            1,
+            Math.round(Number(source.rounds.current.number)),
+          );
+        else out.round = 1;
+
+        out.roundWinners = [];
+        if (source.rounds && Array.isArray(source.rounds.history)) {
+          out.roundWinners = source.rounds.history.map((r) => {
+            const winner = r && r.winner ? r.winner : "T";
+            const scoreA =
+              r && r.scores && Number.isFinite(Number(r.scores.A))
+                ? Number(r.scores.A)
+                : 0;
+            const scoreB =
+              r && r.scores && Number.isFinite(Number(r.scores.B))
+                ? Number(r.scores.B)
+                : 0;
+            return { winner, scoreA, scoreB };
+          });
+        } else if (Array.isArray(source.roundWinners)) {
+          out.roundWinners = source.roundWinners
+            .map((r) => {
+              if (typeof r === "string") {
+                if (r === "A") return { winner: "A", scoreA: 0, scoreB: 0 };
+                if (r === "B") return { winner: "B", scoreA: 0, scoreB: 0 };
+                return { winner: "T", scoreA: 0, scoreB: 0 };
+              }
+              return r;
+            })
+            .filter(Boolean);
+        }
+
+        if (Array.isArray(source.history)) {
+          out.history = source.history.map((h) => {
+            if (typeof h === "string") return h;
+            if (h && h.message) return h.message;
+            try {
+              return JSON.stringify(h);
+            } catch (e) {
+              return String(h);
+            }
+          });
+        } else {
+          out.history = [];
+        }
+        return out;
+      }
+
+      onClick("#importBtn", () => {
+        const input = getEl("#importFile");
+        if (input) input.click();
+      });
+      onChange("#importFile", async (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (!f) return;
+        try {
+          const text = await f.text();
+          const parsed = JSON.parse(text);
+          const normalized = normalizeImportedState(parsed);
+          if (normalized && normalized.error) {
+            alert("Invalid file: could not parse import");
+            e.target.value = "";
+            return;
+          }
+          if (
+            !confirm(
+              "Importing will replace your current game state. Continue?",
+            )
+          ) {
+            e.target.value = "";
+            return;
+          }
+          Object.assign(state, normalized);
+          render();
+          alert("Import successful");
+        } catch (err) {
+          alert(
+            "Failed to import: " +
+              (err && err.message ? err.message : String(err)),
+          );
+        }
+        e.target.value = "";
+      });
+
+      onClick("#closeRules", () => {
+        setDisplay("#rulesModal", "none");
+      });
+      onChange("#nameA", (e) => {
+        state.players.A.name = e.target.value;
+        render();
+      });
+      onChange("#nameB", (e) => {
+        state.players.B.name = e.target.value;
+        render();
+      });
+      onChange("#uploadA", (e) => handleImageUpload("A", e.target.files[0]));
+      onChange("#uploadB", (e) => handleImageUpload("B", e.target.files[0]));
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          const swUrl = new URL("service-worker.js", window.location.href);
+          const swFallbackUrl = new URL(
+            "service-worker.js",
+            window.location.origin,
+          );
+          const registerServiceWorker = (url) =>
+            navigator.serviceWorker.register(url.toString());
+
+          registerServiceWorker(swUrl)
+            .then((reg) => {
+              if (reg.waiting) {
+                reg.waiting.postMessage({ type: "SKIP_WAITING" });
+              }
+              reg.addEventListener("updatefound", () => {
+                const newWorker = reg.installing;
+                if (!newWorker) return;
+                newWorker.addEventListener("statechange", () => {
+                  if (
+                    newWorker.state === "installed" &&
+                    navigator.serviceWorker.controller
+                  ) {
+                    newWorker.postMessage({ type: "SKIP_WAITING" });
+                  }
+                });
+              });
+            })
+            .catch((err) => {
+              if (swUrl.toString() !== swFallbackUrl.toString()) {
+                registerServiceWorker(swFallbackUrl).catch((fallbackErr) =>
+                  console.warn(
+                    "[PunchBuggy] Service worker registration failed",
+                    fallbackErr,
+                  ),
+                );
+                return;
+              }
+              console.warn(
+                "[PunchBuggy] Service worker registration failed",
+                err,
+              );
+            });
+        });
+      }
+
+      load();
+    </script>
   </body>
 </html>

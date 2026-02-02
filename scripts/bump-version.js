@@ -1,37 +1,37 @@
 #!/usr/bin/env node
-'use strict';
+"use strict";
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 const args = process.argv.slice(2);
 const version = args[0];
 
 if (!version || !/^\d+\.\d+\.\d+$/.test(version)) {
-  console.error('Usage: node scripts/bump-version.js <x.y.z> [notes]');
+  console.error("Usage: node scripts/bump-version.js <x.y.z> [notes]");
   process.exit(1);
 }
 
-const notes = args.slice(1).join(' ').trim();
+const notes = args.slice(1).join(" ").trim();
 const date = new Date().toISOString().slice(0, 10);
 
-const root = path.resolve(__dirname, '..');
-const appVersionPath = path.join(root, 'public', 'app-version.js');
-const manifestPath = path.join(root, 'public', 'manifest.webmanifest');
-const changelogPath = path.join(root, 'CHANGELOG.md');
+const root = path.resolve(__dirname, "..");
+const appVersionPaths = [path.join(root, "public", "app-version.js")];
+const manifestPath = path.join(root, "manifest.webmanifest");
+const changelogPath = path.join(root, "CHANGELOG.md");
 
 function readFile(filePath) {
-  return fs.readFileSync(filePath, 'utf8');
+  return fs.readFileSync(filePath, "utf8");
 }
 
 function writeFile(filePath, contents) {
-  fs.writeFileSync(filePath, contents, 'utf8');
+  fs.writeFileSync(filePath, contents, "utf8");
 }
 
 function updateAppVersion(contents) {
   const pattern = /PUNCHBUGGY_APP_VERSION\s*=\s*['"][^'"]+['"]/;
   if (!pattern.test(contents)) {
-    throw new Error('Could not find PUNCHBUGGY_APP_VERSION assignment.');
+    throw new Error("Could not find PUNCHBUGGY_APP_VERSION assignment.");
   }
   return contents.replace(pattern, `PUNCHBUGGY_APP_VERSION = '${version}'`);
 }
@@ -39,7 +39,7 @@ function updateAppVersion(contents) {
 function updateManifest(contents) {
   const pattern = /"version"\s*:\s*"[^"]+"/;
   if (!pattern.test(contents)) {
-    throw new Error('Could not find manifest version.');
+    throw new Error("Could not find manifest version.");
   }
   return contents.replace(pattern, `"version": "${version}"`);
 }
@@ -48,17 +48,22 @@ function updateChangelog(contents) {
   if (contents.includes(`## [${version}]`)) {
     return contents;
   }
-  const lines = contents.split('\n');
-  const headerIndex = lines.findIndex((line) => line.startsWith('## ['));
+  const lines = contents.split("\n");
+  const headerIndex = lines.findIndex((line) => line.startsWith("## ["));
   const insertIndex = headerIndex === -1 ? lines.length : headerIndex;
-  const entry = [`## [${version}] - ${date}`, `- ${notes || 'TBD'}`, ''];
+  const entry = [`## [${version}] - ${date}`, `- ${notes || "TBD"}`, ""];
   lines.splice(insertIndex, 0, ...entry);
-  return lines.join('\n');
+  return lines.join("\n");
 }
 
 try {
-  const appVersion = updateAppVersion(readFile(appVersionPath));
-  writeFile(appVersionPath, appVersion);
+  appVersionPaths.forEach((filePath) => {
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Missing app version file: ${filePath}`);
+    }
+    const appVersion = updateAppVersion(readFile(filePath));
+    writeFile(filePath, appVersion);
+  });
 
   const manifest = updateManifest(readFile(manifestPath));
   writeFile(manifestPath, manifest);

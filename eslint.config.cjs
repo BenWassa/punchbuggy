@@ -1,27 +1,27 @@
-const globals = require('globals');
+const globals = require("globals");
 
 module.exports = [
   {
-    ignores: ['node_modules/**', 'dist/**', '.vite/**'],
+    ignores: ["node_modules/**", "dist/**", ".vite/**"],
   },
   {
-    files: ['**/*.js', '**/*.cjs'],
+    files: ["**/*.js", "**/*.cjs"],
     languageOptions: {
       ecmaVersion: 2021,
-      sourceType: 'module',
+      sourceType: "module",
       globals: {
         ...globals.browser,
         ...globals.worker,
       },
     },
     rules: {
-      'no-unused-vars': 'warn',
+      "no-unused-vars": "warn",
     },
   },
   {
-    files: ['scripts/**/*.js', 'vite.config.cjs'],
+    files: ["scripts/**/*.js", "vite.config.cjs"],
     languageOptions: {
-      sourceType: 'script',
+      sourceType: "script",
       globals: globals.node,
     },
   },

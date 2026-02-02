@@ -18,7 +18,7 @@ The auto-backup status still reports correctly, so the service worker is active;
   - Shows the banner when `reg.waiting` is present or when a new worker reaches the `installed` state.
   - Adds a 30 s auto-refresh timer **after** calling `showBanner`.
   - Calls `window.location.reload()` on every `controllerchange`, regardless of whether the user requested the refresh.
-- `service-worker.js#L14-L58`:
+- `public/service-worker.js#L14-L58`:
   - Uses `self.clients.claim()` on activate and reloads all shell assets into a versioned cache.
   - Only calls `skipWaiting()` when it receives a `SKIP_WAITING` postMessage.
 

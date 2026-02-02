@@ -1,14 +1,15 @@
 {
   "name": "punchbuggy",
   "private": true,
-  "version": "0.0.0",
+  "version": "3.3.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --outDir docs",
     "preview": "vite preview",
     "bump": "node scripts/bump-version.js",
     "lint": "eslint . --ext .js,.cjs",
     "format": "prettier --write .",
+    "prettier": "prettier --write .",
     "format:check": "prettier --check .",
     "release": "node scripts/release.js"
   },

@@ -2,18 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## [3.1.0] - 2026-02-01
+## [3.3.1] - 2026-02-02
 
-- Fix: Prevent silent service worker updates on mobile by gating page reloads behind update banner display. Updates now only apply with user confirmation or auto-timer, ensuring the banner is always shown before refreshing.
+- Fix splash screen loading with optimized JPG, title preload, and brightness fade animation
 
-## [3.0.1] - 2026-01-20
+## [3.3.0] - 2026-02-02
 
-- Patch release test
+- UI polish: taller avatars, score/streak layout, button/header tweaks
 
-## [3.0.0] - 2026-01-20
+## [3.0.0] - 2026-02-02
 
-- Build: introduce Vite bundler scaffold and move static assets to `public/`.
-- Refactor: extract inline CSS/JS into `src/styles/app.css` and `src/main.js` as a first modularization step.
+- Major UI refresh: new player layout, leaderboard presentation, and streamlined modals.
+- Remove auto backups + migration workflow and related UI text.
+- Silent service worker updates with versioned cache busting (no update banner).
 
 ## [2.2.0] - 2025-10-27
 
