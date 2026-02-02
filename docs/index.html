@@ -1526,10 +1526,16 @@
         const el = getEl(sel);
         if (el) el.style.display = value;
       };
+      const DEBUG_TIMINGS = window.location.search.includes("debugTimings");
       const lazyLoadHighResImage = (img) => {
         if (!img) return;
         const highSrc = img.dataset.high;
         if (!highSrc || img.dataset.loaded === "true") return;
+        if (DEBUG_TIMINGS) {
+          const label = `highRes:${highSrc}`;
+          console.time(label);
+          img.dataset.timingLabel = label;
+        }
         img.classList.add("loading");
         const loader = new Image();
         const finish = () => {
@@ -1538,6 +1544,10 @@
           img.classList.remove("loading");
           img.classList.add("loaded");
           img.dataset.loaded = "true";
+          if (DEBUG_TIMINGS && img.dataset.timingLabel) {
+            console.timeEnd(img.dataset.timingLabel);
+            delete img.dataset.timingLabel;
+          }
         };
         loader.onload = () => {
           img.src = highSrc;
@@ -1638,6 +1648,7 @@
       }
 
       function render() {
+        if (DEBUG_TIMINGS) console.time("render");
         setText("#scoreA", state.players.A.score);
         setText("#scoreB", state.players.B.score);
         updateStreakBadge(getEl("#streakA"), state.players.A.streak);
@@ -2016,6 +2027,8 @@
         document.body.style.overflow = "hidden";
         setDisplay("#leaderboardView", "block");
         renderLeaderboard();
+        lazyLoadHighResImage(getEl(".app-title-img"));
+        if (DEBUG_TIMINGS) console.timeEnd("render");
       }
       function closeFullLeaderboard() {
         document.body.style.overflow = "";
