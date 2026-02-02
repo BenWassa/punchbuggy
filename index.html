@@ -296,12 +296,24 @@
       .player-crown.frustrated {
         background: rgba(0, 0, 0, 0.35);
         border-color: rgba(255, 255, 255, 0.25);
+        animation: frustratedPulse 1s ease-in-out infinite alternate;
       }
       .player-crown.frustrated .crown-emoji {
         display: none;
       }
       .player-crown.frustrated .frustrated-icon {
         display: block;
+      }
+      @keyframes frustratedPulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.15);
+        }
+        100% {
+          transform: scale(1);
+        }
       }
 
       .upload-label {
