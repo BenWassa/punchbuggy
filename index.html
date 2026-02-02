@@ -696,11 +696,16 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 20px;
-        height: 20px;
+        width: 26px;
+        height: 26px;
         margin-right: 8px;
-        border-radius: 6px;
-        background: rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .menu-btn-icon img {
+        width: 18px;
+        height: 18px;
+        filter: brightness(0) invert(1);
       }
       .menu-about {
         margin-top: 6px;
@@ -1066,7 +1071,9 @@
         aria-label="Reset game"
         title="Reset game"
       >
-        <span class="menu-btn-icon" aria-hidden="true">🔁</span>
+        <span class="menu-btn-icon" aria-hidden="true">
+          <img src="/delete.svg" alt="" />
+        </span>
         Reset Game
       </button>
       <button id="menuExport" class="menu-btn">Export JSON</button>
