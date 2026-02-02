@@ -692,6 +692,16 @@
       .menu-btn.danger {
         color: #ff9a9a;
       }
+      .menu-btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.06);
+      }
       .menu-about {
         margin-top: 6px;
         padding: 10px 12px;
@@ -1056,7 +1066,27 @@
         aria-label="Reset game"
         title="Reset game"
       >
-        ♻️ Reset Game
+        <span class="menu-btn-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18" role="presentation">
+            <path
+              d="M6.5 8a6.5 6.5 0 1 1 1.72 4.58L4.5 6.07 6.83 3.7l3 3"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              fill="none"
+            />
+            <path
+              d="M22.5 13a9 9 0 1 1-2.75-6.34"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              fill="none"
+            />
+          </svg>
+        </span>
+        Reset Game
       </button>
       <button id="menuExport" class="menu-btn">Export JSON</button>
       <button id="menuImport" class="menu-btn">Import JSON</button>
