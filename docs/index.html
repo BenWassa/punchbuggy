@@ -283,6 +283,43 @@
         object-fit: cover;
         background: rgba(0, 0, 0, 0.2);
       }
+      .avatar-wrapper.loading::after,
+      .avatar-container.loading::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 18px;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.1) 0%,
+          rgba(255, 255, 255, 0.02) 50%,
+          rgba(255, 255, 255, 0.1) 100%
+        );
+        animation: skeletonShimmer 1.6s linear infinite;
+        pointer-events: none;
+      }
+      .avatar.loading,
+      .avatar-lg.loading {
+        filter: blur(3px);
+        opacity: 0.6;
+      }
+      .app-title-img.lazy-title {
+        filter: blur(4px);
+        opacity: 0.4;
+        transition: opacity 0.4s ease, filter 0.4s ease;
+      }
+      .app-title-img.lazy-title.loaded {
+        filter: none;
+        opacity: 1;
+      }
+      @keyframes skeletonShimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
       .player-card.p1 .avatar {
         border-color: var(--p1-accent);
       }
@@ -1083,9 +1120,10 @@
           </svg>
         </button>
         <div class="app-title">
-          <img
-            class="app-title-img"
-            src="/punchbuggy_title.png"
+        <img
+            class="app-title-img lazy-title"
+            src="/punchbuggy_title_low.png"
+            data-high="/punchbuggy_title.png"
             alt="Punch Buggy logo"
             role="img"
           />
@@ -1488,6 +1526,51 @@
         const el = getEl(sel);
         if (el) el.style.display = value;
       };
+      const lazyLoadHighResImage = (img) => {
+        if (!img) return;
+        const highSrc = img.dataset.high;
+        if (!highSrc || img.dataset.loaded === "true") return;
+        img.classList.add("loading");
+        const loader = new Image();
+        const finish = () => {
+          loader.onload = null;
+          loader.onerror = null;
+          img.classList.remove("loading");
+          img.classList.add("loaded");
+          img.dataset.loaded = "true";
+        };
+        loader.onload = () => {
+          img.src = highSrc;
+          finish();
+        };
+        loader.onerror = finish;
+        loader.src = highSrc;
+      };
+      const setAvatarSrc = (selector, src) => {
+        const img = getEl(selector);
+        if (!img) return;
+        const wrapper =
+          img.closest(".avatar-wrapper") || img.closest(".avatar-container");
+        if (img._lazyCleanup) img._lazyCleanup();
+        const loadedHandler = () => cleanup();
+        const cleanup = () => {
+          if (wrapper) wrapper.classList.remove("loading");
+          img.classList.remove("loading");
+          img.removeEventListener("load", loadedHandler);
+          img.removeEventListener("error", loadedHandler);
+          img._lazyCleanup = null;
+        };
+        img._lazyCleanup = cleanup;
+        if (wrapper) wrapper.classList.add("loading");
+        img.classList.add("loading");
+        img.addEventListener("load", loadedHandler);
+        img.addEventListener("error", loadedHandler);
+        img.src = src || "";
+      };
+      const avatarAPlaceholder = getEl("#avatarA");
+      const avatarBPlaceholder = getEl("#avatarB");
+      const defaultAvatarA = avatarAPlaceholder ? avatarAPlaceholder.src : "";
+      const defaultAvatarB = avatarBPlaceholder ? avatarBPlaceholder.src : "";
       const onClick = (sel, handler) => {
         const el = getEl(sel);
         if (el) el.onclick = handler;
@@ -1561,13 +1644,16 @@
         updateStreakBadge(getEl("#streakB"), state.players.B.streak);
         setValue("#nameA", state.players.A.name);
         setValue("#nameB", state.players.B.name);
-        if (state.players.A.avatar) setSrc("#avatarA", state.players.A.avatar);
-        if (state.players.B.avatar) setSrc("#avatarB", state.players.B.avatar);
+        const avatarA = state.players.A.avatar || defaultAvatarA;
+        const avatarB = state.players.B.avatar || defaultAvatarB;
+        setAvatarSrc("#avatarA", avatarA);
+        setAvatarSrc("#avatarB", avatarB);
 
         // Note: #round and #lead logic was in original JS but no HTML elements for them were found in main UI scope
         // If needed, they could be added to header.
 
         renderLeaderboard();
+        lazyLoadHighResImage(getEl(".app-title-img"));
 
         const leader =
           state.players.A.score === state.players.B.score
@@ -1676,8 +1762,8 @@
         const avatarB =
           state.players.B.avatar || (avatarBEl ? avatarBEl.src : "");
 
-        if ($("#lbAvatarA")) $("#lbAvatarA").src = avatarA;
-        if ($("#lbAvatarB")) $("#lbAvatarB").src = avatarB;
+        setAvatarSrc("#lbAvatarA", avatarA);
+        setAvatarSrc("#lbAvatarB", avatarB);
         if ($("#lbNameA")) $("#lbNameA").textContent = state.players.A.name;
         if ($("#lbNameB")) $("#lbNameB").textContent = state.players.B.name;
         if ($("#lbWinsA")) $("#lbWinsA").textContent = winsA;
