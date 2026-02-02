@@ -57,6 +57,9 @@
         /* Safe area variables */
         --sat: env(safe-area-inset-top, 0px);
         --sab: env(safe-area-inset-bottom, 20px);
+
+        /* JS fallback for older browsers without dynamic viewport units */
+        --app-height: 100vh;
       }
       * {
         box-sizing: border-box;
@@ -72,6 +75,12 @@
         overflow: hidden; /* Prevent body scroll, handle inside containers */
       }
       body {
+        min-height: 100vh;
+        min-height: 100svh;
+        min-height: 100dvh;
+        height: 100vh;
+        height: 100svh;
+        height: 100dvh;
         margin: 0;
         font-family:
           "Sora",
@@ -95,6 +104,13 @@
         padding-top: calc(12px + var(--sat));
         padding-bottom: calc(12px + var(--sab));
         gap: 16px; /* Increased gap */
+      }
+
+      @supports not (height: 100dvh) {
+        body {
+          min-height: var(--app-height);
+          height: var(--app-height);
+        }
       }
 
       /* Header */
@@ -1164,6 +1180,21 @@
     <script src="app-version.js"></script>
     <script>
       // --- JS from main.js (Embedded) ---
+      const setAppHeight = () => {
+        const height = window.visualViewport
+          ? window.visualViewport.height
+          : window.innerHeight;
+        document.documentElement.style.setProperty(
+          "--app-height",
+          `${Math.round(height)}px`
+        );
+      };
+
+      setAppHeight();
+      window.addEventListener("resize", setAppHeight);
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", setAppHeight);
+      }
 
       const $ = (sel) => document.querySelector(sel);
       const warnMissing = (sel) =>
@@ -1839,8 +1870,15 @@
 
       if ("serviceWorker" in navigator) {
         window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("./service-worker.js")
+          const swUrl = new URL("service-worker.js", window.location.href);
+          const swFallbackUrl = new URL(
+            "service-worker.js",
+            window.location.origin,
+          );
+          const registerServiceWorker = (url) =>
+            navigator.serviceWorker.register(url.toString());
+
+          registerServiceWorker(swUrl)
             .then((reg) => {
               if (reg.waiting) {
                 reg.waiting.postMessage({ type: "SKIP_WAITING" });
@@ -1858,12 +1896,21 @@
                 });
               });
             })
-            .catch((err) =>
+            .catch((err) => {
+              if (swUrl.toString() !== swFallbackUrl.toString()) {
+                registerServiceWorker(swFallbackUrl).catch((fallbackErr) =>
+                  console.warn(
+                    "[PunchBuggy] Service worker registration failed",
+                    fallbackErr,
+                  ),
+                );
+                return;
+              }
               console.warn(
                 "[PunchBuggy] Service worker registration failed",
                 err,
-              ),
-            );
+              );
+            });
         });
       }
 
