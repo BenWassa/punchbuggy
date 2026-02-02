@@ -1,0 +1,22 @@
+{
+  "name": "punchbuggy",
+  "private": true,
+  "version": "3.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "bump": "node scripts/bump-version.js",
+    "lint": "eslint . --ext .js,.cjs",
+    "format": "prettier --write .",
+    "prettier": "prettier --write .",
+    "format:check": "prettier --check .",
+    "release": "node scripts/release.js"
+  },
+  "devDependencies": {
+    "eslint": "^9.18.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "vite": "^5.4.0"
+  }
+}
