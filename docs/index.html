@@ -126,6 +126,30 @@
         padding: 12px;
         border-radius: 18px;
       }
+      .app-title {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-height: 48px;
+      }
+      .app-title-img {
+        width: min(220px, 80vw);
+        height: auto;
+        display: block;
+        max-height: 48px;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
       .topbar {
         display: grid;
         grid-template-columns: 48px 1fr 48px;
@@ -1058,7 +1082,13 @@
           </svg>
         </button>
         <div class="app-title">
-          <span class="title-main">PUNCH BUGGY</span>
+          <img
+            class="app-title-img"
+            src="/punchbuggy_title.png"
+            alt="Punch Buggy logo"
+            role="img"
+          />
+          <span class="sr-only">Punch Buggy</span>
         </div>
         <div></div>
       </div>
