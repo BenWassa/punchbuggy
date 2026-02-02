@@ -10,7 +10,7 @@ const APP_SHELL = [
   './manifest.webmanifest',
   './service-worker.js',
   './app-version.js',
-  './icons/punchbuggy.svg',
+  './icons/punchbuggy.png',
 ].map((path) => new URL(path, self.location).toString());
 
 self.addEventListener('install', (event) => {

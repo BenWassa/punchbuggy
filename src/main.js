@@ -2,6 +2,62 @@ import './styles/app.css';
 import '../archive/migrations/migrate-to-v2.js';
 
 const $ = (sel) => document.querySelector(sel);
+const warnMissing = (sel) => console.warn(`[PunchBuggy] Missing element for selector: ${sel}`);
+const getEl = (sel) => {
+  const el = $(sel);
+  if (!el) warnMissing(sel);
+  return el;
+};
+const setText = (sel, text) => {
+  const el = getEl(sel);
+  if (el) el.textContent = text;
+};
+const setValue = (sel, value) => {
+  const el = getEl(sel);
+  if (el) el.value = value;
+};
+const setSrc = (sel, value) => {
+  const el = getEl(sel);
+  if (el) el.src = value;
+};
+const setDisplay = (sel, value) => {
+  const el = getEl(sel);
+  if (el) el.style.display = value;
+};
+const onClick = (sel, handler) => {
+  const el = getEl(sel);
+  if (el) el.onclick = handler;
+};
+const onChange = (sel, handler) => {
+  const el = getEl(sel);
+  if (el) el.onchange = handler;
+};
+const safeStorageGet = (key) => {
+  try {
+    return localStorage.getItem(key);
+  } catch (err) {
+    console.warn(`[PunchBuggy] Failed to read localStorage key "${key}"`, err);
+    return null;
+  }
+};
+const safeStorageSet = (key, value) => {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (err) {
+    console.warn(`[PunchBuggy] Failed to write localStorage key "${key}"`, err);
+    return false;
+  }
+};
+const safeStorageRemove = (key) => {
+  try {
+    localStorage.removeItem(key);
+    return true;
+  } catch (err) {
+    console.warn(`[PunchBuggy] Failed to remove localStorage key "${key}"`, err);
+    return false;
+  }
+};
 const state = {
   round: 1,
   players: {
@@ -17,43 +73,45 @@ const state = {
 // Version display: show the *running* version (persisted in localStorage on first load)
 // rather than the newly-fetched version from app-version.js, so users see the current version
 // until they explicitly click Refresh to apply the update.
-const versionEl = $('#appVersion');
+const versionEl = getEl('#appVersion');
 if (versionEl) {
-  const storedVersion = localStorage.getItem('punchBuggy_running_version');
+  const storedVersion = safeStorageGet('punchBuggy_running_version');
   const appVersion = window.PUNCHBUGGY_APP_VERSION || 'unknown';
   const currentVersion = storedVersion || appVersion || '—';
   versionEl.textContent = currentVersion;
   // Persist or sync the running version so the UI reflects the active build.
   if (!storedVersion || (appVersion && storedVersion !== appVersion)) {
-    localStorage.setItem('punchBuggy_running_version', appVersion);
+    safeStorageSet('punchBuggy_running_version', appVersion);
     versionEl.textContent = appVersion;
   }
 }
 
 // Console logging: print version details on page load for debugging
 console.log('[PunchBuggy] Version info:', {
-  runningVersion: localStorage.getItem('punchBuggy_running_version'),
+  runningVersion: safeStorageGet('punchBuggy_running_version'),
   fetchedVersion: window.PUNCHBUGGY_APP_VERSION,
   autoApplyEnabled: window.PUNCHBUGGY_AUTO_APPLY_UPDATES,
 });
 
 function render() {
-  $('#scoreA').textContent = state.players.A.score;
-  $('#scoreB').textContent = state.players.B.score;
-  updateStreakBadge($('#streakA'), state.players.A.streak);
-  updateStreakBadge($('#streakB'), state.players.B.streak);
-  $('#nameA').value = state.players.A.name;
-  $('#nameB').value = state.players.B.name;
-  if (state.players.A.avatar) $('#avatarA').src = state.players.A.avatar;
-  if (state.players.B.avatar) $('#avatarB').src = state.players.B.avatar;
-  $('#round').textContent = state.round;
+  setText('#scoreA', state.players.A.score);
+  setText('#scoreB', state.players.B.score);
+  updateStreakBadge(getEl('#streakA'), state.players.A.streak);
+  updateStreakBadge(getEl('#streakB'), state.players.B.streak);
+  setValue('#nameA', state.players.A.name);
+  setValue('#nameB', state.players.B.name);
+  if (state.players.A.avatar) setSrc('#avatarA', state.players.A.avatar);
+  if (state.players.B.avatar) setSrc('#avatarB', state.players.B.avatar);
+  setText('#round', state.round);
   const diff = state.players.A.score - state.players.B.score;
-  $('#lead').textContent =
+  setText(
+    '#lead',
     diff === 0
       ? 'Tied'
       : diff > 0
         ? `${state.players.A.name} +${diff}`
-        : `${state.players.B.name} +${Math.abs(diff)}`;
+        : `${state.players.B.name} +${Math.abs(diff)}`
+  );
   renderLeaderboard();
   // show crown on current leader avatar
   const leader =
@@ -63,14 +121,14 @@ function render() {
         ? 'A'
         : 'B';
   if (leader === 'A') {
-    $('#crownA').style.display = 'flex';
-    $('#crownB').style.display = 'none';
+    setDisplay('#crownA', 'flex');
+    setDisplay('#crownB', 'none');
   } else if (leader === 'B') {
-    $('#crownB').style.display = 'flex';
-    $('#crownA').style.display = 'none';
+    setDisplay('#crownB', 'flex');
+    setDisplay('#crownA', 'none');
   } else {
-    $('#crownA').style.display = 'none';
-    $('#crownB').style.display = 'none';
+    setDisplay('#crownA', 'none');
+    setDisplay('#crownB', 'none');
   }
   renderModalLog();
   save();
@@ -119,7 +177,8 @@ function renderLeaderboard() {
     .filter(Boolean);
 
   // small card: compact per-round rows
-  const mini = $('#miniList');
+  const mini = getEl('#miniList');
+  if (!mini) return;
   mini.innerHTML = '';
   rounds.forEach((r, idx) => {
     const row = document.createElement('div');
@@ -176,8 +235,10 @@ function renderLeaderboard() {
   const percentA = winTotal ? Math.round((winsA / winTotal) * 100) : 50;
   const percentB = 100 - percentA;
 
-  const avatarA = state.players.A.avatar || $('#avatarA').src;
-  const avatarB = state.players.B.avatar || $('#avatarB').src;
+  const avatarAEl = $('#avatarA');
+  const avatarBEl = $('#avatarB');
+  const avatarA = state.players.A.avatar || (avatarAEl ? avatarAEl.src : '');
+  const avatarB = state.players.B.avatar || (avatarBEl ? avatarBEl.src : '');
 
   if ($('#lbAvatarA')) $('#lbAvatarA').src = avatarA;
   if ($('#lbAvatarB')) $('#lbAvatarB').src = avatarB;
@@ -254,24 +315,34 @@ function renderLeaderboard() {
 
 function save() {
   const { undoStack, ...persisted } = state;
-  localStorage.setItem('punchBuggy', JSON.stringify(persisted));
+  const payload = JSON.stringify(persisted);
+  if (!safeStorageSet('punchBuggy', payload)) {
+    console.warn('[PunchBuggy] Save failed (localStorage may be full or unavailable).');
+  }
 }
 function load() {
-  const s = localStorage.getItem('punchBuggy');
+  const s = safeStorageGet('punchBuggy');
   if (s) {
-    const parsed = JSON.parse(s);
-    // migrate roundWinners legacy strings to objects
-    if (parsed.roundWinners && Array.isArray(parsed.roundWinners)) {
-      parsed.roundWinners = parsed.roundWinners.map((r) => {
-        if (typeof r === 'string') {
-          if (r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
-          if (r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
-          return { winner: 'T', scoreA: 0, scoreB: 0 };
+    try {
+      const parsed = JSON.parse(s);
+      if (parsed && typeof parsed === 'object') {
+        // migrate roundWinners legacy strings to objects
+        if (parsed.roundWinners && Array.isArray(parsed.roundWinners)) {
+          parsed.roundWinners = parsed.roundWinners.map((r) => {
+            if (typeof r === 'string') {
+              if (r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
+              if (r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
+              return { winner: 'T', scoreA: 0, scoreB: 0 };
+            }
+            return r;
+          });
         }
-        return r;
-      });
+        Object.assign(state, parsed);
+      }
+    } catch (err) {
+      console.warn('[PunchBuggy] Failed to parse saved game state, clearing storage.', err);
+      safeStorageRemove('punchBuggy');
     }
-    Object.assign(state, parsed);
   }
   state.undoStack = [];
   render();
@@ -292,16 +363,25 @@ function score(p, d = 1) {
     state.players[other].streak = 0;
 
     // Winner animation
-    $(`.card[data-player="${p}"]`).classList.add('winner');
-    setTimeout(() => $(`.card[data-player="${p}"]`).classList.remove('winner'), 600);
+    const winnerCard = $(`.card[data-player="${p}"]`);
+    if (winnerCard) {
+      winnerCard.classList.add('winner');
+      setTimeout(() => winnerCard.classList.remove('winner'), 600);
+    }
 
     // Loser animation
-    $(`.card[data-player="${other}"]`).classList.add('loser');
-    setTimeout(() => $(`.card[data-player="${other}"]`).classList.remove('loser'), 500);
+    const loserCard = $(`.card[data-player="${other}"]`);
+    if (loserCard) {
+      loserCard.classList.add('loser');
+      setTimeout(() => loserCard.classList.remove('loser'), 500);
+    }
 
     // Score bump
-    $(`#score${p}`).classList.add('bump');
-    setTimeout(() => $(`#score${p}`).classList.remove('bump'), 500);
+    const scoreEl = $(`#score${p}`);
+    if (scoreEl) {
+      scoreEl.classList.add('bump');
+      setTimeout(() => scoreEl.classList.remove('bump'), 500);
+    }
 
     log(`${state.players[p].name} spotted a bug! +1`);
   } else {
@@ -342,13 +422,15 @@ function undo() {
 function recordRoundWinner() {
   const a = state.players.A.score;
   const b = state.players.B.score;
+  const playerAName = state.players && state.players.A ? state.players.A.name : 'Player A';
+  const playerBName = state.players && state.players.B ? state.players.B.name : 'Player B';
   let win = 'T';
   if (a > b) win = 'A';
   else if (b > a) win = 'B';
   state.roundWinners.push({ winner: win, scoreA: a, scoreB: b });
   if (win === 'T') log(`🤝 Round ${state.round} tied ${a}-${b}`);
-  else if (win === 'A') log(`🏆 ${state.players.A.name} won Round ${state.round} ${a}-${b}`);
-  else log(`🏆 ${state.players.B.name} won Round ${state.round} ${b}-${a}`);
+  else if (win === 'A') log(`🏆 ${playerAName} won Round ${state.round} ${a}-${b}`);
+  else log(`🏆 ${playerBName} won Round ${state.round} ${b}-${a}`);
 }
 
 function nextRound() {
@@ -370,43 +452,49 @@ function handleImageUpload(player, file) {
     state.players[player].avatar = e.target.result;
     render();
   };
+  reader.onerror = () => {
+    console.warn('[PunchBuggy] Avatar upload failed', reader.error);
+    alert('Failed to read the image file. Please try a smaller image.');
+  };
+  reader.onabort = () => {
+    console.warn('[PunchBuggy] Avatar upload was aborted');
+  };
   reader.readAsDataURL(file);
 }
 
-$('#btnA').onclick = () => score('A', 1);
-$('#btnB').onclick = () => score('B', 1);
-$('#minusA').onclick = () => score('A', -1);
-$('#minusB').onclick = () => score('B', -1);
-$('#resetBtn').onclick = reset;
-$('#undoBtn').onclick = undo;
-$('#nextRound').onclick = nextRound;
+onClick('#btnA', () => score('A', 1));
+onClick('#btnB', () => score('B', 1));
+onClick('#minusA', () => score('A', -1));
+onClick('#minusB', () => score('B', -1));
+onClick('#resetBtn', reset);
+onClick('#undoBtn', undo);
+onClick('#nextRound', nextRound);
 // bottom nav and leaderboard controls
 function toggleLeaderboard(show) {
-  const wrap = $('#leaderboardWrap');
-  wrap.style.display = show ? 'block' : 'none';
+  setDisplay('#leaderboardWrap', show ? 'block' : 'none');
 }
 
-$('#clearBoard').onclick = () => {
+onClick('#clearBoard', () => {
   if (confirm('Clear round history?')) {
     state.roundWinners = [];
     render();
   }
-};
-$('#closeBoard').onclick = () => toggleLeaderboard(false);
+});
+onClick('#closeBoard', () => toggleLeaderboard(false));
 // fullscreen leaderboard controls
 function openFullLeaderboard() {
   document.body.style.overflow = 'hidden';
-  $('#leaderboardView').style.display = 'block';
+  setDisplay('#leaderboardView', 'block');
   renderLeaderboard();
 }
 function closeFullLeaderboard() {
   document.body.style.overflow = '';
-  $('#leaderboardView').style.display = 'none';
+  setDisplay('#leaderboardView', 'none');
 }
-$('#leaderboardBtn').onclick = () => openFullLeaderboard();
-$('#closeFull').onclick = () => closeFullLeaderboard();
-const menuPanel = $('#menuPanel');
-const menuBtn = $('#menuBtn');
+onClick('#leaderboardBtn', () => openFullLeaderboard());
+onClick('#closeFull', () => closeFullLeaderboard());
+const menuPanel = getEl('#menuPanel');
+const menuBtn = getEl('#menuBtn');
 function toggleMenu(force) {
   if (!menuPanel) return;
   const shouldOpen = typeof force === 'boolean' ? force : !menuPanel.classList.contains('open');
@@ -417,9 +505,7 @@ function toggleMenu(force) {
     menuBtn.focus();
   }
 }
-if (menuBtn) {
-  menuBtn.onclick = () => toggleMenu();
-}
+if (menuBtn) menuBtn.onclick = () => toggleMenu();
 // Rules content (concise, comprehensive)
 const rules = [
   'Objective: Spot the VW Beetle (or other agreed target) first to score a point.',
@@ -431,25 +517,26 @@ const rules = [
   'Tie Rounds: If both players have equal scores when Next Round is pressed, the round is recorded as a tie.',
   'Customization: Change player names or avatars before/after rounds. Avatars are local only.',
 ];
-$('#rulesBtn').onclick = () => {
+onClick('#rulesBtn', () => {
   toggleMenu(false);
-  const el = $('#rulesContent');
+  const el = getEl('#rulesContent');
+  if (!el) return;
   el.innerHTML =
     '<ol style="margin:0;padding-left:18px">' +
     rules.map((r) => `<li style="margin-bottom:8px">${r}</li>`).join('') +
     '</ol>';
-  $('#rulesModal').style.display = 'flex';
-};
+  setDisplay('#rulesModal', 'flex');
+});
 
 // Data modal handlers (export/import/log/clear)
-$('#dataBtn').onclick = () => {
+onClick('#dataBtn', () => {
   toggleMenu(false);
-  $('#dataModal').style.display = 'flex';
+  setDisplay('#dataModal', 'flex');
   renderModalLog();
-};
-$('#closeData').onclick = () => {
-  $('#dataModal').style.display = 'none';
-};
+});
+onClick('#closeData', () => {
+  setDisplay('#dataModal', 'none');
+});
 async function clearAllAppData() {
   // Reset in-memory state first so UI clears immediately.
   state.round = 1;
@@ -460,21 +547,20 @@ async function clearAllAppData() {
   render();
 
   // Remove localStorage data.
-  try {
-    localStorage.removeItem('punchBuggy');
-  } catch (err) {
-    console.warn('Failed to clear localStorage', err);
-  }
+  safeStorageRemove('punchBuggy');
+  safeStorageRemove('punchBuggy_running_version');
+
+  // No IndexedDB data is used currently.
 }
 
-$('#clearData').onclick = () => {
+onClick('#clearData', () => {
   if (confirm('Delete all game data (rounds, scores, history, names, avatars)?')) {
     clearAllAppData();
   }
-};
+});
 
 // Export state as JSON file
-$('#exportData').onclick = () => {
+onClick('#exportData', () => {
   const payload = JSON.stringify(state, null, 2);
   const blob = new Blob([payload], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -485,7 +571,7 @@ $('#exportData').onclick = () => {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-};
+});
 
 // Import - parse file and normalize various export shapes (supports older shape and `rounds`-style exports)
 function normalizeImportedState(parsed) {
@@ -574,8 +660,11 @@ function normalizeImportedState(parsed) {
   return out;
 }
 
-$('#importBtn').onclick = () => $('#importFile').click();
-$('#importFile').onchange = async (e) => {
+onClick('#importBtn', () => {
+  const input = getEl('#importFile');
+  if (input) input.click();
+});
+onChange('#importFile', async (e) => {
   const f = e.target.files && e.target.files[0];
   if (!f) return;
   try {
@@ -598,24 +687,26 @@ $('#importFile').onchange = async (e) => {
     alert('Failed to import: ' + (err && err.message ? err.message : String(err)));
   }
   e.target.value = '';
-};
+});
 
-$('#closeRules').onclick = () => {
-  $('#rulesModal').style.display = 'none';
-};
-$('#nameA').onchange = (e) => {
+onClick('#closeRules', () => {
+  setDisplay('#rulesModal', 'none');
+});
+onChange('#nameA', (e) => {
   state.players.A.name = e.target.value;
   render();
-};
-$('#nameB').onchange = (e) => {
+});
+onChange('#nameB', (e) => {
   state.players.B.name = e.target.value;
   render();
-};
-$('#uploadA').onchange = (e) => handleImageUpload('A', e.target.files[0]);
-$('#uploadB').onchange = (e) => handleImageUpload('B', e.target.files[0]);
+});
+onChange('#uploadA', (e) => handleImageUpload('A', e.target.files[0]));
+onChange('#uploadB', (e) => handleImageUpload('B', e.target.files[0]));
 
 function setupServiceWorkerUpdates() {
   if (!('serviceWorker' in navigator)) return;
+  // Skip service worker registration in development
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '0.0.0.0') return;
   // Dev flag: set to `false` to require manual refresh. Set to `true` to re-enable auto-apply.
   // Default intentionally `false` so users must click Refresh to apply updates.
   window.PUNCHBUGGY_AUTO_APPLY_UPDATES =
@@ -623,10 +714,10 @@ function setupServiceWorkerUpdates() {
       ? false
       : !!window.PUNCHBUGGY_AUTO_APPLY_UPDATES;
 
-  const banner = $('#updateBanner');
-  const bannerText = $('#updateBannerText');
-  const refreshBtn = $('#refreshUpdate');
-  const dismissBtn = $('#dismissUpdate');
+  const banner = getEl('#updateBanner');
+  const bannerText = getEl('#updateBannerText');
+  const refreshBtn = getEl('#refreshUpdate');
+  const dismissBtn = getEl('#dismissUpdate');
   const root = document.documentElement;
   let waitingWorker = null;
   let autoReloadTimer = null;
@@ -656,7 +747,7 @@ function setupServiceWorkerUpdates() {
     if (waitingWorker) {
       const worker = waitingWorker;
       // Update the running version in localStorage so after reload the UI shows the new version
-      localStorage.setItem(
+      safeStorageSet(
         'punchBuggy_running_version',
         window.PUNCHBUGGY_APP_VERSION || 'unknown'
       );

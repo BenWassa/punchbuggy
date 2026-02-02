@@ -9,9 +9,9 @@
   "description": "Track Punch Buggy scores offline with a quick, mobile-friendly interface.",
   "icons": [
     {
-      "src": "icons/punchbuggy.svg",
-      "type": "image/svg+xml",
-      "sizes": "any",
+      "src": "icons/punchbuggy.png",
+      "type": "image/png",
+      "sizes": "1024x1024",
       "purpose": "any maskable"
     }
   ]
