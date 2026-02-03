@@ -12,7 +12,19 @@
       name="apple-mobile-web-app-status-bar-style"
       content="black-translucent"
     />
-    <link rel="manifest" href="/assets/manifest-3O8VcEq4.webmanifest" />
+    <link
+      rel="preload"
+      as="image"
+      href="/punchbuggy/assets/punchbuggy_splash-Bpp-ds4i.jpg"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="punchbuggy_title.png"
+      fetchpriority="high"
+    />
+    <link rel="manifest" href="manifest.webmanifest" />
     <link
       rel="icon"
       type="image/png"
@@ -37,7 +49,7 @@
         --plasma: #ffffff;
         --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
         --radius: 20px; /* Slightly rounder for modern feel */
-        --splash-image: url("/punchbuggy_splash.png");
+        --splash-image: url("/punchbuggy/assets/punchbuggy_splash-Bpp-ds4i.jpg");
         --p1-base: #1a4d40;
         --p1-accent: #5be2b0;
         --p1-glow: rgba(91, 226, 176, 0.22);
@@ -120,6 +132,9 @@
         z-index: -1;
         transition: opacity 400ms ease;
         pointer-events: none;
+      }
+      body.splash-hidden::before {
+        opacity: 0;
       }
 
       /* Splash screen overlay - shown while content loads */
@@ -1177,8 +1192,8 @@
         <div class="app-title">
           <img
             class="app-title-img lazy-title"
-            src="/punchbuggy_title_low.png"
-            data-high="/punchbuggy_title.png"
+            src="punchbuggy_title.png"
+            data-high="punchbuggy_title.png"
             alt="Punch Buggy logo"
             role="img"
           />
@@ -1196,7 +1211,7 @@
         title="Reset game"
       >
         <span class="menu-btn-icon" aria-hidden="true">
-          <img src="/delete.svg" alt="" />
+          <img src="delete.svg" alt="" />
         </span>
         Reset Game
       </button>
@@ -1225,7 +1240,7 @@
                 <span class="crown-emoji" aria-hidden="true">👑</span>
                 <img
                   class="frustrated-icon"
-                  src="/frustrated.png"
+                  src="frustrated.png"
                   alt="Frustrated face"
                 />
               </div>
@@ -1295,7 +1310,7 @@
                 <span class="crown-emoji" aria-hidden="true">👑</span>
                 <img
                   class="frustrated-icon"
-                  src="/frustrated.png"
+                  src="frustrated.png"
                   alt="Frustrated face"
                 />
               </div>
@@ -1533,7 +1548,7 @@
     <!-- Splash screen overlay - shown while content loads -->
     <div
       id="splashOverlay"
-      style="background-image: url(&quot;/assets/punchbuggy_splash-Bpp-ds4i.jpg&quot;)"
+      style="background-image: url(&quot;/punchbuggy/assets/punchbuggy_splash-Bpp-ds4i.jpg&quot;)"
     ></div>
 
     <script>
@@ -1556,7 +1571,7 @@
       setAppHeight();
       const splashImages = {
         punchbuggy_splash: "./punchbuggy_splash.jpg",
-        punchbuggy_splash_2: "./punchbuggy_splash_2.png",
+        punchbuggy_splash_2: "./punchbuggy_splash.jpg",
       };
       const applySplashImage = () => {
         const params = new URLSearchParams(window.location.search);
@@ -1578,6 +1593,8 @@
         const splash = document.getElementById("splashOverlay");
         if (splash && !splash.classList.contains("hidden")) {
           splash.classList.add("hidden");
+          document.body.classList.add("splash-hidden");
+          document.documentElement.style.setProperty("--splash-image", "none");
         }
       };
 
