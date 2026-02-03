@@ -706,7 +706,12 @@ onChange('#uploadB', (e) => handleImageUpload('B', e.target.files[0]));
 function setupServiceWorkerUpdates() {
   if (!('serviceWorker' in navigator)) return;
   // Skip service worker registration in development
-  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '0.0.0.0') return;
+  if (
+    location.hostname === 'localhost' ||
+    location.hostname === '127.0.0.1' ||
+    location.hostname === '0.0.0.0'
+  )
+    return;
   // Dev flag: set to `false` to require manual refresh. Set to `true` to re-enable auto-apply.
   // Default intentionally `false` so users must click Refresh to apply updates.
   window.PUNCHBUGGY_AUTO_APPLY_UPDATES =
@@ -747,10 +752,7 @@ function setupServiceWorkerUpdates() {
     if (waitingWorker) {
       const worker = waitingWorker;
       // Update the running version in localStorage so after reload the UI shows the new version
-      safeStorageSet(
-        'punchBuggy_running_version',
-        window.PUNCHBUGGY_APP_VERSION || 'unknown'
-      );
+      safeStorageSet('punchBuggy_running_version', window.PUNCHBUGGY_APP_VERSION || 'unknown');
       console.log(
         '[PunchBuggy] Update requested, new version will be:',
         window.PUNCHBUGGY_APP_VERSION

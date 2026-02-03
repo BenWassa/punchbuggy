@@ -8,29 +8,11 @@
     />
     <meta name="theme-color" content="#0b0f1a" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <link
-      rel="preload"
-      as="image"
-      href="punchbuggy_splash.jpg"
-      fetchpriority="high"
-    />
-    <link
-      rel="preload"
-      as="image"
-      href="punchbuggy_title.png"
-      fetchpriority="high"
-    />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="preload" as="image" href="punchbuggy_splash.jpg" fetchpriority="high" />
+    <link rel="preload" as="image" href="punchbuggy_title.png" fetchpriority="high" />
     <link rel="manifest" href="manifest.webmanifest" />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="1024x1024"
-      href="icons/punchbuggy.png"
-    />
+    <link rel="icon" type="image/png" sizes="1024x1024" href="icons/punchbuggy.png" />
     <title>Punch Buggy</title>
     <style>
       /* --- CSS from app.css (Refactored for Layout) --- */
@@ -49,7 +31,7 @@
         --plasma: #ffffff;
         --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
         --radius: 20px; /* Slightly rounder for modern feel */
-        --splash-image: url("punchbuggy_splash.jpg");
+        --splash-image: url('punchbuggy_splash.jpg');
         --p1-base: #1a4d40;
         --p1-accent: #5be2b0;
         --p1-glow: rgba(91, 226, 176, 0.22);
@@ -96,21 +78,16 @@
         height: 100dvh;
         margin: 0;
         font-family:
-          "Sora",
+          'Sora',
           -apple-system,
           BlinkMacSystemFont,
-          "Segoe UI",
+          'Segoe UI',
           Roboto,
           Helvetica,
           Arial,
           sans-serif;
         color: var(--text);
-        background: radial-gradient(
-          120% 80% at 18% 0%,
-          #15254a 0%,
-          #0b0f1a 55%,
-          #070e1d 100%
-        );
+        background: radial-gradient(120% 80% at 18% 0%, #15254a 0%, #0b0f1a 55%, #070e1d 100%);
         display: flex;
         flex-direction: column;
         padding: 12px;
@@ -120,12 +97,11 @@
       }
 
       body::before {
-        content: "";
+        content: '';
         position: fixed;
         inset: 0;
         background:
-          linear-gradient(180deg, rgba(11, 15, 26, 0.9), rgba(11, 15, 26, 0.4)),
-          var(--splash-image);
+          linear-gradient(180deg, rgba(11, 15, 26, 0.9), rgba(11, 15, 26, 0.4)), var(--splash-image);
         background-size: cover;
         background-position: center;
         opacity: 0.65;
@@ -353,7 +329,7 @@
       }
       .avatar-wrapper.loading::after,
       .avatar-container.loading::after {
-        content: "";
+        content: '';
         position: absolute;
         inset: 0;
         border-radius: 18px;
@@ -616,11 +592,7 @@
       }
       .streak-badge.inferno {
         color: var(--plasma);
-        background: linear-gradient(
-          135deg,
-          rgba(255, 77, 77, 0.3),
-          rgba(255, 159, 67, 0.3)
-        );
+        background: linear-gradient(135deg, rgba(255, 77, 77, 0.3), rgba(255, 159, 67, 0.3));
         border: 1px solid rgba(255, 255, 255, 0.6);
         text-shadow:
           0 0 5px #fff,
@@ -732,11 +704,7 @@
         z-index: 40;
         padding: 10px;
         border-radius: 22px;
-        background: linear-gradient(
-          180deg,
-          rgba(12, 18, 34, 0.9),
-          rgba(8, 12, 22, 0.95)
-        );
+        background: linear-gradient(180deg, rgba(12, 18, 34, 0.9), rgba(8, 12, 22, 0.95));
         border: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow:
           0 14px 28px rgba(0, 0, 0, 0.35),
@@ -949,19 +917,11 @@
         top: 0;
         z-index: 10;
         padding: 8px 0 16px;
-        background: linear-gradient(
-          180deg,
-          rgba(11, 15, 26, 0.98),
-          rgba(11, 15, 26, 0.6)
-        );
+        background: linear-gradient(180deg, rgba(11, 15, 26, 0.98), rgba(11, 15, 26, 0.6));
         backdrop-filter: blur(8px);
       }
       .matchup-card {
-        background: linear-gradient(
-          180deg,
-          rgba(18, 26, 43, 0.95),
-          rgba(12, 20, 36, 0.9)
-        );
+        background: linear-gradient(180deg, rgba(18, 26, 43, 0.95), rgba(12, 20, 36, 0.9));
         border: 1px solid rgba(255, 255, 255, 0.08);
         border-radius: 22px;
         padding: 18px;
@@ -1204,12 +1164,7 @@
     </header>
 
     <nav id="menuPanel" class="menu-panel" aria-label="Application menu">
-      <button
-        id="resetBtnMenu"
-        class="menu-btn danger"
-        aria-label="Reset game"
-        title="Reset game"
-      >
+      <button id="resetBtnMenu" class="menu-btn danger" aria-label="Reset game" title="Reset game">
         <span class="menu-btn-icon" aria-hidden="true">
           <img src="delete.svg" alt="" />
         </span>
@@ -1219,9 +1174,7 @@
       <button id="menuImport" class="menu-btn">Import JSON</button>
       <div class="menu-about">
         <div class="menu-about-title">About</div>
-        <div class="menu-about-version">
-          Version <span id="appVersion"></span>
-        </div>
+        <div class="menu-about-version">Version <span id="appVersion"></span></div>
       </div>
     </nav>
 
@@ -1238,11 +1191,7 @@
               />
               <div id="crownA" class="player-crown" aria-hidden="true">
                 <span class="crown-emoji" aria-hidden="true">👑</span>
-                <img
-                  class="frustrated-icon"
-                  src="frustrated.png"
-                  alt="Frustrated face"
-                />
+                <img class="frustrated-icon" src="frustrated.png" alt="Frustrated face" />
               </div>
               <label class="upload-label" for="uploadA">
                 <svg
@@ -1261,12 +1210,7 @@
                   <circle cx="12" cy="13" r="4" />
                 </svg>
               </label>
-              <input
-                type="file"
-                id="uploadA"
-                class="upload-input"
-                accept="image/*"
-              />
+              <input type="file" id="uploadA" class="upload-input" accept="image/*" />
             </div>
             <div class="name-box">
               <input id="nameA" class="player-input" value="Player A" />
@@ -1308,11 +1252,7 @@
               />
               <div id="crownB" class="player-crown" aria-hidden="true">
                 <span class="crown-emoji" aria-hidden="true">👑</span>
-                <img
-                  class="frustrated-icon"
-                  src="frustrated.png"
-                  alt="Frustrated face"
-                />
+                <img class="frustrated-icon" src="frustrated.png" alt="Frustrated face" />
               </div>
               <label class="upload-label" for="uploadB">
                 <svg
@@ -1331,12 +1271,7 @@
                   <circle cx="12" cy="13" r="4" />
                 </svg>
               </label>
-              <input
-                type="file"
-                id="uploadB"
-                class="upload-input"
-                accept="image/*"
-              />
+              <input type="file" id="uploadB" class="upload-input" accept="image/*" />
             </div>
             <div class="name-box">
               <input id="nameB" class="player-input" value="Player B" />
@@ -1369,9 +1304,7 @@
 
     <div class="toolbar">
       <button id="undoBtn" class="tool-btn ghost">Undo</button>
-      <button id="leaderboardBtn" class="tool-btn trophy-btn">
-        🏆 Leaderboard
-      </button>
+      <button id="leaderboardBtn" class="tool-btn trophy-btn">🏆 Leaderboard</button>
       <button id="nextRound" class="tool-btn accent">Next Round</button>
     </div>
 
@@ -1396,9 +1329,7 @@
           <div class="modal-title">Data & Logs</div>
           <button id="closeData" class="icon-btn">✕</button>
         </div>
-        <div class="modal-subtitle">
-          Current session history and data management.
-        </div>
+        <div class="modal-subtitle">Current session history and data management.</div>
         <div
           class="modal-body"
           style="
@@ -1425,12 +1356,7 @@
           >
             Import JSON
           </button>
-          <input
-            type="file"
-            id="importFile"
-            style="display: none"
-            accept=".json"
-          />
+          <input type="file" id="importFile" style="display: none" accept=".json" />
           <button
             id="clearData"
             class="tool-btn danger"
@@ -1465,20 +1391,11 @@
                 id="lbAvatarA"
                 class="avatar-lg"
                 src=""
-                style="
-                  width: 64px;
-                  height: 64px;
-                  border-radius: 16px;
-                  background: #333;
-                "
+                style="width: 64px; height: 64px; border-radius: 16px; background: #333"
               />
-              <div id="lbCrownA" class="crown-icon" style="display: none">
-                👑
-              </div>
+              <div id="lbCrownA" class="crown-icon" style="display: none">👑</div>
             </div>
-            <div id="lbNameA" class="player-name" style="margin-top: 8px">
-              Player A
-            </div>
+            <div id="lbNameA" class="player-name" style="margin-top: 8px">Player A</div>
             <div id="lbWinsA" class="big-score">0</div>
           </div>
           <div class="vs-divider">VS</div>
@@ -1488,20 +1405,11 @@
                 id="lbAvatarB"
                 class="avatar-lg"
                 src=""
-                style="
-                  width: 64px;
-                  height: 64px;
-                  border-radius: 16px;
-                  background: #333;
-                "
+                style="width: 64px; height: 64px; border-radius: 16px; background: #333"
               />
-              <div id="lbCrownB" class="crown-icon" style="display: none">
-                👑
-              </div>
+              <div id="lbCrownB" class="crown-icon" style="display: none">👑</div>
             </div>
-            <div id="lbNameB" class="player-name" style="margin-top: 8px">
-              Player B
-            </div>
+            <div id="lbNameB" class="player-name" style="margin-top: 8px">Player B</div>
             <div id="lbWinsB" class="big-score">0</div>
           </div>
         </div>
@@ -1532,69 +1440,48 @@
         </div>
       </div>
 
-      <h3
-        style="
-          margin-top: 24px;
-          margin-bottom: 12px;
-          font-size: 16px;
-          color: var(--muted);
-        "
-      >
+      <h3 style="margin-top: 24px; margin-bottom: 12px; font-size: 16px; color: var(--muted)">
         Round History
       </h3>
       <div id="roundList" class="round-list"></div>
     </div>
 
     <!-- Splash screen overlay - shown while content loads -->
-    <div
-      id="splashOverlay"
-      style="background-image: url(&quot;./punchbuggy_splash.jpg&quot;)"
-    ></div>
+    <div id="splashOverlay" style="background-image: url('./punchbuggy_splash.jpg')"></div>
 
     <script>
       // Set app version for menu and service worker
-      window.PUNCHBUGGY_APP_VERSION = "3.3.1";
+      window.PUNCHBUGGY_APP_VERSION = '3.3.1';
     </script>
 
     <script>
       // --- JS from main.js (Embedded) ---
       const setAppHeight = () => {
-        const height = window.visualViewport
-          ? window.visualViewport.height
-          : window.innerHeight;
-        document.documentElement.style.setProperty(
-          "--app-height",
-          `${Math.round(height)}px`,
-        );
+        const height = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        document.documentElement.style.setProperty('--app-height', `${Math.round(height)}px`);
       };
 
       setAppHeight();
       const splashImages = {
-        punchbuggy_splash: "./punchbuggy_splash.jpg",
-        punchbuggy_splash_2: "./punchbuggy_splash.jpg",
+        punchbuggy_splash: './punchbuggy_splash.jpg',
+        punchbuggy_splash_2: './punchbuggy_splash.jpg',
       };
       const applySplashImage = () => {
         const params = new URLSearchParams(window.location.search);
-        const requested = params.get("splash");
-        const key =
-          requested && splashImages[requested]
-            ? requested
-            : "punchbuggy_splash";
-        document.documentElement.style.setProperty(
-          "--splash-image",
-          `url(${splashImages[key]})`,
-        );
+        const requested = params.get('splash');
+        const key = requested && splashImages[requested] ? requested : 'punchbuggy_splash';
+        document.documentElement.style.setProperty('--splash-image', `url(${splashImages[key]})`);
         document.body.dataset.splash = key;
       };
       applySplashImage();
 
       // Splash screen management
       const hideSplash = () => {
-        const splash = document.getElementById("splashOverlay");
-        if (splash && !splash.classList.contains("hidden")) {
-          splash.classList.add("hidden");
-          document.body.classList.add("splash-hidden");
-          document.documentElement.style.setProperty("--splash-image", "none");
+        const splash = document.getElementById('splashOverlay');
+        if (splash && !splash.classList.contains('hidden')) {
+          splash.classList.add('hidden');
+          document.body.classList.add('splash-hidden');
+          document.documentElement.style.setProperty('--splash-image', 'none');
         }
       };
 
@@ -1602,25 +1489,25 @@
       const splashTimeout = setTimeout(hideSplash, 2800);
 
       // Also hide splash when DOM is fully loaded (whichever comes first)
-      document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener('DOMContentLoaded', () => {
         clearTimeout(splashTimeout);
         hideSplash();
       });
 
       // Hide splash on window load (all resources loaded)
-      window.addEventListener("load", () => {
+      window.addEventListener('load', () => {
         clearTimeout(splashTimeout);
         hideSplash();
       });
 
       // Fallback: hide splash immediately if script reaches here (content already loaded)
-      if (document.readyState !== "loading") {
+      if (document.readyState !== 'loading') {
         hideSplash();
       }
 
-      window.addEventListener("resize", setAppHeight);
+      window.addEventListener('resize', setAppHeight);
       if (window.visualViewport) {
-        window.visualViewport.addEventListener("resize", setAppHeight);
+        window.visualViewport.addEventListener('resize', setAppHeight);
       }
 
       const $ = (sel) => document.querySelector(sel);
@@ -1647,24 +1534,24 @@
         const el = getEl(sel);
         if (el) el.style.display = value;
       };
-      const DEBUG_TIMINGS = window.location.search.includes("debugTimings");
+      const DEBUG_TIMINGS = window.location.search.includes('debugTimings');
       const lazyLoadHighResImage = (img) => {
         if (!img) return;
         const highSrc = img.dataset.high;
-        if (!highSrc || img.dataset.loaded === "true") return;
+        if (!highSrc || img.dataset.loaded === 'true') return;
         if (DEBUG_TIMINGS) {
           const label = `highRes:${highSrc}`;
           console.time(label);
           img.dataset.timingLabel = label;
         }
-        img.classList.add("loading");
+        img.classList.add('loading');
         const loader = new Image();
         const finish = () => {
           loader.onload = null;
           loader.onerror = null;
-          img.classList.remove("loading");
-          img.classList.add("loaded");
-          img.dataset.loaded = "true";
+          img.classList.remove('loading');
+          img.classList.add('loaded');
+          img.dataset.loaded = 'true';
           if (DEBUG_TIMINGS && img.dataset.timingLabel) {
             console.timeEnd(img.dataset.timingLabel);
             delete img.dataset.timingLabel;
@@ -1679,8 +1566,8 @@
       };
 
       // Load title image immediately for faster display
-      window.addEventListener("DOMContentLoaded", () => {
-        const titleImg = document.querySelector(".app-title-img");
+      window.addEventListener('DOMContentLoaded', () => {
+        const titleImg = document.querySelector('.app-title-img');
         if (titleImg) {
           lazyLoadHighResImage(titleImg);
         }
@@ -1689,28 +1576,27 @@
       const setAvatarSrc = (selector, src) => {
         const img = getEl(selector);
         if (!img) return;
-        const wrapper =
-          img.closest(".avatar-wrapper") || img.closest(".avatar-container");
+        const wrapper = img.closest('.avatar-wrapper') || img.closest('.avatar-container');
         if (img._lazyCleanup) img._lazyCleanup();
         const loadedHandler = () => cleanup();
         const cleanup = () => {
-          if (wrapper) wrapper.classList.remove("loading");
-          img.classList.remove("loading");
-          img.removeEventListener("load", loadedHandler);
-          img.removeEventListener("error", loadedHandler);
+          if (wrapper) wrapper.classList.remove('loading');
+          img.classList.remove('loading');
+          img.removeEventListener('load', loadedHandler);
+          img.removeEventListener('error', loadedHandler);
           img._lazyCleanup = null;
         };
         img._lazyCleanup = cleanup;
-        if (wrapper) wrapper.classList.add("loading");
-        img.classList.add("loading");
-        img.addEventListener("load", loadedHandler);
-        img.addEventListener("error", loadedHandler);
-        img.src = src || "";
+        if (wrapper) wrapper.classList.add('loading');
+        img.classList.add('loading');
+        img.addEventListener('load', loadedHandler);
+        img.addEventListener('error', loadedHandler);
+        img.src = src || '';
       };
-      const avatarAPlaceholder = getEl("#avatarA");
-      const avatarBPlaceholder = getEl("#avatarB");
-      const defaultAvatarA = avatarAPlaceholder ? avatarAPlaceholder.src : "";
-      const defaultAvatarB = avatarBPlaceholder ? avatarBPlaceholder.src : "";
+      const avatarAPlaceholder = getEl('#avatarA');
+      const avatarBPlaceholder = getEl('#avatarB');
+      const defaultAvatarA = avatarAPlaceholder ? avatarAPlaceholder.src : '';
+      const defaultAvatarB = avatarBPlaceholder ? avatarBPlaceholder.src : '';
       const onClick = (sel, handler) => {
         const el = getEl(sel);
         if (el) el.onclick = handler;
@@ -1723,10 +1609,7 @@
         try {
           return localStorage.getItem(key);
         } catch (err) {
-          console.warn(
-            `[PunchBuggy] Failed to read localStorage key "${key}"`,
-            err,
-          );
+          console.warn(`[PunchBuggy] Failed to read localStorage key "${key}"`, err);
           return null;
         }
       };
@@ -1735,10 +1618,7 @@
           localStorage.setItem(key, value);
           return true;
         } catch (err) {
-          console.warn(
-            `[PunchBuggy] Failed to write localStorage key "${key}"`,
-            err,
-          );
+          console.warn(`[PunchBuggy] Failed to write localStorage key "${key}"`, err);
           return false;
         }
       };
@@ -1747,119 +1627,116 @@
           localStorage.removeItem(key);
           return true;
         } catch (err) {
-          console.warn(
-            `[PunchBuggy] Failed to remove localStorage key "${key}"`,
-            err,
-          );
+          console.warn(`[PunchBuggy] Failed to remove localStorage key "${key}"`, err);
           return false;
         }
       };
       const state = {
         round: 1,
         players: {
-          A: { name: "Player A", score: 0, streak: 0, avatar: "", punched: 0 },
-          B: { name: "Player B", score: 0, streak: 0, avatar: "", punched: 0 },
+          A: { name: 'Player A', score: 0, streak: 0, avatar: '', punched: 0 },
+          B: { name: 'Player B', score: 0, streak: 0, avatar: '', punched: 0 },
         },
         roundWinners: [],
         history: [],
         undoStack: [],
       };
 
-      const versionEl = getEl("#appVersion");
+      const versionEl = getEl('#appVersion');
       if (versionEl) {
-        const storedVersion = safeStorageGet("punchBuggy_running_version");
-        const appVersion = window.PUNCHBUGGY_APP_VERSION || "unknown";
-        const currentVersion = storedVersion || appVersion || "—";
+        const storedVersion = safeStorageGet('punchBuggy_running_version');
+        const appVersion = window.PUNCHBUGGY_APP_VERSION || 'unknown';
+        const currentVersion = storedVersion || appVersion || '—';
         versionEl.textContent = `v${currentVersion}`;
         if (!storedVersion || (appVersion && storedVersion !== appVersion)) {
-          safeStorageSet("punchBuggy_running_version", appVersion);
+          safeStorageSet('punchBuggy_running_version', appVersion);
           versionEl.textContent = `v${appVersion}`;
         }
       }
 
       function render() {
-        if (DEBUG_TIMINGS) console.time("render");
-        setText("#scoreA", state.players.A.score);
-        setText("#scoreB", state.players.B.score);
-        updateStreakBadge(getEl("#streakA"), state.players.A.streak);
-        updateStreakBadge(getEl("#streakB"), state.players.B.streak);
-        setValue("#nameA", state.players.A.name);
-        setValue("#nameB", state.players.B.name);
+        if (DEBUG_TIMINGS) console.time('render');
+        setText('#scoreA', state.players.A.score);
+        setText('#scoreB', state.players.B.score);
+        updateStreakBadge(getEl('#streakA'), state.players.A.streak);
+        updateStreakBadge(getEl('#streakB'), state.players.B.streak);
+        setValue('#nameA', state.players.A.name);
+        setValue('#nameB', state.players.B.name);
         const avatarA = state.players.A.avatar || defaultAvatarA;
         const avatarB = state.players.B.avatar || defaultAvatarB;
-        setAvatarSrc("#avatarA", avatarA);
-        setAvatarSrc("#avatarB", avatarB);
+        setAvatarSrc('#avatarA', avatarA);
+        setAvatarSrc('#avatarB', avatarB);
 
         // Note: #round and #lead logic was in original JS but no HTML elements for them were found in main UI scope
         // If needed, they could be added to header.
 
         renderLeaderboard();
-        lazyLoadHighResImage(getEl(".app-title-img"));
+        lazyLoadHighResImage(getEl('.app-title-img'));
 
         const leader =
           state.players.A.score === state.players.B.score
             ? null
             : state.players.A.score > state.players.B.score
-              ? "A"
-              : "B";
+              ? 'A'
+              : 'B';
         const setCrownState = (player, isLeader) => {
           const selector = `#crown${player}`;
           const crownEl = getEl(selector);
           if (!crownEl) return;
           const punched = Number(state.players[player].punched) || 0;
           if (isLeader) {
-            crownEl.classList.remove("frustrated");
-            setDisplay(selector, "flex");
+            crownEl.classList.remove('frustrated');
+            setDisplay(selector, 'flex');
             return;
           }
           const isFrustrated = punched >= FRUSTRATED_THRESHOLD;
-          crownEl.classList.toggle("frustrated", isFrustrated);
+          crownEl.classList.toggle('frustrated', isFrustrated);
           if (isFrustrated) {
-            setDisplay(selector, "flex");
+            setDisplay(selector, 'flex');
           } else {
-            setDisplay(selector, "none");
+            setDisplay(selector, 'none');
           }
         };
-        setCrownState("A", leader === "A");
-        setCrownState("B", leader === "B");
+        setCrownState('A', leader === 'A');
+        setCrownState('B', leader === 'B');
         renderModalLog();
         save();
       }
 
-      const STREAK_CLASSES = ["smolder", "burning", "inferno"];
+      const STREAK_CLASSES = ['smolder', 'burning', 'inferno'];
       const FRUSTRATED_THRESHOLD = 3;
 
       function updateStreakBadge(el, streak) {
         if (!el) return;
         el.classList.remove(...STREAK_CLASSES);
         if (streak <= 0) {
-          el.style.display = "none";
-          el.textContent = "";
+          el.style.display = 'none';
+          el.textContent = '';
           return;
         }
-        el.style.display = "inline-flex";
+        el.style.display = 'inline-flex';
         el.innerHTML = `<span class="fire-icon">🔥</span> ${streak}`;
         if (streak >= 10) {
-          el.classList.add("inferno");
+          el.classList.add('inferno');
         } else if (streak >= 5) {
-          el.classList.add("burning");
+          el.classList.add('burning');
         } else if (streak >= 3) {
-          el.classList.add("smolder");
+          el.classList.add('smolder');
         }
       }
 
       function renderModalLog() {
-        const list = $("#modalLog");
+        const list = $('#modalLog');
         if (!list) return;
-        list.innerHTML = "";
+        list.innerHTML = '';
         state.history
           .slice()
           .reverse()
           .forEach((entry) => {
-            const item = document.createElement("li");
-            item.style.padding = "8px";
-            item.style.borderRadius = "8px";
-            item.style.background = "rgba(255,255,255,0.03)";
+            const item = document.createElement('li');
+            item.style.padding = '8px';
+            item.style.borderRadius = '8px';
+            item.style.background = 'rgba(255,255,255,0.03)';
             item.textContent = entry;
             list.appendChild(item);
           });
@@ -1869,10 +1746,10 @@
         const rounds = state.roundWinners
           .map((r) => {
             if (!r) return null;
-            if (typeof r === "string") {
-              if (r === "A") return { winner: "A", scoreA: 0, scoreB: 0 };
-              if (r === "B") return { winner: "B", scoreA: 0, scoreB: 0 };
-              return { winner: "T", scoreA: 0, scoreB: 0 };
+            if (typeof r === 'string') {
+              if (r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
+              if (r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
+              return { winner: 'T', scoreA: 0, scoreB: 0 };
             }
             return r;
           })
@@ -1886,8 +1763,8 @@
         rounds.forEach((r) => {
           totalA += r.scoreA;
           totalB += r.scoreB;
-          if (r.winner === "A") winsA++;
-          else if (r.winner === "B") winsB++;
+          if (r.winner === 'A') winsA++;
+          else if (r.winner === 'B') winsB++;
           else ties++;
         });
 
@@ -1896,84 +1773,73 @@
         const percentA = winTotal ? Math.round((winsA / winTotal) * 100) : 50;
         const percentB = 100 - percentA;
 
-        const avatarAEl = $("#avatarA");
-        const avatarBEl = $("#avatarB");
-        const avatarA =
-          state.players.A.avatar || (avatarAEl ? avatarAEl.src : "");
-        const avatarB =
-          state.players.B.avatar || (avatarBEl ? avatarBEl.src : "");
+        const avatarAEl = $('#avatarA');
+        const avatarBEl = $('#avatarB');
+        const avatarA = state.players.A.avatar || (avatarAEl ? avatarAEl.src : '');
+        const avatarB = state.players.B.avatar || (avatarBEl ? avatarBEl.src : '');
 
-        setAvatarSrc("#lbAvatarA", avatarA);
-        setAvatarSrc("#lbAvatarB", avatarB);
-        if ($("#lbNameA")) $("#lbNameA").textContent = state.players.A.name;
-        if ($("#lbNameB")) $("#lbNameB").textContent = state.players.B.name;
-        if ($("#lbWinsA")) $("#lbWinsA").textContent = winsA;
-        if ($("#lbWinsB")) $("#lbWinsB").textContent = winsB;
-        if ($("#lbPercentA")) $("#lbPercentA").textContent = `${percentA}%`;
-        if ($("#lbPercentB")) $("#lbPercentB").textContent = `${percentB}%`;
-        if ($("#lbMeterA")) $("#lbMeterA").style.width = `${percentA}%`;
-        if ($("#lbMeterB")) $("#lbMeterB").style.width = `${percentB}%`;
-        if ($("#lbTotalRounds"))
-          $("#lbTotalRounds").textContent = rounds.length;
-        if ($("#lbTotalTies")) $("#lbTotalTies").textContent = ties;
-        if ($("#lbTotalPunches"))
-          $("#lbTotalPunches").textContent = totalPunches;
+        setAvatarSrc('#lbAvatarA', avatarA);
+        setAvatarSrc('#lbAvatarB', avatarB);
+        if ($('#lbNameA')) $('#lbNameA').textContent = state.players.A.name;
+        if ($('#lbNameB')) $('#lbNameB').textContent = state.players.B.name;
+        if ($('#lbWinsA')) $('#lbWinsA').textContent = winsA;
+        if ($('#lbWinsB')) $('#lbWinsB').textContent = winsB;
+        if ($('#lbPercentA')) $('#lbPercentA').textContent = `${percentA}%`;
+        if ($('#lbPercentB')) $('#lbPercentB').textContent = `${percentB}%`;
+        if ($('#lbMeterA')) $('#lbMeterA').style.width = `${percentA}%`;
+        if ($('#lbMeterB')) $('#lbMeterB').style.width = `${percentB}%`;
+        if ($('#lbTotalRounds')) $('#lbTotalRounds').textContent = rounds.length;
+        if ($('#lbTotalTies')) $('#lbTotalTies').textContent = ties;
+        if ($('#lbTotalPunches')) $('#lbTotalPunches').textContent = totalPunches;
 
-        const playerAEl = $("#lbPlayerA");
-        const playerBEl = $("#lbPlayerB");
-        if (playerAEl) playerAEl.classList.toggle("winner", winsA > winsB);
-        if (playerBEl) playerBEl.classList.toggle("winner", winsB > winsA);
-        if ($("#lbCrownA"))
-          $("#lbCrownA").style.display = winsA > winsB ? "block" : "none";
-        if ($("#lbCrownB"))
-          $("#lbCrownB").style.display = winsB > winsA ? "block" : "none";
+        const playerAEl = $('#lbPlayerA');
+        const playerBEl = $('#lbPlayerB');
+        if (playerAEl) playerAEl.classList.toggle('winner', winsA > winsB);
+        if (playerBEl) playerBEl.classList.toggle('winner', winsB > winsA);
+        if ($('#lbCrownA')) $('#lbCrownA').style.display = winsA > winsB ? 'block' : 'none';
+        if ($('#lbCrownB')) $('#lbCrownB').style.display = winsB > winsA ? 'block' : 'none';
 
-        const roundList = $("#roundList");
+        const roundList = $('#roundList');
         if (roundList) {
-          roundList.innerHTML = "";
+          roundList.innerHTML = '';
           rounds
             .slice()
             .reverse()
             .forEach((r, idx) => {
               const roundNumber = rounds.length - idx;
-              const item = document.createElement("div");
-              const winClass =
-                r.winner === "A" ? "win-a" : r.winner === "B" ? "win-b" : "tie";
+              const item = document.createElement('div');
+              const winClass = r.winner === 'A' ? 'win-a' : r.winner === 'B' ? 'win-b' : 'tie';
               item.className = `round-item ${winClass}`;
 
-              const roundNum = document.createElement("div");
-              roundNum.className = "round-num";
+              const roundNum = document.createElement('div');
+              roundNum.className = 'round-num';
               roundNum.textContent = `#${roundNumber}`;
 
-              const scores = document.createElement("div");
-              scores.className = "round-scores";
+              const scores = document.createElement('div');
+              scores.className = 'round-scores';
 
-              const scoreA = document.createElement("span");
-              scoreA.className = `score-val p1 ${r.scoreA > r.scoreB ? "winner" : "dim"}`;
+              const scoreA = document.createElement('span');
+              scoreA.className = `score-val p1 ${r.scoreA > r.scoreB ? 'winner' : 'dim'}`;
               scoreA.textContent = r.scoreA;
 
-              const divider = document.createElement("span");
-              divider.className = "round-divider";
-              divider.textContent = "—";
+              const divider = document.createElement('span');
+              divider.className = 'round-divider';
+              divider.textContent = '—';
 
-              const scoreB = document.createElement("span");
-              scoreB.className = `score-val p2 ${r.scoreB > r.scoreA ? "winner" : "dim"}`;
+              const scoreB = document.createElement('span');
+              scoreB.className = `score-val p2 ${r.scoreB > r.scoreA ? 'winner' : 'dim'}`;
               scoreB.textContent = r.scoreB;
 
               scores.appendChild(scoreA);
               scores.appendChild(divider);
               scores.appendChild(scoreB);
 
-              const badge = document.createElement("div");
-              badge.className = "round-badge";
-              const badgeLabel = document.createElement("span");
+              const badge = document.createElement('div');
+              badge.className = 'round-badge';
+              const badgeLabel = document.createElement('span');
               badgeLabel.className =
-                r.winner === "A"
-                  ? "badge-a"
-                  : r.winner === "B"
-                    ? "badge-b"
-                    : "badge-tie";
-              badgeLabel.textContent = r.winner === "T" ? "TIE" : "WIN";
+                r.winner === 'A' ? 'badge-a' : r.winner === 'B' ? 'badge-b' : 'badge-tie';
+              badgeLabel.textContent = r.winner === 'T' ? 'TIE' : 'WIN';
               badge.appendChild(badgeLabel);
 
               item.appendChild(roundNum);
@@ -1987,24 +1853,22 @@
       function save() {
         const { undoStack, ...persisted } = state;
         const payload = JSON.stringify(persisted);
-        if (!safeStorageSet("punchBuggy", payload)) {
-          console.warn(
-            "[PunchBuggy] Save failed (localStorage may be full or unavailable).",
-          );
+        if (!safeStorageSet('punchBuggy', payload)) {
+          console.warn('[PunchBuggy] Save failed (localStorage may be full or unavailable).');
         }
       }
       function load() {
-        const s = safeStorageGet("punchBuggy");
+        const s = safeStorageGet('punchBuggy');
         if (s) {
           try {
             const parsed = JSON.parse(s);
-            if (parsed && typeof parsed === "object") {
+            if (parsed && typeof parsed === 'object') {
               if (parsed.roundWinners && Array.isArray(parsed.roundWinners)) {
                 parsed.roundWinners = parsed.roundWinners.map((r) => {
-                  if (typeof r === "string") {
-                    if (r === "A") return { winner: "A", scoreA: 0, scoreB: 0 };
-                    if (r === "B") return { winner: "B", scoreA: 0, scoreB: 0 };
-                    return { winner: "T", scoreA: 0, scoreB: 0 };
+                  if (typeof r === 'string') {
+                    if (r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
+                    if (r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
+                    return { winner: 'T', scoreA: 0, scoreB: 0 };
                   }
                   return r;
                 });
@@ -2012,11 +1876,8 @@
               Object.assign(state, parsed);
             }
           } catch (err) {
-            console.warn(
-              "[PunchBuggy] Failed to parse saved game state, clearing storage.",
-              err,
-            );
-            safeStorageRemove("punchBuggy");
+            console.warn('[PunchBuggy] Failed to parse saved game state, clearing storage.', err);
+            safeStorageRemove('punchBuggy');
           }
         }
         state.undoStack = [];
@@ -2030,30 +1891,29 @@
 
       function score(p, d = 1) {
         pushUndoState();
-        const other = p === "A" ? "B" : "A";
+        const other = p === 'A' ? 'B' : 'A';
         state.players[p].score = Math.max(0, state.players[p].score + d);
 
         if (d > 0) {
           state.players[p].punched = 0;
-          state.players[other].punched =
-            (state.players[other].punched || 0) + 1;
+          state.players[other].punched = (state.players[other].punched || 0) + 1;
           state.players[p].streak++;
           state.players[other].streak = 0;
 
           const winnerCard = $(`.card[data-player="${p}"]`);
           if (winnerCard) {
-            winnerCard.classList.add("winner");
-            setTimeout(() => winnerCard.classList.remove("winner"), 600);
+            winnerCard.classList.add('winner');
+            setTimeout(() => winnerCard.classList.remove('winner'), 600);
           }
           const loserCard = $(`.card[data-player="${other}"]`);
           if (loserCard) {
-            loserCard.classList.add("loser");
-            setTimeout(() => loserCard.classList.remove("loser"), 500);
+            loserCard.classList.add('loser');
+            setTimeout(() => loserCard.classList.remove('loser'), 500);
           }
           const scoreEl = $(`#score${p}`);
           if (scoreEl) {
-            scoreEl.classList.add("bump");
-            setTimeout(() => scoreEl.classList.remove("bump"), 500);
+            scoreEl.classList.add('bump');
+            setTimeout(() => scoreEl.classList.remove('bump'), 500);
           }
           log(`${state.players[p].name} spotted a bug! +1`);
         } else {
@@ -2071,7 +1931,7 @@
       }
 
       function reset() {
-        if (confirm("Reset entire game? This will also clear round history.")) {
+        if (confirm('Reset entire game? This will also clear round history.')) {
           state.round = 1;
           Object.values(state.players).forEach((p) => {
             p.score = 0;
@@ -2095,17 +1955,14 @@
       function recordRoundWinner() {
         const a = state.players.A.score;
         const b = state.players.B.score;
-        const playerAName =
-          state.players && state.players.A ? state.players.A.name : "Player A";
-        const playerBName =
-          state.players && state.players.B ? state.players.B.name : "Player B";
-        let win = "T";
-        if (a > b) win = "A";
-        else if (b > a) win = "B";
+        const playerAName = state.players && state.players.A ? state.players.A.name : 'Player A';
+        const playerBName = state.players && state.players.B ? state.players.B.name : 'Player B';
+        let win = 'T';
+        if (a > b) win = 'A';
+        else if (b > a) win = 'B';
         state.roundWinners.push({ winner: win, scoreA: a, scoreB: b });
-        if (win === "T") log(`🤝 Round ${state.round} tied ${a}-${b}`);
-        else if (win === "A")
-          log(`🏆 ${playerAName} won Round ${state.round} ${a}-${b}`);
+        if (win === 'T') log(`🤝 Round ${state.round} tied ${a}-${b}`);
+        else if (win === 'A') log(`🏆 ${playerAName} won Round ${state.round} ${a}-${b}`);
         else log(`🏆 ${playerBName} won Round ${state.round} ${b}-${a}`);
       }
 
@@ -2122,78 +1979,72 @@
       }
 
       function handleImageUpload(player, file) {
-        if (!file || !file.type.startsWith("image/")) return;
+        if (!file || !file.type.startsWith('image/')) return;
         const reader = new FileReader();
         reader.onload = (e) => {
           state.players[player].avatar = e.target.result;
           render();
         };
         reader.onerror = () => {
-          console.warn("[PunchBuggy] Avatar upload failed", reader.error);
-          alert("Failed to read the image file. Please try a smaller image.");
+          console.warn('[PunchBuggy] Avatar upload failed', reader.error);
+          alert('Failed to read the image file. Please try a smaller image.');
         };
         reader.readAsDataURL(file);
       }
 
-      onClick("#btnA", () => score("A", 1));
-      onClick("#btnB", () => score("B", 1));
-      onClick("#minusA", () => score("A", -1));
-      onClick("#minusB", () => score("B", -1));
-      onClick("#resetBtnMenu", () => {
+      onClick('#btnA', () => score('A', 1));
+      onClick('#btnB', () => score('B', 1));
+      onClick('#minusA', () => score('A', -1));
+      onClick('#minusB', () => score('B', -1));
+      onClick('#resetBtnMenu', () => {
         toggleMenu(false);
         reset();
       });
-      onClick("#menuExport", () => {
-        const exportBtn = getEl("#exportData");
+      onClick('#menuExport', () => {
+        const exportBtn = getEl('#exportData');
         if (exportBtn) exportBtn.click();
       });
-      onClick("#menuImport", () => {
-        const importBtn = getEl("#importBtn");
+      onClick('#menuImport', () => {
+        const importBtn = getEl('#importBtn');
         if (importBtn) importBtn.click();
       });
-      onClick("#undoBtn", undo);
-      onClick("#nextRound", nextRound);
+      onClick('#undoBtn', undo);
+      onClick('#nextRound', nextRound);
 
       function openFullLeaderboard() {
-        document.body.style.overflow = "hidden";
-        setDisplay("#leaderboardView", "block");
+        document.body.style.overflow = 'hidden';
+        setDisplay('#leaderboardView', 'block');
         renderLeaderboard();
-        lazyLoadHighResImage(getEl(".app-title-img"));
-        if (DEBUG_TIMINGS) console.timeEnd("render");
+        lazyLoadHighResImage(getEl('.app-title-img'));
+        if (DEBUG_TIMINGS) console.timeEnd('render');
       }
       function closeFullLeaderboard() {
-        document.body.style.overflow = "";
-        setDisplay("#leaderboardView", "none");
+        document.body.style.overflow = '';
+        setDisplay('#leaderboardView', 'none');
       }
-      onClick("#leaderboardBtn", () => openFullLeaderboard());
-      onClick("#closeFull", () => closeFullLeaderboard());
+      onClick('#leaderboardBtn', () => openFullLeaderboard());
+      onClick('#closeFull', () => closeFullLeaderboard());
 
-      const menuPanel = getEl("#menuPanel");
-      const menuBtn = getEl("#menuBtn");
+      const menuPanel = getEl('#menuPanel');
+      const menuBtn = getEl('#menuBtn');
       function toggleMenu(force) {
         if (!menuPanel) return;
         const shouldOpen =
-          typeof force === "boolean"
-            ? force
-            : !menuPanel.classList.contains("open");
-        menuPanel.classList.toggle("open", shouldOpen);
-        menuPanel.setAttribute("aria-hidden", shouldOpen ? "false" : "true");
+          typeof force === 'boolean' ? force : !menuPanel.classList.contains('open');
+        menuPanel.classList.toggle('open', shouldOpen);
+        menuPanel.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
         menuPanel.inert = !shouldOpen;
-        if (
-          !shouldOpen &&
-          menuBtn &&
-          menuPanel.contains(document.activeElement)
-        ) {
+        if (!shouldOpen && menuBtn && menuPanel.contains(document.activeElement)) {
           menuBtn.focus();
         }
       }
       if (menuBtn) menuBtn.onclick = () => toggleMenu();
 
       // Close menu when clicking outside of it
-      document.addEventListener("click", (e) => {
+      document.addEventListener('click', (e) => {
         if (
           menuPanel &&
-          menuPanel.classList.contains("open") &&
+          menuPanel.classList.contains('open') &&
           !menuPanel.contains(e.target) &&
           menuBtn &&
           !menuBtn.contains(e.target)
@@ -2202,49 +2053,45 @@
         }
       });
 
-      onClick("#closeData", () => {
-        setDisplay("#dataModal", "none");
+      onClick('#closeData', () => {
+        setDisplay('#dataModal', 'none');
       });
 
       async function clearAllAppData() {
         state.round = 1;
         state.players.A = {
-          name: "Player A",
+          name: 'Player A',
           score: 0,
           streak: 0,
-          avatar: "",
+          avatar: '',
           punched: 0,
         };
         state.players.B = {
-          name: "Player B",
+          name: 'Player B',
           score: 0,
           streak: 0,
-          avatar: "",
+          avatar: '',
           punched: 0,
         };
         state.history = [];
         state.roundWinners = [];
         render();
-        safeStorageRemove("punchBuggy");
-        safeStorageRemove("punchBuggy_running_version");
-        setDisplay("#dataModal", "none");
+        safeStorageRemove('punchBuggy');
+        safeStorageRemove('punchBuggy_running_version');
+        setDisplay('#dataModal', 'none');
       }
 
-      onClick("#clearData", () => {
-        if (
-          confirm(
-            "Delete all game data (rounds, scores, history, names, avatars)?",
-          )
-        ) {
+      onClick('#clearData', () => {
+        if (confirm('Delete all game data (rounds, scores, history, names, avatars)?')) {
           clearAllAppData();
         }
       });
 
-      onClick("#exportData", () => {
+      onClick('#exportData', () => {
         const payload = JSON.stringify(state, null, 2);
-        const blob = new Blob([payload], { type: "application/json" });
+        const blob = new Blob([payload], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = url;
         a.download = `punchbuggy-export-${Date.now()}.json`;
         document.body.appendChild(a);
@@ -2254,27 +2101,24 @@
       });
 
       function normalizeImportedState(parsed) {
-        if (!parsed || typeof parsed !== "object") return { error: "invalid" };
-        const source =
-          parsed.data && typeof parsed.data === "object" ? parsed.data : parsed;
+        if (!parsed || typeof parsed !== 'object') return { error: 'invalid' };
+        const source = parsed.data && typeof parsed.data === 'object' ? parsed.data : parsed;
         const out = {};
         out.players = {
-          A: { name: "Player A", score: 0, streak: 0, avatar: "", punched: 0 },
-          B: { name: "Player B", score: 0, streak: 0, avatar: "", punched: 0 },
+          A: { name: 'Player A', score: 0, streak: 0, avatar: '', punched: 0 },
+          B: { name: 'Player B', score: 0, streak: 0, avatar: '', punched: 0 },
         };
 
-        if (source.players && typeof source.players === "object") {
-          ["A", "B"].forEach((k) => {
+        if (source.players && typeof source.players === 'object') {
+          ['A', 'B'].forEach((k) => {
             const p = source.players[k] || {};
             const name =
-              typeof p.name === "string" && p.name.trim()
-                ? p.name.trim()
-                : out.players[k].name;
-            const avatar = typeof p.avatar === "string" ? p.avatar : "";
+              typeof p.name === 'string' && p.name.trim() ? p.name.trim() : out.players[k].name;
+            const avatar = typeof p.avatar === 'string' ? p.avatar : '';
             let score = 0,
               streak = 0,
               punched = 0;
-            if (p.current && typeof p.current === "object") {
+            if (p.current && typeof p.current === 'object') {
               score = Number(p.current.score) || 0;
               streak = Number(p.current.streak) || 0;
               punched = Number(p.current.punched) || 0;
@@ -2294,33 +2138,26 @@
           source.rounds.current &&
           Number.isFinite(Number(source.rounds.current.number))
         )
-          out.round = Math.max(
-            1,
-            Math.round(Number(source.rounds.current.number)),
-          );
+          out.round = Math.max(1, Math.round(Number(source.rounds.current.number)));
         else out.round = 1;
 
         out.roundWinners = [];
         if (source.rounds && Array.isArray(source.rounds.history)) {
           out.roundWinners = source.rounds.history.map((r) => {
-            const winner = r && r.winner ? r.winner : "T";
+            const winner = r && r.winner ? r.winner : 'T';
             const scoreA =
-              r && r.scores && Number.isFinite(Number(r.scores.A))
-                ? Number(r.scores.A)
-                : 0;
+              r && r.scores && Number.isFinite(Number(r.scores.A)) ? Number(r.scores.A) : 0;
             const scoreB =
-              r && r.scores && Number.isFinite(Number(r.scores.B))
-                ? Number(r.scores.B)
-                : 0;
+              r && r.scores && Number.isFinite(Number(r.scores.B)) ? Number(r.scores.B) : 0;
             return { winner, scoreA, scoreB };
           });
         } else if (Array.isArray(source.roundWinners)) {
           out.roundWinners = source.roundWinners
             .map((r) => {
-              if (typeof r === "string") {
-                if (r === "A") return { winner: "A", scoreA: 0, scoreB: 0 };
-                if (r === "B") return { winner: "B", scoreA: 0, scoreB: 0 };
-                return { winner: "T", scoreA: 0, scoreB: 0 };
+              if (typeof r === 'string') {
+                if (r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
+                if (r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
+                return { winner: 'T', scoreA: 0, scoreB: 0 };
               }
               return r;
             })
@@ -2329,7 +2166,7 @@
 
         if (Array.isArray(source.history)) {
           out.history = source.history.map((h) => {
-            if (typeof h === "string") return h;
+            if (typeof h === 'string') return h;
             if (h && h.message) return h.message;
             try {
               return JSON.stringify(h);
@@ -2343,11 +2180,11 @@
         return out;
       }
 
-      onClick("#importBtn", () => {
-        const input = getEl("#importFile");
+      onClick('#importBtn', () => {
+        const input = getEl('#importFile');
         if (input) input.click();
       });
-      onChange("#importFile", async (e) => {
+      onChange('#importFile', async (e) => {
         const f = e.target.files && e.target.files[0];
         if (!f) return;
         try {
@@ -2355,68 +2192,54 @@
           const parsed = JSON.parse(text);
           const normalized = normalizeImportedState(parsed);
           if (normalized && normalized.error) {
-            alert("Invalid file: could not parse import");
-            e.target.value = "";
+            alert('Invalid file: could not parse import');
+            e.target.value = '';
             return;
           }
-          if (
-            !confirm(
-              "Importing will replace your current game state. Continue?",
-            )
-          ) {
-            e.target.value = "";
+          if (!confirm('Importing will replace your current game state. Continue?')) {
+            e.target.value = '';
             return;
           }
           Object.assign(state, normalized);
           render();
-          alert("Import successful");
+          alert('Import successful');
         } catch (err) {
-          alert(
-            "Failed to import: " +
-              (err && err.message ? err.message : String(err)),
-          );
+          alert('Failed to import: ' + (err && err.message ? err.message : String(err)));
         }
-        e.target.value = "";
+        e.target.value = '';
       });
 
-      onClick("#closeRules", () => {
-        setDisplay("#rulesModal", "none");
+      onClick('#closeRules', () => {
+        setDisplay('#rulesModal', 'none');
       });
-      onChange("#nameA", (e) => {
+      onChange('#nameA', (e) => {
         state.players.A.name = e.target.value;
         render();
       });
-      onChange("#nameB", (e) => {
+      onChange('#nameB', (e) => {
         state.players.B.name = e.target.value;
         render();
       });
-      onChange("#uploadA", (e) => handleImageUpload("A", e.target.files[0]));
-      onChange("#uploadB", (e) => handleImageUpload("B", e.target.files[0]));
+      onChange('#uploadA', (e) => handleImageUpload('A', e.target.files[0]));
+      onChange('#uploadB', (e) => handleImageUpload('B', e.target.files[0]));
 
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          const swUrl = new URL("service-worker.js", window.location.href);
-          const swFallbackUrl = new URL(
-            "service-worker.js",
-            window.location.origin,
-          );
-          const registerServiceWorker = (url) =>
-            navigator.serviceWorker.register(url.toString());
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          const swUrl = new URL('service-worker.js', window.location.href);
+          const swFallbackUrl = new URL('service-worker.js', window.location.origin);
+          const registerServiceWorker = (url) => navigator.serviceWorker.register(url.toString());
 
           registerServiceWorker(swUrl)
             .then((reg) => {
               if (reg.waiting) {
-                reg.waiting.postMessage({ type: "SKIP_WAITING" });
+                reg.waiting.postMessage({ type: 'SKIP_WAITING' });
               }
-              reg.addEventListener("updatefound", () => {
+              reg.addEventListener('updatefound', () => {
                 const newWorker = reg.installing;
                 if (!newWorker) return;
-                newWorker.addEventListener("statechange", () => {
-                  if (
-                    newWorker.state === "installed" &&
-                    navigator.serviceWorker.controller
-                  ) {
-                    newWorker.postMessage({ type: "SKIP_WAITING" });
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                    newWorker.postMessage({ type: 'SKIP_WAITING' });
                   }
                 });
               });
@@ -2424,17 +2247,11 @@
             .catch((err) => {
               if (swUrl.toString() !== swFallbackUrl.toString()) {
                 registerServiceWorker(swFallbackUrl).catch((fallbackErr) =>
-                  console.warn(
-                    "[PunchBuggy] Service worker registration failed",
-                    fallbackErr,
-                  ),
+                  console.warn('[PunchBuggy] Service worker registration failed', fallbackErr)
                 );
                 return;
               }
-              console.warn(
-                "[PunchBuggy] Service worker registration failed",
-                err,
-              );
+              console.warn('[PunchBuggy] Service worker registration failed', err);
             });
         });
       }

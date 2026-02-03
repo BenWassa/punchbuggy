@@ -25,7 +25,7 @@
       body {
         background: var(--bg);
         color: var(--text);
-        font-family: "Sora", sans-serif;
+        font-family: 'Sora', sans-serif;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -160,11 +160,7 @@
            White hot core, subtle heat shimmer, multi-layer shadows */
       .streak-badge.inferno {
         color: #fff;
-        background: linear-gradient(
-          135deg,
-          rgba(255, 77, 77, 0.3),
-          rgba(255, 159, 67, 0.3)
-        );
+        background: linear-gradient(135deg, rgba(255, 77, 77, 0.3), rgba(255, 159, 67, 0.3));
         border: 1px solid rgba(255, 255, 255, 0.6);
         text-shadow:
           0 0 5px #fff,
@@ -240,33 +236,25 @@
       <!-- Level 1 -->
       <div class="demo-row">
         <div class="label">Smoldering</div>
-        <div class="streak-badge smolder">
-          <span class="fire-icon">🔥</span> 3 Streak
-        </div>
+        <div class="streak-badge smolder"><span class="fire-icon">🔥</span> 3 Streak</div>
       </div>
 
       <!-- Level 2 -->
       <div class="demo-row">
         <div class="label">Burning</div>
-        <div class="streak-badge burning">
-          <span class="fire-icon">🔥</span> 7 Streak
-        </div>
+        <div class="streak-badge burning"><span class="fire-icon">🔥</span> 7 Streak</div>
       </div>
 
       <!-- Level 3 -->
       <div class="demo-row">
         <div class="label">Inferno</div>
-        <div class="streak-badge inferno">
-          <span class="fire-icon">🔥</span> 15 Streak
-        </div>
+        <div class="streak-badge inferno"><span class="fire-icon">🔥</span> 15 Streak</div>
       </div>
     </div>
 
     <!-- Live Test Area -->
     <div style="margin-top: 40px; text-align: center">
-      <div class="label" style="width: 100%; margin-bottom: 10px">
-        Live Test
-      </div>
+      <div class="label" style="width: 100%; margin-bottom: 10px">Live Test</div>
       <div id="liveBadge" class="streak-badge">
         <span class="fire-icon">🔥</span> <span id="liveCount">0</span> Streak
       </div>
@@ -279,23 +267,23 @@
 
     <script>
       let streak = 0;
-      const badge = document.getElementById("liveBadge");
-      const countSpan = document.getElementById("liveCount");
+      const badge = document.getElementById('liveBadge');
+      const countSpan = document.getElementById('liveCount');
 
       function updateStreak(change) {
         streak = Math.max(0, streak + change);
         countSpan.textContent = streak;
 
         // Reset base class
-        badge.className = "streak-badge";
+        badge.className = 'streak-badge';
 
         // Apply Level Logic
         if (streak >= 10) {
-          badge.classList.add("inferno");
+          badge.classList.add('inferno');
         } else if (streak >= 5) {
-          badge.classList.add("burning");
+          badge.classList.add('burning');
         } else if (streak >= 3) {
-          badge.classList.add("smolder");
+          badge.classList.add('smolder');
         }
       }
 

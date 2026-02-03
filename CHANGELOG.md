@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.4.0] - 2026-02-03
+
+- Minor version bump: rebuild assets and speed up splash preload
+
 ## [3.3.1] - 2026-02-02
 
 - Fix splash screen loading with optimized JPG, title preload, and brightness fade animation
