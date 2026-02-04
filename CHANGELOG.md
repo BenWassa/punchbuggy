@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.4.2] - 2026-02-04
+- Cleanup leaderboard & round history
+
 ## [3.4.1] - 2026-02-04
 
 - Fix PWA layout to prevent extra scroll on small screens

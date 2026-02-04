@@ -965,16 +965,14 @@
       }
       .crown-icon {
         position: absolute;
-        top: -8px;
-        left: -8px;
-        width: 28px;
-        height: 28px;
-        display: grid;
-        place-items: center;
-        font-size: 18px;
-        background: linear-gradient(180deg, #ffd166, #ffb347);
-        border-radius: 50%;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        top: -10px;
+        left: -6px;
+        display: inline-block;
+        font-size: 20px;
+        line-height: 1;
+        background: transparent;
+        border-radius: 0;
+        box-shadow: none;
       }
       .avatar-container {
         position: relative;
@@ -1078,6 +1076,22 @@
         justify-content: center;
         gap: 10px;
         font-weight: 700;
+      }
+      .win-tag {
+        padding: 2px 6px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        margin-left: 6px;
+      }
+      .win-tag.a {
+        background: rgba(91, 226, 176, 0.2);
+        color: var(--p1-accent);
+      }
+      .win-tag.b {
+        background: rgba(138, 168, 255, 0.2);
+        color: var(--p2-accent);
       }
       .score-val.p1.winner {
         color: var(--p1-accent);
@@ -1371,19 +1385,13 @@
     <div id="leaderboardView" class="leaderboard-view">
       <div
         class="lb-header"
-        style="
-          margin-bottom: 20px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        "
+        style="display: flex; justify-content: space-between; align-items: center"
       >
         <h2 style="margin: 0">Leaderboard</h2>
         <button id="closeFull" class="icon-btn">✕</button>
       </div>
 
       <div class="matchup-card">
-        <div class="matchup-header">Head to Head</div>
         <div class="players-row">
           <div class="player p1" id="lbPlayerA">
             <div class="avatar-container">
@@ -1391,7 +1399,7 @@
                 id="lbAvatarA"
                 class="avatar-lg"
                 src=""
-                style="width: 64px; height: 64px; border-radius: 16px; background: #333"
+                style="width: 84px; height: 84px; border-radius: 20px; background: #333"
               />
               <div id="lbCrownA" class="crown-icon" style="display: none">👑</div>
             </div>
@@ -1405,7 +1413,7 @@
                 id="lbAvatarB"
                 class="avatar-lg"
                 src=""
-                style="width: 64px; height: 64px; border-radius: 16px; background: #333"
+                style="width: 84px; height: 84px; border-radius: 20px; background: #333"
               />
               <div id="lbCrownB" class="crown-icon" style="display: none">👑</div>
             </div>
@@ -1440,7 +1448,15 @@
         </div>
       </div>
 
-      <h3 style="margin-top: 24px; margin-bottom: 12px; font-size: 16px; color: var(--muted)">
+      <h3
+        style="
+          margin-top: 24px;
+          margin-bottom: 12px;
+          font-size: 16px;
+          color: var(--muted);
+          text-align: center;
+        "
+      >
         Round History
       </h3>
       <div id="roundList" class="round-list"></div>
@@ -1451,7 +1467,7 @@
 
     <script>
       // Set app version for menu and service worker
-      window.PUNCHBUGGY_APP_VERSION = '3.4.1';
+      window.PUNCHBUGGY_APP_VERSION = '3.4.2';
     </script>
 
     <script>
@@ -1821,6 +1837,12 @@
               const scoreA = document.createElement('span');
               scoreA.className = `score-val p1 ${r.scoreA > r.scoreB ? 'winner' : 'dim'}`;
               scoreA.textContent = r.scoreA;
+              if (r.winner === 'A') {
+                const winTagA = document.createElement('span');
+                winTagA.className = 'win-tag a';
+                winTagA.textContent = 'WIN';
+                scoreA.appendChild(winTagA);
+              }
 
               const divider = document.createElement('span');
               divider.className = 'round-divider';
@@ -1829,6 +1851,12 @@
               const scoreB = document.createElement('span');
               scoreB.className = `score-val p2 ${r.scoreB > r.scoreA ? 'winner' : 'dim'}`;
               scoreB.textContent = r.scoreB;
+              if (r.winner === 'B') {
+                const winTagB = document.createElement('span');
+                winTagB.className = 'win-tag b';
+                winTagB.textContent = 'WIN';
+                scoreB.appendChild(winTagB);
+              }
 
               scores.appendChild(scoreA);
               scores.appendChild(divider);

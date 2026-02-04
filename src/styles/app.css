@@ -879,8 +879,8 @@ button {
   position: relative;
 }
 .avatar-lg {
-  width: 72px;
-  height: 72px;
+  width: 84px;
+  height: 84px;
   border-radius: 20px;
   object-fit: cover;
   border: 3px solid rgba(255, 255, 255, 0.1);
@@ -892,10 +892,10 @@ button {
 }
 .crown-icon {
   position: absolute;
-  top: -12px;
-  right: -8px;
-  font-size: 24px;
-  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.3));
+  top: -10px;
+  left: -6px;
+  font-size: 20px;
+  line-height: 1;
   animation: lb-bounce 2s infinite;
 }
 .player-name {
@@ -984,6 +984,8 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
+  justify-content: center;
+  text-align: center;
 }
 .history-section h3 span {
   background: rgba(255, 255, 255, 0.1);
@@ -1034,6 +1036,22 @@ button {
   gap: 16px;
   font-size: 18px;
   font-weight: 800;
+}
+.win-tag {
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  margin-left: 6px;
+}
+.win-tag.a {
+  background: rgba(91, 226, 176, 0.2);
+  color: var(--p1-accent);
+}
+.win-tag.b {
+  background: rgba(138, 168, 255, 0.2);
+  color: var(--p2-accent);
 }
 .score-val {
   width: 30px;

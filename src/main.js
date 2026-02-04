@@ -284,6 +284,12 @@ function renderLeaderboard() {
         const scoreA = document.createElement('span');
         scoreA.className = `score-val p1 ${r.scoreA > r.scoreB ? 'winner' : 'dim'}`;
         scoreA.textContent = r.scoreA;
+        if (r.winner === 'A') {
+          const winTagA = document.createElement('span');
+          winTagA.className = 'win-tag a';
+          winTagA.textContent = 'WIN';
+          scoreA.appendChild(winTagA);
+        }
 
         const divider = document.createElement('span');
         divider.className = 'round-divider';
@@ -292,6 +298,12 @@ function renderLeaderboard() {
         const scoreB = document.createElement('span');
         scoreB.className = `score-val p2 ${r.scoreB > r.scoreA ? 'winner' : 'dim'}`;
         scoreB.textContent = r.scoreB;
+        if (r.winner === 'B') {
+          const winTagB = document.createElement('span');
+          winTagB.className = 'win-tag b';
+          winTagB.textContent = 'WIN';
+          scoreB.appendChild(winTagB);
+        }
 
         scores.appendChild(scoreA);
         scores.appendChild(divider);
@@ -314,7 +326,8 @@ function renderLeaderboard() {
 }
 
 function save() {
-  const { undoStack, ...persisted } = state;
+  const persisted = { ...state };
+  delete persisted.undoStack;
   const payload = JSON.stringify(persisted);
   if (!safeStorageSet('punchBuggy', payload)) {
     console.warn('[PunchBuggy] Save failed (localStorage may be full or unavailable).');
@@ -413,10 +426,10 @@ function reset() {
 
 function undo() {
   if (!state.undoStack.length) return;
-  const prev = state.undoStack.pop();
-  const { undoStack, ...rest } = state;
+  const undoStackRef = state.undoStack;
+  const prev = undoStackRef.pop();
   Object.assign(state, prev);
-  state.undoStack = undoStack;
+  state.undoStack = undoStackRef;
   render();
 }
 function recordRoundWinner() {
@@ -645,7 +658,7 @@ function normalizeImportedState(parsed) {
       if (h && h.message) return h.message;
       try {
         return JSON.stringify(h);
-      } catch (e) {
+      } catch {
         return String(h);
       }
     });
