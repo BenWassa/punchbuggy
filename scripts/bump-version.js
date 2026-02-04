@@ -17,7 +17,9 @@ const date = new Date().toISOString().slice(0, 10);
 
 const root = path.resolve(__dirname, '..');
 const appVersionPaths = [path.join(root, 'public', 'app-version.js')];
-const manifestPath = path.join(root, 'manifest.webmanifest');
+const manifestPath = fs.existsSync(path.join(root, 'manifest.webmanifest'))
+  ? path.join(root, 'manifest.webmanifest')
+  : path.join(root, 'public', 'manifest.webmanifest');
 const changelogPath = path.join(root, 'CHANGELOG.md');
 
 function readFile(filePath) {
