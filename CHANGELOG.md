@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 ## [3.4.1] - 2026-02-04
+
 - Fix PWA layout to prevent extra scroll on small screens
 
 ## [3.4.0] - 2026-02-03
