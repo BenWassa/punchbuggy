@@ -5,9 +5,9 @@ No punchbacks.
 ## Features that matter
 
 - **Mobile-first UI** with oversized scores, tall action buttons, and safe-area spacing for notch devices.
-- **Player avatars** support inline uploads with a consistent SVG camera icon and accessible labels.
+- **Player avatars** support inline uploads (max 1.5 MB) with a consistent SVG camera icon and accessible labels.
 - **Leaderboard view** with head-to-head stats and round history details.
-- **Quiet updates** via the service worker with versioned cache busting (no banners or prompts).
+- **Service worker updates** with versioned cache busting; an update banner appears when a new version is ready and reloads the page automatically when confirmed.
 
 ## Versioning & release flow
 

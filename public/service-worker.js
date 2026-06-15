@@ -15,8 +15,13 @@ const APP_SHELL = [
 ].map((path) => new URL(path, self.location).toString());
 
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)));
+  // skipWaiting inside waitUntil ensures caching completes before the SW activates
+  event.waitUntil(
+    Promise.all([
+      self.skipWaiting(),
+      caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)),
+    ])
+  );
 });
 
 self.addEventListener('activate', (event) => {
@@ -43,11 +48,14 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          // Only cache successful responses — never cache 4xx/5xx error pages
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
           return response;
         })
-        .catch(() => caches.match(event.request))
+        .catch(() => caches.match(event.request).then((r) => r || caches.match(new URL('./index.html', self.location).toString())))
     );
     return;
   }
@@ -75,11 +83,18 @@ self.addEventListener('fetch', (event) => {
       }
       return fetch(event.request)
         .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          // Only cache successful responses
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
           return response;
         })
-        .catch(() => caches.match(new URL('./index.html', self.location).toString()));
+        .catch(() =>
+          caches
+            .match(new URL('./index.html', self.location).toString())
+            .then((r) => r || new Response('Offline — no cached content available.', { status: 503, statusText: 'Service Unavailable' }))
+        );
     })
   );
 });

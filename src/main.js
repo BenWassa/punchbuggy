@@ -149,6 +149,14 @@ function updateStreakBadge(el, streak) {
   }
 }
 
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function renderModalLog() {
   const list = $('#modalLog');
   if (!list) return;
@@ -156,7 +164,8 @@ function renderModalLog() {
     .slice()
     .reverse()
     .map(
-      (e) => `<li style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.03)">${e}</li>`
+      (e) =>
+        `<li style="padding:8px;border-radius:8px;background:rgba(255,255,255,0.03)">${escapeHtml(e)}</li>`
     )
     .join('');
 }
@@ -333,24 +342,69 @@ function save() {
     console.warn('[PunchBuggy] Save failed (localStorage may be full or unavailable).');
   }
 }
+function sanitizeLoadedState(parsed) {
+  // Ensure top-level shape is safe before assigning into state
+  if (!parsed || typeof parsed !== 'object') return null;
+
+  // Guard players: must be an object with A and B sub-objects
+  if (!parsed.players || typeof parsed.players !== 'object') {
+    parsed.players = {
+      A: { name: 'Player A', score: 0, streak: 0, avatar: '' },
+      B: { name: 'Player B', score: 0, streak: 0, avatar: '' },
+    };
+  } else {
+    ['A', 'B'].forEach((k) => {
+      const p = parsed.players[k];
+      if (!p || typeof p !== 'object') {
+        parsed.players[k] = { name: `Player ${k}`, score: 0, streak: 0, avatar: '' };
+      } else {
+        parsed.players[k] = {
+          name: typeof p.name === 'string' && p.name.trim() ? p.name.trim() : `Player ${k}`,
+          score: typeof p.score === 'number' ? p.score : Number(p.score) || 0,
+          streak: typeof p.streak === 'number' ? p.streak : Number(p.streak) || 0,
+          avatar: typeof p.avatar === 'string' ? p.avatar : '',
+        };
+      }
+    });
+  }
+
+  // Migrate roundWinners legacy strings to objects
+  if (Array.isArray(parsed.roundWinners)) {
+    parsed.roundWinners = parsed.roundWinners
+      .map((r) => {
+        if (!r) return null;
+        if (typeof r === 'string') {
+          if (r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
+          if (r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
+          return { winner: 'T', scoreA: 0, scoreB: 0 };
+        }
+        // Validate winner value
+        const winner = r.winner === 'A' || r.winner === 'B' ? r.winner : 'T';
+        return {
+          winner,
+          scoreA: typeof r.scoreA === 'number' ? r.scoreA : Number(r.scoreA) || 0,
+          scoreB: typeof r.scoreB === 'number' ? r.scoreB : Number(r.scoreB) || 0,
+        };
+      })
+      .filter(Boolean);
+  } else {
+    parsed.roundWinners = [];
+  }
+
+  parsed.round = typeof parsed.round === 'number' && parsed.round >= 1 ? Math.round(parsed.round) : 1;
+  parsed.history = Array.isArray(parsed.history) ? parsed.history.filter((h) => typeof h === 'string') : [];
+
+  return parsed;
+}
+
 function load() {
   const s = safeStorageGet('punchBuggy');
   if (s) {
     try {
       const parsed = JSON.parse(s);
-      if (parsed && typeof parsed === 'object') {
-        // migrate roundWinners legacy strings to objects
-        if (parsed.roundWinners && Array.isArray(parsed.roundWinners)) {
-          parsed.roundWinners = parsed.roundWinners.map((r) => {
-            if (typeof r === 'string') {
-              if (r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
-              if (r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
-              return { winner: 'T', scoreA: 0, scoreB: 0 };
-            }
-            return r;
-          });
-        }
-        Object.assign(state, parsed);
+      const safe = sanitizeLoadedState(parsed);
+      if (safe) {
+        Object.assign(state, safe);
       }
     } catch (err) {
       console.warn('[PunchBuggy] Failed to parse saved game state, clearing storage.', err);
@@ -363,7 +417,6 @@ function load() {
 
 function log(msg) {
   state.history.push(msg);
-  render();
 }
 
 function score(p, d = 1) {
@@ -435,8 +488,8 @@ function undo() {
 function recordRoundWinner() {
   const a = state.players.A.score;
   const b = state.players.B.score;
-  const playerAName = state.players && state.players.A ? state.players.A.name : 'Player A';
-  const playerBName = state.players && state.players.B ? state.players.B.name : 'Player B';
+  const playerAName = state.players.A.name;
+  const playerBName = state.players.B.name;
   let win = 'T';
   if (a > b) win = 'A';
   else if (b > a) win = 'B';
@@ -455,11 +508,19 @@ function nextRound() {
     p.streak = 0;
   });
   log(`🏁 Round ${state.round} started!`);
-  render();
+  render(); // single render after all state mutations
 }
+
+const AVATAR_MAX_BYTES = 1.5 * 1024 * 1024; // 1.5 MB — keeps base64 under ~2 MB
 
 function handleImageUpload(player, file) {
   if (!file || !file.type.startsWith('image/')) return;
+  if (file.size > AVATAR_MAX_BYTES) {
+    alert(
+      `Image is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Please choose an image under 1.5 MB.`
+    );
+    return;
+  }
   const reader = new FileReader();
   reader.onload = (e) => {
     state.players[player].avatar = e.target.result;
@@ -572,9 +633,11 @@ onClick('#clearData', () => {
   }
 });
 
-// Export state as JSON file
+// Export state as JSON file (exclude runtime-only undoStack)
 onClick('#exportData', () => {
-  const payload = JSON.stringify(state, null, 2);
+  const exportable = { ...state };
+  delete exportable.undoStack;
+  const payload = JSON.stringify(exportable, null, 2);
   const blob = new Blob([payload], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -629,11 +692,13 @@ function normalizeImportedState(parsed) {
     out.round = Math.max(1, Math.round(Number(source.rounds.current.number)));
   else out.round = 1;
 
+  const validWinner = (v) => (v === 'A' || v === 'B' ? v : 'T');
+
   // Round winners: try to map from `rounds.history` if present, otherwise use roundWinners if available
   out.roundWinners = [];
   if (source.rounds && Array.isArray(source.rounds.history)) {
     out.roundWinners = source.rounds.history.map((r) => {
-      const winner = r && r.winner ? r.winner : 'T';
+      const winner = validWinner(r && r.winner);
       const scoreA = r && r.scores && Number.isFinite(Number(r.scores.A)) ? Number(r.scores.A) : 0;
       const scoreB = r && r.scores && Number.isFinite(Number(r.scores.B)) ? Number(r.scores.B) : 0;
       return { winner, scoreA, scoreB };
@@ -641,12 +706,15 @@ function normalizeImportedState(parsed) {
   } else if (Array.isArray(source.roundWinners)) {
     out.roundWinners = source.roundWinners
       .map((r) => {
+        if (!r) return null;
         if (typeof r === 'string') {
-          if (r === 'A') return { winner: 'A', scoreA: 0, scoreB: 0 };
-          if (r === 'B') return { winner: 'B', scoreA: 0, scoreB: 0 };
-          return { winner: 'T', scoreA: 0, scoreB: 0 };
+          return { winner: validWinner(r), scoreA: 0, scoreB: 0 };
         }
-        return r;
+        return {
+          winner: validWinner(r.winner),
+          scoreA: Number.isFinite(Number(r.scoreA)) ? Number(r.scoreA) : 0,
+          scoreB: Number.isFinite(Number(r.scoreB)) ? Number(r.scoreB) : 0,
+        };
       })
       .filter(Boolean);
   }
@@ -739,6 +807,7 @@ function setupServiceWorkerUpdates() {
   const root = document.documentElement;
   let waitingWorker = null;
   let autoReloadTimer = null;
+  let updateRequested = false; // tracks that a reload is pending after SKIP_WAITING
 
   function applyBannerOffset() {
     if (!banner || banner.style.display === 'none') return;
@@ -770,6 +839,7 @@ function setupServiceWorkerUpdates() {
         '[PunchBuggy] Update requested, new version will be:',
         window.PUNCHBUGGY_APP_VERSION
       );
+      updateRequested = true; // set BEFORE hideBanner() clears waitingWorker
       hideBanner();
       worker.postMessage({ type: 'SKIP_WAITING' });
     }
@@ -818,9 +888,9 @@ function setupServiceWorkerUpdates() {
   };
 
   navigator.serviceWorker.addEventListener('controllerchange', () => {
-    // Only reload the page when an update was pending (banner was shown).
-    if (!waitingWorker) return;
-    // proceed with reload
+    // Only reload when the user (or auto-timer) explicitly requested a refresh.
+    // waitingWorker is already null here (cleared by hideBanner), so we use updateRequested.
+    if (!updateRequested) return;
     window.location.reload();
   });
 
